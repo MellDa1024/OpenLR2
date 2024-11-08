@@ -9817,8 +9817,8 @@ int PlayPreviewSample(game *g) {
 			ReadKeyConfig(g, "LR2files\\Config\\keyconfig_p.xml");
 			g->sSelect.metaSelected.keymode = 9;
 			InitGameplay(&g->gameplay, &tCfg.play);
-			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_9.bme", &g->audio, g, &g->sSelect.metaSelected, 1, scratchSide);
-			LoadBmsResource(&g->gameplay, "LR2files\\Config\\sample_9.bme", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide, 0);
+			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_9.pms", &g->audio, g, &g->sSelect.metaSelected, 1, scratchSide);
+			LoadBmsResource(&g->gameplay, "LR2files\\Config\\sample_9.pms", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide, 0);
 			break;
 
 		case 13:
