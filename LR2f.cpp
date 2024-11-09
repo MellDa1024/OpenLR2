@@ -68,12 +68,13 @@ void MYRANKING::InitRanking() {
 //401090
 bool CheckScoreSaveConditon(game *g){
 	if ( (g->config.play.battle == 0 || g->config.play.battle == 4) && g->config.play.is_extra != 1
-		&& g->config.play.m_addlong == 0 && g->config.play.unused_f2 == 0 && g->config.play.m_loudness < 1 
+		&& g->config.play.m_addlong == 0 && g->config.play.unused_f2 == 0 && g->config.play.m_loudness <= 0 
 		&& g->config.play.m_lunaris == 0 && g->config.play.hsfix != 4 && g->config.play.m_addmine == 0 
-		&& g->config.play.m_addnote == 0 && g->config.play.is_extra == 0 && g->config.play.autokey == 0
-		&& (g->config.play.unknown_1 == 0 || g->sSelect.metaSelected.keymode < 10) && g->config.play.p1_assist == 0
-		&& (g->config.play.p2_assist == 0 || g->sSelect.metaSelected.keymode < 10) &&g->config.play.random[0] < 4) {
-		return g->config.play.random[1] < 4;
+		&& (g->config.play.m_addnote == 0 && g->config.play.is_extra == 0) && g->config.play.autokey == 0
+		&& (g->config.play.unknown_1 == 0 || g->sSelect.metaSelected.keymode < 10) 
+		&& g->config.play.p1_assist == 0 && (g->config.play.p2_assist == 0 || g->sSelect.metaSelected.keymode < 10)
+		&& g->config.play.random[0] < 4 && g->config.play.random[1] < 4) {
+		return true;
 	}
 	return false;
 }
@@ -82,15 +83,15 @@ bool CheckScoreSaveConditon(game *g){
 int CheckClearLampChallenge(game *g){
 	int gauge;
 
-	if (g->config.play.m_addlong == 1 || g->config.play.unused_f2 || 0 < g->config.play.m_loudness
-		|| g->config.play.m_lunaris != '\0' || 0 < g->config.play.m_addlong
-		|| g->config.play.m_addmine != 0 || g->config.play.m_addnote != 0 || g->config.play.battle == 1) {
+	if (g->config.play.m_addlong == 1 || g->config.play.unused_f2 || g->config.play.m_loudness > 0
+		|| g->config.play.m_lunaris || g->config.play.m_addlong > 0
+		|| g->config.play.m_addmine || g->config.play.m_addnote || g->config.play.battle == 1) {
 		return 0;
 	}
 
 	if (g->config.play.random[0] < 4 && g->config.play.random[1] < 4 && g->config.play.hsfix != 4
-		&& g->config.play.autokey == 0 && (g->config.play.unknown_1 == 0 || g->sSelect.metaSelected.keymode < 10) && g->config.play.p1_assist == 0
-		&& (g->config.play.p2_assist == 0 || g->sSelect.metaSelected.keymode < 10)) {
+		&& g->config.play.autokey == 0 && (g->config.play.unknown_1 == 0 || g->sSelect.metaSelected.keymode < 10) 
+		&& g->config.play.p1_assist == 0 && (g->config.play.p2_assist == 0 || g->sSelect.metaSelected.keymode < 10)) {
 
 		gauge = g->config.play.gaugeOption[0];
 		if (gauge == 1) return 3;
@@ -412,18 +413,19 @@ int InitFxParam(game *g, int fxNum){
 }
 
 //401fe0
+//TODO : banner image load fails
 void ThreadProc_LoadBanner(void *param) {
 	game *g = (game*)param;
 
 	CSTR path;
 	CSTR dir = g->sSelect.bmsList[g->sSelect.cur_song].filepath.getDirectory();
 
-	if (g->sSelect.bmsList[g->sSelect.cur_song].isBanner != 0 && g->skstruct.reloadbanner == 1) {
-		path.assign(dir);
+	if (g->sSelect.bmsList[g->sSelect.cur_song].isBanner && g->skstruct.reloadbanner == 1) {
+		path = dir;
 		path.add(g->sSelect.bmsList[g->sSelect.cur_song].banner);
 
 		if (ReloadImage(path, &g->skstruct.GrHandle[102]) == -1) {
-			path = path.left(path.length() - 3);
+			path = path.left(path.length() - 3); //TOFIX : a.jpg -> a. -> a..png
 			path.add(".png");
 			if (ReloadImage(path, &g->skstruct.GrHandle[102]) == -1) {
 				g->sSelect.bmsList[g->sSelect.cur_song].isBanner = 0;
@@ -11259,7 +11261,7 @@ void ReactInput(game *g) {
 			SetTimeLapse(16, &g->timer1);
 			g->txtStruct.readme.show = 0;
 		}
-		else if (g->KeyInput.mouse_buttonL == 2) {
+		else if (g->KeyInput.mouse_buttonL == 2) { //original is very slow, it is adequately fast. It's misbehavior...but isn't it good?
 			if (g->KeyInput.mouse_oldX < 200) {
 				g->txtStruct.readme.w += g->timer1.tickTime * 600.0 / 1000.0;
 			}
@@ -19165,9 +19167,7 @@ int AddDrawingBuffer_JudgeCombo(DrawingBuf *drb, SRCstruct *jSrc, DSTstruct *jDs
 ////LR2graphic_load
 //49e780
 int ReloadImage(CSTR filename, int *grHandle) {
-	int ret;
-	ret = ReloadGraph(filename.outstr(), *grHandle, 0);
-	return ret;
+	return ReloadGraph(filename, *grHandle, 0);
 }
 
 //49e7f0
