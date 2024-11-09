@@ -7432,7 +7432,7 @@ int ProcSinglenote(game *g, int lane, int keypress, int timing, int player) {
 	NoteStruct &note = g->gameplay.bmsobj_note[lane].notes[g->gameplay.bmsobj_note[lane].note_count];
 
 	if (note.channel > 0) {
-		if (keypress == 1 && g->gameplay.player[player].judgetime[4] > note.realTiming - timing) {
+		if (keypress == 1 && note.realTiming - (double)timing < (double)g->gameplay.player[player].judgetime[4]) {
 			ApplyJudge(0, g, player, lane, note.channel);
 
 			if (g->gameplay.keysound[0].load)
@@ -7440,7 +7440,7 @@ int ProcSinglenote(game *g, int lane, int keypress, int timing, int player) {
 			else
 				PlaySound(&g->audio, &g->audio.sysSound.mine, g->audio.chnKey, -1);
 		}
-		else if (timing <= note.realTiming)
+		else if ((double)timing <= note.realTiming)
 			return 0;
 		else if (keypress == 1 || keypress == 2) {
 			ApplyJudge(0, g, player, lane, note.channel);
@@ -7456,7 +7456,8 @@ int ProcSinglenote(game *g, int lane, int keypress, int timing, int player) {
 		return 0;
 	}
 	else {
-		if (timing - (int)note.realTiming > g->gameplay.player[player].judgetime[2] && g->gameplay.player[player].note_current < g->gameplay.player[player].totalnotes) {
+		//passed note
+		if ((double)timing - note.realTiming > (double)g->gameplay.player[player].judgetime[2] && g->gameplay.player[player].note_current < g->gameplay.player[player].totalnotes) {
 			ApplyJudgeToScore(1, g, player, lane, &g->timer1, 0);
 			g->gameplay.bmsobj_note[lane].noteVal = note.val;
 			note.active = -1;
@@ -7469,7 +7470,7 @@ int ProcSinglenote(game *g, int lane, int keypress, int timing, int player) {
 
 		if (gap <= g->gameplay.player[player].judgetime[5] && g->gameplay.player[player].note_current < g->gameplay.player[player].totalnotes) {
 			g->gameplay.autojudge_midcount++;
-			g->gameplay.autojudge_midsum += timing - note.realTiming;
+			g->gameplay.autojudge_midsum += timing - (int)note.realTiming;
 			JudgeToScore(5, g, player, lane, 0);
 			g->gameplay.bmsobj_note[lane].noteVal = note.val;
 			PlaySound(&g->audio, &g->gameplay.keysound[g->gameplay.bmsobj_note[lane].noteVal], g->audio.chnStageKey[note.stage], note.stage);
@@ -7480,7 +7481,7 @@ int ProcSinglenote(game *g, int lane, int keypress, int timing, int player) {
 		}
 		if (gap <= g->gameplay.player[player].judgetime[4] && g->gameplay.player[player].note_current < g->gameplay.player[player].totalnotes) {
 			g->gameplay.autojudge_midcount++;
-			g->gameplay.autojudge_midsum += timing - note.realTiming;
+			g->gameplay.autojudge_midsum += timing - (int)note.realTiming;
 			JudgeToScore(4, g, player, lane, 0);
 			g->gameplay.bmsobj_note[lane].noteVal = note.val;
 			PlaySound(&g->audio, &g->gameplay.keysound[g->gameplay.bmsobj_note[lane].noteVal], g->audio.chnStageKey[note.stage], note.stage);
@@ -7491,7 +7492,7 @@ int ProcSinglenote(game *g, int lane, int keypress, int timing, int player) {
 		}
 		if (gap <= g->gameplay.player[player].judgetime[3] && g->gameplay.player[player].note_current < g->gameplay.player[player].totalnotes) {
 			g->gameplay.autojudge_midcount++;
-			g->gameplay.autojudge_midsum += timing - note.realTiming;
+			g->gameplay.autojudge_midsum += timing - (int)note.realTiming;
 			JudgeToScore(3, g, player, lane, 0);
 			g->gameplay.bmsobj_note[lane].noteVal = note.val;
 			PlaySound(&g->audio, &g->gameplay.keysound[g->gameplay.bmsobj_note[lane].noteVal], g->audio.chnStageKey[note.stage], note.stage);
@@ -7504,20 +7505,20 @@ int ProcSinglenote(game *g, int lane, int keypress, int timing, int player) {
 
 		if (gap <= g->gameplay.player[player].judgetime[2] && g->gameplay.player[player].note_current < g->gameplay.player[player].totalnotes) {
 			g->gameplay.autojudge_midcount++;
-			g->gameplay.autojudge_midsum += timing - note.realTiming;
+			g->gameplay.autojudge_midsum += timing - (int)note.realTiming;
 			JudgeToScore(2, g, player, lane, 0);
 			g->gameplay.bmsobj_note[lane].noteVal = note.val;
 			PlaySound(&g->audio, &g->gameplay.keysound[g->gameplay.bmsobj_note[lane].noteVal], g->audio.chnStageKey[note.stage], note.stage);
 			note.active = -1;
 			g->gameplay.bmsobj_note[lane].note_count++;
 			
-			if (g->gameplay.bmsobj_note[lane].note_count < g->gameplay.bmsobj_note[lane].count && abs(timing - (int)g->gameplay.bmsobj_note[lane].notes[g->gameplay.bmsobj_note[lane].note_count].realTiming) <= g->gameplay.player[player].judgetime[2]) {
+			if (g->gameplay.bmsobj_note[lane].note_count < g->gameplay.bmsobj_note[lane].count && abs(timing - (int)note.realTiming) <= g->gameplay.player[player].judgetime[2]) {
 				ProcSinglenote(g, lane, 1, timing, player);
 				return 1;
 			}
 			return 1;
 		}
-		if (note.realTiming - timing < g->gameplay.player[player].judgetime[1] && g->gameplay.player[player].note_current < g->gameplay.player[player].totalnotes) {
+		else if ((int)note.realTiming - timing < g->gameplay.player[player].judgetime[1] && g->gameplay.player[player].note_current < g->gameplay.player[player].totalnotes) {
 			JudgeToScore(0, g, player, lane, 0);
 			g->gameplay.bmsobj_note[lane].noteVal = note.val;
 			PlaySound(&g->audio, &g->gameplay.keysound[g->gameplay.bmsobj_note[lane].noteVal], g->audio.chnStageKey[note.stage], note.stage);
@@ -7535,7 +7536,7 @@ int ProcLongnote(game *g, int lane, int keypress, int timing, int player) {
 	
 	NoteStruct &note = g->gameplay.bmsobj_note[lane].notes[g->gameplay.bmsobj_note[lane].note_count];
 
-	if (timing - note.realTiming > g->gameplay.player[player].judgetime[3] && note.active <= 0) {
+	if ((double)timing - note.realTiming > (double)g->gameplay.player[player].judgetime[3] && note.active <= 0) {
 		ApplyJudgeToScore(1, g, player, lane, &g->timer1, 0);
 		g->gameplay.bmsobj_note[lane].noteVal = note.val;
 		note.active = -1;
@@ -7577,7 +7578,7 @@ int ProcLongnote(game *g, int lane, int keypress, int timing, int player) {
 			note.active = 2;
 			return 1;
 		}
-		else if (timing - (int)note.realTiming < g->gameplay.player[player].judgetime[1]) {
+		else if ((int)note.realTiming - timing < g->gameplay.player[player].judgetime[1]) {
 			JudgeToScore(0, g, player, lane, 0);
 			g->gameplay.bmsobj_note[lane].noteVal = note.val;
 			PlaySound(&g->audio, &g->gameplay.keysound[g->gameplay.bmsobj_note[lane].noteVal], g->audio.chnStageKey[note.stage], note.stage);
@@ -7591,7 +7592,7 @@ int ProcLongnote(game *g, int lane, int keypress, int timing, int player) {
 	}
 
 	else if (keypress == 2) {
-		if ((int)note.realTiming_ln < timing && note.active) {
+		if ((int)note.realTiming_ln < timing && note.active > 0) {
 			if (note.active < 4) {
 				ResetTimeLapse(70 + lane, &g->timer1);
 			}
@@ -7606,7 +7607,7 @@ int ProcLongnote(game *g, int lane, int keypress, int timing, int player) {
 		}
 	}
 	else if (keypress == 3 && note.active > 0) {
-		if (g->gameplay.player[player].judgetime[3] + timing < note.realTiming_ln) {
+		if (g->gameplay.player[player].judgetime[3] + timing < (int)note.realTiming_ln) {
 			StopSound(&g->audio, &g->gameplay.keysound[g->gameplay.bmsobj_note[lane].noteVal]);
 			ResetTimeLapse(70 + lane, &g->timer1);
 			JudgeToScore(2, g, player, lane, 0);
@@ -8527,7 +8528,7 @@ int Proc_Text(game *g, sqlite3 *sql, char flag) {
 		g->sSelect.is_mouseOnTextInput = 1;
 
 		if (CheckKeyInput(g->txtStruct.hKeyInput) >= 1 || flag == 0) {
-
+			//CheckKeyInput() 0:doing 1:done 2:cancle -1:error
 			if (CheckKeyInput(g->txtStruct.hKeyInput) == 1) {
 
 				CSTR buf;
@@ -18279,7 +18280,7 @@ int LRDraw(DrawingBuf *drBuf, TextStruct *txt, SONGSELECT *sSel, skstruct *sks, 
 		}
 	}
 	else if (draw.grHandle != -1) return 1;
-	//if (draw.subHandle == -1) return 1; //TODO : this line is not in original
+	//if (draw.subHandle == -1) return 1; //DEBUG : this line is not in original
 	if (draw.fontHandle != -1) {
 		if (draw.subHandle < 10000) {
 			if (draw.subHandle < 1000) {
@@ -18306,6 +18307,8 @@ int LRDraw(DrawingBuf *drBuf, TextStruct *txt, SONGSELECT *sSel, skstruct *sks, 
 		}
 		
 	}
+
+	return 1;
 }
 
 //49bf60
