@@ -1876,7 +1876,7 @@ int ApplyJudgeToScore(int judge, game *g, int player, int lane, Timer *T, char i
 		AddReplayData(&g->gameplay.replay, GetTimeLapse(41, &g->timer1), player * 2 + (lane >= 10) + 210, judge);
 	}
 
-	if (g->gameplay.is_notplaying_unchecked == 0 && g->config.play.m_lunaris == 0 && g->gameplay.replay.status != 2) {
+	if (g->gameplay.isAutoplay == 0 && g->config.play.m_lunaris == 0 && g->gameplay.replay.status != 2) {
 
 		switch (judge) {
 			case 0: 
@@ -1913,7 +1913,7 @@ int ApplyJudgeToScore(int judge, game *g, int player, int lane, Timer *T, char i
 	if (judge >= 1) {
 		if (player == 0) {
 			if(isReplay == 0) g->gameplay.p1Score.AddJudgeQueue(judge);
-			if (g->gameplay.ghostBattle == 0 && g->gameplay.is_notplaying_unchecked == 0 && g->config.play.battle != 1) {
+			if (g->gameplay.ghostBattle == 0 && g->gameplay.isAutoplay == 0 && g->config.play.battle != 1) {
 				while (g->gameplay.highScore.DealJudgeFromQueue() == 0) {}
 				while (g->gameplay.targetScore.DealJudgeFromQueue() == 0) {}
 
@@ -2336,7 +2336,7 @@ int DrawNotes(game *g, skstruct *sk, Timer *T, CONFIG_PLAY *cfg) {
 					note_x = tmp * -1.0;
 				}
 
-				if (g->gameplay.is_notplaying_unchecked == 0 && g->gameplay.bmsobj_note[key].autoplay == 0 && isDpGbattle == 0) {
+				if (g->gameplay.isAutoplay == 0 && g->gameplay.bmsobj_note[key].autoplay == 0 && isDpGbattle == 0) {
 					if (g->gameplay.bmsobj_note[key].notes[i].channel > 0) {
 						AddDrawingBuffer_PlayArea(&sk->drBuf, &sk->src_MINE[key], &sk->dst_NOTE[key], T, note_x, note_y, 255, notesize_x, notesize_y, 1);
 					}
@@ -2428,7 +2428,7 @@ int DrawNotes(game *g, skstruct *sk, Timer *T, CONFIG_PLAY *cfg) {
 								}
 								else if (cfg->battle == 1 || (g->skinData.select > 11 && g->procSelecter == 7)) {
 									if (g->net.rankingData.target_ID <= 0 || g->gameplay.targetScore.ghostReadCount <= 0) {
-										ApplyJudgeToScore(5, g, 0, key / 10, T, 0);
+										ApplyJudgeToScore(5, g, key / 10, key, T, 0);
 										g->gameplay.bmsobj_note[key].measure++;
 									}
 									else {
@@ -2460,7 +2460,7 @@ int DrawNotes(game *g, skstruct *sk, Timer *T, CONFIG_PLAY *cfg) {
 			}
 		}
 		
-		if ((g->gameplay.is_notplaying_unchecked || isDpGbattle) && GetTimeLapse(50 + key, T) >= 80.0 && GetTimeLapse(100 + key, T) > 0.0) {
+		if ((g->gameplay.isAutoplay || isDpGbattle) && GetTimeLapse(50 + key, T) >= 80.0 && GetTimeLapse(100 + key, T) > 0.0) {
 			ResetTimeLapse(100 + key, T);
 			SetTimeLapse(120 + key, T);
 		}
@@ -4291,7 +4291,7 @@ void ThreadProc_PO4parseBMS(game *g) {
 	g->gameplay.courseStageCount = 0;
 	InitGameplay(&g->gameplay, &g->config.play);
 	
-	ParseBmsFile(&g->gameplay, g->sSelect.metaSelected.filepath, &g->audio, g, &g->sSelect.metaSelected, g->skstruct.flag_BGA, 0);
+	ParseBmsFile(&g->gameplay, g->sSelect.metaSelected.filepath, &g->audio, &g->config, &g->sSelect.metaSelected, g->skstruct.flag_BGA, 0);
 	g->po4_hThread_ParseBMS = 0;
 	g->gameplay.bmsResourceLoaded = 1;
 	return;
@@ -4348,7 +4348,7 @@ int Proc_Auto2avi(game *g, CSTR directory, CSTR filename) {
 
 
 	g->config.system.isablebmsthread = 1;
-	ParseBmsFile(&g->gameplay, filename, &g->audio, g, &g->sSelect.metaSelected, 0, 0);
+	ParseBmsFile(&g->gameplay, filename, &g->audio, &g->config, &g->sSelect.metaSelected, 0, 0);
 
 	if (g->gameplay.flag_longsound || g->gameplay.flag_0note) {
 		MessageBoxA(NULL, "規約違反のbmsの可能性があるので、この機能は利用できません。", "エラー", 0);
@@ -4582,11 +4582,11 @@ bool GetOptionFlag_dst(game *gs, int option) {
 			break;
 		case 32:
 			if (gs->procSelecter == 7) return ret;
-			if (gs->gameplay.is_notplaying_unchecked == 0) return ret;
+			if (gs->gameplay.isAutoplay == 0) return ret;
 			break;
 		case 33:
 			if (gs->procSelecter == 7) return ret;
-			if (gs->gameplay.is_notplaying_unchecked == 1) return ret;
+			if (gs->gameplay.isAutoplay == 1) return ret;
 			break;
 		case 34:
 			if (gs->config.play.play_ghost == 0) return ret;
@@ -4613,7 +4613,7 @@ bool GetOptionFlag_dst(game *gs, int option) {
 		case 41:
 			if (gs->config.play.bga == 1) return ret;
 			if (gs->config.play.bga == 3) return ret;
-			if (gs->config.play.bga == 2 && (gs->gameplay.is_notplaying_unchecked == 1 || gs->gameplay.replay.status == 2)) return ret;
+			if (gs->config.play.bga == 2 && (gs->gameplay.isAutoplay == 1 || gs->gameplay.replay.status == 2)) return ret;
 			break;
 
 		case 42:
@@ -7667,7 +7667,7 @@ void LoadPreview(game *g) {
 	g->gameplay.bmsResourceLoaded = 0;
 	g->gameplay.flag_closingPhase = '\0';
 	g->gameplay.flag_gameinput = '\0';
-	g->gameplay.is_notplaying_unchecked = 1;
+	g->gameplay.isAutoplay = 1;
 	g->gameplay.courseType = -1;
 	g->gameplay.is2Pplay = 0;
 	g->gameplay.courseStageCount = 0;
@@ -7676,7 +7676,7 @@ void LoadPreview(game *g) {
 	InitGameplay(&g->gameplay, &g->config.play);
 
 	g->gameplay.isPreviewLoad = 1;
-	ParseBmsFile(&g->gameplay, g->gameplay.previewBMSfilepath, &g->audio, g, &meta, 0, 0);
+	ParseBmsFile(&g->gameplay, g->gameplay.previewBMSfilepath, &g->audio, &g->config, &meta, 0, 0);
 	if (g->gameplay.flag_closingPhase == 0 && g->procSelecter == 2 && g->gameplay.previewStatus == 1) {
 		LoadBmsResource(&g->gameplay, g->gameplay.previewBMSfilepath, &g->audio, &g->config, &meta, 0, g->skstruct.flag_flip, 1);
 	}
@@ -7856,7 +7856,7 @@ int ProcI_SkinSelect(game *g) {
 	if (g->skinData.select <= 4 || g->skinData.select == 12 || g->skinData.select == 13) {
 		if (GetTimeLapse(40, &g->timer2) < 0 && GetTimeLapse(0, &g->timer2) > g->skstruct2.loadend + g->skstruct2.loadstart)
 			SetTimeLapse(40, &g->timer2);
-		if (GetTimeLapse(41, &g->timer2) < 0 && GetTimeLapse(0, &g->timer2) > g->skstruct2.playstart)
+		if (GetTimeLapse(41, &g->timer2) < 0 && GetTimeLapse(40, &g->timer2) > g->skstruct2.playstart)
 			SetTimeLapse(41, &g->timer2);
 
 		if (GetTimeLapse(48, &g->timer2) < 0 && (g->gameplay.player[0].totalnotes == g->gameplay.player[0].note_current))
@@ -8861,13 +8861,13 @@ int InitSelectBySearchResult(game *g, sqlite3 *sql) {
 					g->sSelect.listTopbar = 0;
 					flag = 1;
 					g->procSelecter = 3;
-					g->gameplay.is_notplaying_unchecked = 0;
+					g->gameplay.isAutoplay = 0;
 				}
 				if (g->sSelect.filter_clicked == 9) {
 					g->sSelect.listTopbar = 0;
 					flag = 1;
 					g->procSelecter = 3;
-					g->gameplay.is_notplaying_unchecked = 1;
+					g->gameplay.isAutoplay = 1;
 				}
 				if (g->sSelect.filter_clicked == 7) {
 					g->sSelect.listTopbar = g->sSelect.course.return_Topbar;
@@ -8964,7 +8964,7 @@ int InitSelectBySearchResult(game *g, sqlite3 *sql) {
 				ProcS_Select(g);
 				if (g->sSelect.searchMax == 1 && g->sSelect.rivalID == 0) {
 					g->procSelecter = 3;
-					g->gameplay.is_notplaying_unchecked = 0;
+					g->gameplay.isAutoplay = 0;
 					g->isSkipDrawTick = 1;
 				}
 				else {
@@ -9040,7 +9040,7 @@ int SaveResult(game *g, sqlite3* sql) {
 		g->gameplay.isNosave = 0;
 	}
 
-	if (g->gameplay.is_notplaying_unchecked) return -1;
+	if (g->gameplay.isAutoplay) return -1;
 
 	CheckClear(&g->gameplay.player[0], g->config.play.gaugeOption[0], g->gameplay.is2Pplay);
 	if (g->gameplay.courseType == 0 || g->gameplay.courseType == 2) {
@@ -9599,7 +9599,7 @@ int ProcS_subCourseResult(game *g, sqlite3 *sql) {
 
 	PlayerCheckAndSwap(&g->gameplay);
 
-	if (g->gameplay.isNosave || g->gameplay.is_notplaying_unchecked == 1 || g->gameplay.replay.status == 2) return 0;
+	if (g->gameplay.isNosave || g->gameplay.isAutoplay == 1 || g->gameplay.replay.status == 2) return 0;
 
 	memcpy(&g->sSelect.old, &g->sSelect.bmsList[g->sSelect.cur_song].mybest, sizeof(STATUS));
 	
@@ -9779,7 +9779,7 @@ int PlayPreviewSample(game *g) {
 	int scratchSide = 0;
 	ConfigStruct tCfg = g->config;
 	tCfg.play.battle = (g->skinData.select >= 12);
-	g->gameplay.is_notplaying_unchecked = 1;
+	g->gameplay.isAutoplay = 1;
 	scratchSide = 0;
 	if (g->skinData.select == 3 && g->skinData.Data[g->skinData.skinID[3]].type == SKINTYPE_14KEYS)
 		scratchSide = g->skstruct2.scratchside_1 + g->skstruct2.scratchside_2 * 2;
@@ -9794,7 +9794,7 @@ int PlayPreviewSample(game *g) {
 			ReadKeyConfig(g, "LR2files\\Config\\keyconfig.xml");
 			g->sSelect.metaSelected.keymode = 7;
 			InitGameplay(&g->gameplay, &tCfg.play);
-			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_7.bme", &g->audio, g, &g->sSelect.metaSelected, 1, scratchSide);
+			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_7.bme", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide);
 			LoadBmsResource(&g->gameplay, "LR2files\\Config\\sample_7.bme", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide, 0);
 			break;
 
@@ -9805,7 +9805,7 @@ int PlayPreviewSample(game *g) {
 				ReadKeyConfig(g, "LR2files\\Config\\keyconfig_5.xml");
 			g->sSelect.metaSelected.keymode = 5;
 			InitGameplay(&g->gameplay, &tCfg.play);
-			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_5.bme", &g->audio, g, &g->sSelect.metaSelected, 1, scratchSide);
+			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_5.bme", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide);
 			LoadBmsResource(&g->gameplay, "LR2files\\Config\\sample_5.bme", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide, 0);
 			break;
 
@@ -9813,7 +9813,7 @@ int PlayPreviewSample(game *g) {
 			ReadKeyConfig(g, "LR2files\\Config\\keyconfig.xml");
 			g->sSelect.metaSelected.keymode = 14;
 			InitGameplay(&g->gameplay, &tCfg.play);
-			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_14.bme", &g->audio, g, &g->sSelect.metaSelected, 1, scratchSide);
+			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_14.bme", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide);
 			LoadBmsResource(&g->gameplay, "LR2files\\Config\\sample_14.bme", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide, 0);
 			break;
 
@@ -9824,7 +9824,7 @@ int PlayPreviewSample(game *g) {
 				ReadKeyConfig(g, "LR2files\\Config\\keyconfig_5.xml");
 			g->sSelect.metaSelected.keymode = 10;
 			InitGameplay(&g->gameplay, &tCfg.play);
-			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_10.bme", &g->audio, g, &g->sSelect.metaSelected, 1, scratchSide);
+			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_10.bme", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide);
 			LoadBmsResource(&g->gameplay, "LR2files\\Config\\sample_10.bme", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide, 0);
 			break;
 
@@ -9832,7 +9832,7 @@ int PlayPreviewSample(game *g) {
 			ReadKeyConfig(g, "LR2files\\Config\\keyconfig_p.xml");
 			g->sSelect.metaSelected.keymode = 9;
 			InitGameplay(&g->gameplay, &tCfg.play);
-			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_9.pms", &g->audio, g, &g->sSelect.metaSelected, 1, scratchSide);
+			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_9.pms", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide);
 			LoadBmsResource(&g->gameplay, "LR2files\\Config\\sample_9.pms", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide, 0);
 			break;
 
@@ -9843,7 +9843,7 @@ int PlayPreviewSample(game *g) {
 				ReadKeyConfig(g, "LR2files\\Config\\keyconfig_5.xml");
 			g->sSelect.metaSelected.keymode = 5;
 			InitGameplay(&g->gameplay, &tCfg.play);
-			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_5.bme", &g->audio, g, &g->sSelect.metaSelected, 1, scratchSide);
+			ParseBmsFile(&g->gameplay, "LR2files\\Config\\sample_5.bme", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide);
 			LoadBmsResource(&g->gameplay, "LR2files\\Config\\sample_5.bme", &g->audio, &tCfg, &g->sSelect.metaSelected, 1, scratchSide, 0);
 			break;
 	}
@@ -10257,7 +10257,7 @@ int SetObjectValue_Button(game *g, skstruct *sk, Timer *T, char flag) {
 				if (isClickSuccess == 2) {
 					if (g->procSelecter == 2) {
 						if (g->sSelect.bmsList[g->sSelect.cur_song].keymode > 0 || g->sSelect.bmsList[g->sSelect.cur_song].folderType == 9) {
-							g->gameplay.is_notplaying_unchecked = 0;
+							g->gameplay.isAutoplay = 0;
 							g->sSelect.is_clicked_autoplay_replay = 1;
 						}
 					}
@@ -10269,7 +10269,7 @@ int SetObjectValue_Button(game *g, skstruct *sk, Timer *T, char flag) {
 				if (isClickSuccess == 2) {
 					if (g->procSelecter == 2) {
 						if (g->sSelect.bmsList[g->sSelect.cur_song].keymode > 0 || g->sSelect.bmsList[g->sSelect.cur_song].folderType == 9) {
-							g->gameplay.is_notplaying_unchecked = 1;
+							g->gameplay.isAutoplay = 1;
 							g->sSelect.is_clicked_autoplay_replay = 1;
 						}
 					}
@@ -10305,7 +10305,7 @@ int SetObjectValue_Button(game *g, skstruct *sk, Timer *T, char flag) {
 				if (isClickSuccess == 2) {
 					if (g->procSelecter == 2 && g->sSelect.bmsList[g->sSelect.cur_song].keymode > 0) {
 						g->gameplay.replay.status = 2;
-						g->gameplay.is_notplaying_unchecked = 0;
+						g->gameplay.isAutoplay = 0;
 						g->sSelect.is_clicked_autoplay_replay = 1;
 					}
 				}
@@ -11917,7 +11917,7 @@ void SubProcI_Select(game *g, sqlite3 *sql) {
 			else if (g->sSelect.is_clicked_autoplay_replay) {
 				g->sSelect.is_clicked_autoplay_replay = 0;
 				if (g->sSelect.bmsList[g->sSelect.cur_song].folderType == 9) {
-					CreateRandomCourse(g,sql,g->gameplay.is_notplaying_unchecked != 0);
+					CreateRandomCourse(g,sql,g->gameplay.isAutoplay != 0);
 					return;
 				}
 				else if (((g->sSelect.bmsList[g->sSelect.cur_song].courseStageCount <= 0 || g->sSelect.bmsList[g->sSelect.cur_song].coursePlayable == 1) && g->sSelect.bmsList[g->sSelect.cur_song].keymode >= 1)) {
@@ -11940,7 +11940,7 @@ void SubProcI_Select(game *g, sqlite3 *sql) {
 						else {
 							g->procSelecter = 3;
 							g->gameplay.replay.status = 0;
-							g->gameplay.is_notplaying_unchecked = 1;
+							g->gameplay.isAutoplay = 1;
 							ErrorLogAdd("ホールド無しでオートプレイ\n");
 						}
 						return;
@@ -11957,7 +11957,7 @@ void SubProcI_Select(game *g, sqlite3 *sql) {
 					else if (g->KeyInput.p1_buttonInput[6] == 0 && g->KeyInput.p2_buttonInput[6] == 0 && g->KeyInput.p1_buttonInput[1] == 0) {
 						g->procSelecter = 3;
 						g->gameplay.replay.status = 0;
-						g->gameplay.is_notplaying_unchecked = 1;
+						g->gameplay.isAutoplay = 1;
 						ResetTimeLapse(172, &g->timer1);
 						ErrorLogAdd("ホールド途中終了でオートプレイ\n");
 						return;
@@ -11965,7 +11965,7 @@ void SubProcI_Select(game *g, sqlite3 *sql) {
 					else if (GetTimeLapse(172, &g->timer1) > 2000.0) {
 						g->procSelecter = 3;
 						g->gameplay.replay.status = 2;
-						g->gameplay.is_notplaying_unchecked = 0;
+						g->gameplay.isAutoplay = 0;
 						ErrorLogAdd("ホールド1秒でリプレイ\n");
 						return;
 					}
@@ -12251,7 +12251,7 @@ void SubProcI_Select(game *g, sqlite3 *sql) {
 					}
 					else {
 						g->procSelecter = 3;
-						g->gameplay.is_notplaying_unchecked = 0;
+						g->gameplay.isAutoplay = 0;
 					}
 					return;
 				}
@@ -12622,7 +12622,7 @@ int ProcGame(game *g) {
 
 				if ((g->gameplay.player[0].HP >= 2.0 || g->config.play.battle == 1) && (g->gameplay.player[0].HP >= 2.0 || g->gameplay.player[1].HP >= 2.0 || g->config.play.battle != 1) || g->gameplay.isPreviewLoad) {
 
-					if (g->gameplay.is_notplaying_unchecked == 0 && g->config.play.m_lunaris == 0 && g->gameplay.isPreviewLoad == 0) {
+					if (g->gameplay.isAutoplay == 0 && g->config.play.m_lunaris == 0 && g->gameplay.isPreviewLoad == 0) {
 						oldt142 = t142;
 						if (g->gameplay.bpmChangedRealtime > 0) {
 							t142 = g->gameplay.bpmChangedRealtime * 2 - t142;
@@ -12641,7 +12641,7 @@ int ProcGame(game *g) {
 						}
 					}
 
-					if (g->config.play.m_lunaris == 0 && g->gameplay.is_notplaying_unchecked == 0 && g->gameplay.replay.status != 2 && g->config.play.autojudge > 0 && g->config.play.battle != 1 && g->gameplay.autojudge_midcount > 9) {
+					if (g->config.play.m_lunaris == 0 && g->gameplay.isAutoplay == 0 && g->gameplay.replay.status != 2 && g->config.play.autojudge > 0 && g->config.play.battle != 1 && g->gameplay.autojudge_midcount > 9) {
 
 						if (g->gameplay.autojudge_midsum > 0) g->config.play.judgetiming++;
 						else if (g->gameplay.autojudge_midsum < 0) g->config.play.judgetiming--;
@@ -12674,7 +12674,7 @@ int ProcGame(game *g) {
 					LogGraphData(&g->gameplay.rategraph[0], g->gameplay.highScore.rate, t142, g->gameplay.song_runtime);
 					LogGraphData(&g->gameplay.rategraph[1], g->gameplay.targetScore.rate, t142, g->gameplay.song_runtime);
 
-					if (g->gameplay.is_notplaying_unchecked == 0 && g->is_starter == 0 && g->gameplay.isPreviewLoad == 0) {
+					if (g->gameplay.isAutoplay == 0 && g->is_starter == 0 && g->gameplay.isPreviewLoad == 0) {
 						int t160 = GetTimeLapse(160, &g->timer1);
 						if (t160 >= 5000) {
 							g->gameplay.delayCheckCount++;
@@ -12812,7 +12812,7 @@ int ProcGame(game *g) {
 			case 27:
 			case 28:
 			case 29:
-				if ((g->gameplay.is_notplaying_unchecked == 0 && g->config.play.m_lunaris == 0 && g->gameplay.isPreviewLoad == 0) || val <= 0) {
+				if ((g->gameplay.isAutoplay == 0 && g->config.play.m_lunaris == 0 && g->gameplay.isPreviewLoad == 0) || val <= 0) {
 					if (g->gameplay.bmsobj_note[op - 10].autoplay && val > 0) {
 						PlaySound(&g->audio, &g->gameplay.keysound[val], g->audio.chnStageKey[stage], stage);
 						g->gameplay.bmsobj_note[op - 10].noteVal = val;
@@ -12929,7 +12929,7 @@ int ProcGame(game *g) {
 		}
 	}
 
-	if (g->gameplay.is_notplaying_unchecked == 0 && g->config.play.m_lunaris == 0 && g->gameplay.isPreviewLoad == 0) {
+	if (g->gameplay.isAutoplay == 0 && g->config.play.m_lunaris == 0 && g->gameplay.isPreviewLoad == 0) {
 		oldt142 = t142;
 		if (g->gameplay.bpmChangedRealtime > 0) {
 			t142 = g->gameplay.bpmChangedRealtime * 2 - t142;
@@ -13003,7 +13003,7 @@ int ProcGame(game *g) {
 			if (g->is_starter) {
 				g->po4_23da8 = 1;
 				g->po4flagSceneStart = 1;
-				if (g->gameplay.is_notplaying_unchecked == 0 && g->config.play.autojudge == 0 && g->gameplay.player[0].exscore > 0) {
+				if (g->gameplay.isAutoplay == 0 && g->config.play.autojudge == 0 && g->gameplay.player[0].exscore > 0) {
 					SetTimeLapse(411, &g->timer1);
 					g->gameplay.player[0].clearType = 1;
 					if(g->gameplay.player[0].totalnotes == g->gameplay.player[0].max_combo)
@@ -13170,7 +13170,7 @@ int ProcS_Play(game *g, sqlite3* sql) {
 	if (g->net.rankingData.target_ID > 0 && g->net.isOnline == 1) {
 		g->gameplay.targetScore.InitJudgeQueue();
 		g->net.WaitAndInitRanking();
-		if ((g->gameplay.ghostBattle == 0 && g->gameplay.is_notplaying_unchecked != 1) || g->gameplay.replay.status == 2) {
+		if ((g->gameplay.ghostBattle == 0 && g->gameplay.isAutoplay != 1) || g->gameplay.replay.status == 2) {
 			g->net.GetTargetInfo(0, md5, &gData, &gName, &seed, &iTemp, &iTemp, &iTemp, &iTemp, &iTemp);
 		}
 		else {
@@ -13227,12 +13227,12 @@ int ProcS_Play(game *g, sqlite3* sql) {
 			}
 			else {
 				g->rec.recMode = 1;
-				g->gameplay.is_notplaying_unchecked = 1;
+				g->gameplay.isAutoplay = 1;
 			}
 			g->audio.cmd_mediaOut = true;
 		}
 
-		ParseBmsFile(&g->gameplay, g->sSelect.metaSelected.filepath, &g->audio, g, &g->sSelect.metaSelected, g->skstruct.flag_BGA, scratchside);
+		ParseBmsFile(&g->gameplay, g->sSelect.metaSelected.filepath, &g->audio, &g->config, &g->sSelect.metaSelected, g->skstruct.flag_BGA, scratchside);
 	}
 	else {
 		InitGameplay_retry(&g->gameplay, &g->audio, g);
@@ -13483,11 +13483,11 @@ int ProcI_PO4Select(game *g, sqlite3 *sql) { //not tested
 			}
 			else if (g->po4_23da8 != 0) {
 				if (GetTimeLapse(411, &g->timer1) >= g->skstruct.event_STARTINPUT[5]) {
-					if (g->gameplay.is_notplaying_unchecked == 0 && g->config.play.autojudge == 0 && g->gameplay.player[0].exscore > 0) {
+					if (g->gameplay.isAutoplay == 0 && g->config.play.autojudge == 0 && g->gameplay.player[0].exscore > 0) {
 						SaveResult(g, sql);
 						g->po4flagSceneEnd = 0;
 					}
-					g->gameplay.is_notplaying_unchecked = 0;
+					g->gameplay.isAutoplay = 0;
 				}
 			}
 		}
@@ -13776,7 +13776,7 @@ int ProcI_PO4Select(game *g, sqlite3 *sql) { //not tested
 				g->po4procSelecter = 6;
 				g->po4sceneFadeout = g->skstruct.event_FADEOUT[3];
 
-				g->gameplay.is_notplaying_unchecked = 1;
+				g->gameplay.isAutoplay = 1;
 				
 				g->po4flagSceneStart = 1;
 				g->po4flagSceneEnd = 1;
@@ -17809,11 +17809,12 @@ int LoadLR2CustomFolder(sqlite3 *sql, CONFIG_JUKEBOX *jb, CSTR scoreDBpath, char
 ////LR2graphic_draw
 //49a770
 bool IsMultibyte(byte ch){
-	if (0x80 < ch) {
+	/*if (0x80 < ch) {
 		if (ch < 0xa0) return true;
 		if (0xdf < ch) return ch < 0xfe;
 	}
-	return false;
+	return false;*/
+	return (0x81 <= ch && ch < 0xA0) || (0xE0 <= ch && ch < 0xFE);
 }
 
 //49a790
@@ -18059,8 +18060,10 @@ int GetTextGraphLength(CSTR *str, ImageFont *imF) {
 		ch = *str->atPos(pos);
 		// 'ch < 0x81 || (0x9f < ch && (ch < 0xe0 || 0xfd < ch))' is replaced with !IsMultiByte()
 		if (!IsMultibyte(ch)) {
-			if (ch < 0) vCh = *str->atPos(pos) + 0x100;
-			else vCh = *str->atPos(pos);
+			if (ch < 0)
+				vCh = *str->atPos(pos) + 0x100;
+			else
+				vCh = *str->atPos(pos);
 		}
 		else {
 			vCh = (*str->atPos(pos) << 8) + (uchar)*str->atPos(pos + 1);
@@ -22851,7 +22854,7 @@ int LoadBmsResource(gameplay *gp, CSTR BMSfilepath, AUDIO *aud, ConfigStruct *cf
 	if (cfg->system.isablebmsthread == 0) CoUninitialize();
 	if (gp->bgaHandle[0] != -1) gp->missLayer = 0;
 
-	if (gp->is_notplaying_unchecked == 1) {
+	if (gp->isAutoplay == 1) {
 
 		for (int i = 0; i < gp->bmsobj.size; i++) {
 			if (!(gp->bmsobj.notes[i].op >= 10 && gp->bmsobj.notes[i].op < 30)) {
@@ -27459,7 +27462,7 @@ int AddReplayDataHeader(CONFIG_PLAY *cfg, REPLAY *rp, AUDIO *snd, gameplay *gp){
 	AddReplayData(rp, 0, 0x69, *(short *)&cfg->rand[0]);
 	AddReplayData(rp, 0, 0x9b, *(short *)&cfg->rand[1]);
 	AddReplayData(rp, 0, 0xc9, *(short *)&cfg->battle);
-	AddReplayData(rp, 0, 0xca, *(short *)&gp->is_notplaying_unchecked);
+	AddReplayData(rp, 0, 0xca, *(short *)&gp->isAutoplay);
 	AddReplayData(rp, 0, 0xcb, *(short *)&cfg->hsfix);
 	AddReplayData(rp, 0, 0xcc, *(short *)&cfg->is_extra);
 	AddReplayData(rp, 0, 0xcd, *(short *)&cfg->m_extra);
@@ -27557,7 +27560,7 @@ int REPLAY_ApplyJudgeToScore(gameplay *gp, Timer *T, game *g, uint judge, int pl
 	if (judge > 5) return 0;
 	
 	if (judge >= 1) {
-		if (player == 0 && gp->ghostBattle == 0 && gp->is_notplaying_unchecked == 0 && g->config.play.battle != 1) {
+		if (player == 0 && gp->ghostBattle == 0 && gp->isAutoplay == 0 && g->config.play.battle != 1) {
 			while (gp->highScore.DealJudgeFromQueue() == 0) {}
 			while (gp->targetScore.DealJudgeFromQueue() == 0) {}
 
@@ -27923,7 +27926,7 @@ int ReplayDataToInput(ReplayData *data, game *g, AUDIO *aud, gameplay *gp, input
 			g->config.play.battle = data->value;
 			break;
 		case 0xca:
-			gp->is_notplaying_unchecked = data->value;
+			gp->isAutoplay = data->value;
 			break;
 		case 0xcb:
 			g->config.play.hsfix = data->value;

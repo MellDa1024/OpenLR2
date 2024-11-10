@@ -315,7 +315,7 @@ int PlayerCheckAndSwap(gameplay * gp);
 
 
 
-int ParseBmsFile(gameplay * gp, CSTR filename, AUDIO * aud, game * g, BMSMETA * meta, int bgaFlag, int scratchSide);
+//ParseBmsFile()
 
 int SPtoDP(LaneStruct * lane, int baseNoteID, CHARTCONVERTER * cc);
 

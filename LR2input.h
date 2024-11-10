@@ -36,3 +36,5 @@ int WaitInput(inputStructure *is);
 int InputToButton(inputStructure *is, CONFIG_INPUT *cfg_input, int player, int isReplay);
 void InitMIDIInput(void);
 int InitInputStructure(inputStructure *is);
+
+int ParseBmsFile(gameplay * gp, CSTR filename, AUDIO * aud, ConfigStruct * cfg, BMSMETA * meta, int bgaFlag, int scratchSide);

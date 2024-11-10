@@ -155,7 +155,7 @@ struct CONFIG_PLAY {
 	int p2_assist;
 	int dpflip;
 	int unknown_2;
-	int hsfix;
+	int hsfix; // 1:max 2:min 3:average 4:constant
 	int battle; // 1:battle 2:d-battle 3:sp-to-dp 4:g-battle
 	int autojudge;
 	int judgetiming;
@@ -611,8 +611,6 @@ typedef struct REPLAY REPLAY, *PREPLAY;
 typedef struct PLAYSCORE PLAYSCORE, *PPLAYSCORE;
 
 typedef long LONG;
-
-typedef ulong ULONG_PTR;
 
 typedef struct WSAData WSAData, *PWSAData;
 
@@ -1455,7 +1453,7 @@ struct gameplay {
 	undefined field71_0x73deb;
 	int autojudge_midsum;
 	int autojudge_midcount;
-	int is_notplaying_unchecked;
+	int isAutoplay;
 	int flag_retry;
 	struct GRAPHDATA statgraph[2];
 	struct GRAPHDATAB rategraph[2]; /* 0:high 1:target? */

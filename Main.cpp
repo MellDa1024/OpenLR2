@@ -540,14 +540,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				gs.sSelect.cur_song = 0;
 				ProcS_Select(&gs);
 				gs.gameplay.replay.status = 0;
-				gs.gameplay.is_notplaying_unchecked = (gs.cmd_auto != 0);
+				gs.gameplay.isAutoplay = (gs.cmd_auto != 0);
 				if ((gs.auto2avi != '\0') || (gs.is_recordmode != '\0')) {
 					gs.gameplay.flag_closingPhase = 0;
-					gs.gameplay.is_notplaying_unchecked = 1;
+					gs.gameplay.isAutoplay = 1;
 					gs.gameplay.replay.status = 0;
 					if (gs.rec.recMode == 2) {
 						gs.gameplay.replay.status = gs.rec.recMode;
-						gs.gameplay.is_notplaying_unchecked = 0;
+						gs.gameplay.isAutoplay = 0;
 					}
 					else if (gs.rec.recMode == 3) {
 						gs.skstruct.drBuf.isDisabled = 1;
@@ -920,7 +920,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							if (gs.config.play.m_lunaris) {
 								LoadScene(&gs.skstruct, gs.config.skin.skinFilePath[0], gs.skinData.Data[gs.skinData.skinID[0]].informationP5, 0);
 								ReadKeyConfig(&gs, "LR2files\\Config\\keyconfig.xml");
-								gs.gameplay.is_notplaying_unchecked = 0;
+								gs.gameplay.isAutoplay = 0;
 							}
 							for (int i = 0; i < gs.skstruct.num_of_ImageFont; i++) {
 								LoadFontForText(&gs.skstruct.ImageFonts[i], &gs.sSelect.bmsList[gs.sSelect.cur_song].artist);
@@ -1263,13 +1263,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							WriteSkinCustomizeXml(&tmpSk, skinMD5);
 							SetTarget(&gs);
 
-							if (gs.gameplay.is_notplaying_unchecked) {
+							if (gs.gameplay.isAutoplay) {
 								gs.procSelecter = 2;
-								for (int i = 0; i < 6480; i++) {
-									StopSound(&gs.audio, &gs.gameplay.keysound[i]);
-									ReleaseSound(&gs.audio, &gs.gameplay.keysound[i]);
+								if(gs.is_recordmode == 0){
+									for (int i = 0; i < 6480; i++) {
+										StopSound(&gs.audio, &gs.gameplay.keysound[i]);
+										ReleaseSound(&gs.audio, &gs.gameplay.keysound[i]);
+									}
+									ErrorLogAdd("BMSの音を初期化しました\n");
 								}
-								ErrorLogAdd("BMSの音を初期化しました\n");
 							}
 							else if (gs.gameplay.player[0].note_current == 0 && gs.gameplay.player[1].note_current == 0 && gs.config.play.m_lunaris == 0) {
 								gs.procSelecter = 2;
@@ -1330,7 +1332,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 								ApplySoundFX(&gs.audio, 1, gs.config.sound.disabledsp);
 							}
 							else if (gs.gameplay.replay.status == 1) {
-								if (gs.gameplay.is_notplaying_unchecked == 0) {
+								if (gs.gameplay.isAutoplay == 0) {
 									if (gs.sSelect.bmsList[gs.sSelect.cur_song].courseType == 2 || gs.sSelect.bmsList[gs.sSelect.cur_song].courseType == 0) {
 										CSTR tmp;
 										cstrSprintf(&tmp, "__%d", gs.gameplay.courseStageNow);
@@ -1347,7 +1349,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 										}
 									}
 									else if (gs.config.play.replay == 3) {
-										if (gs.gameplay.player[0].clearType > 1 && gs.gameplay.player[0].exscore > 0) {
+										if (gs.gameplay.player[0].clearType >= 2 && gs.gameplay.player[0].exscore > 0) {
 											if (SaveReplay(&gs.gameplay.replay, gs.sSelect.bmsList[gs.sSelect.cur_song].hash, gs.config.player.id) == 1)
 												gs.sSelect.bmsList[gs.sSelect.cur_song].replayExist = 1;
 										}
@@ -1362,7 +1364,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 								ReleaseReplayBuffer(&gs.gameplay.replay);
 							}
 
-							if (gs.gameplay.is_notplaying_unchecked == 1 && (gs.gameplay.courseType == 0 || gs.gameplay.courseType == 2) && gs.gameplay.courseStageNow < gs.gameplay.courseStageCount + -1 && gs.gameplay.flag_closingPhase == 0) {
+							if (gs.gameplay.isAutoplay == 1 && (gs.gameplay.courseType == 0 || gs.gameplay.courseType == 2) && gs.gameplay.courseStageNow < gs.gameplay.courseStageCount -1  && gs.gameplay.flag_closingPhase == 0) {
 								gs.gameplay.courseStageNow++;
 								gs.procSelecter = 4;
 							}
@@ -1389,7 +1391,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							}
 							StopSysSound(&gs);
 							if (gs.gameplay.courseType == 0 || gs.gameplay.courseType == 2) {
-								if (gs.gameplay.courseStageNow < gs.gameplay.courseStageCount + -1 && gs.gameplay.player[0].clearType != 0 && (gs.gameplay.player[1].clearType != 0 || gs.config.play.battle != 1) && gs.gameplay.player[0].HP >= 2.0) {
+								if (gs.gameplay.courseStageNow < gs.gameplay.courseStageCount -1 && gs.gameplay.player[0].clearType != 0 && (gs.gameplay.player[1].clearType != 0 || gs.config.play.battle != 1) && gs.gameplay.player[0].HP >= 2.0) {
 									gs.gameplay.courseStageNow++;
 									gs.procSelecter = 4;
 								}
@@ -1404,7 +1406,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							ReadLR2SoundSet(&gs, gs.config.skin.skinFilePath[10], 0);
 							break;
 						case 13:
-							if (gs.gameplay.replay.status == 1 && gs.gameplay.is_notplaying_unchecked == 0) {
+							if (gs.gameplay.replay.status == 1 && gs.gameplay.isAutoplay == 0) {
 								if (gs.config.play.replay == 1) {
 									if (MoveReplayFile(gs.sSelect.bmsList[gs.sSelect.cur_song].hash, gs.config.player.id) == 1)
 										gs.sSelect.bmsList[gs.sSelect.cur_song].replayExist = 1;
