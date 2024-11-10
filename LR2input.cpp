@@ -1873,7 +1873,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, game *g, BMSMETA *meta
 							if (gp->bmsobj.size == gp->bmsobj.count) ExpandNoteBuffer(&gp->bmsobj, 1000);
 
 							if (((10 <= channel && channel < 20) || (30 <= channel && channel < 40) || (50 <= channel && channel < 60)) && (meta->keymode < 10 && ((g->config.play.battle == 1 && (g->config.play.random[0] != g->config.play.random[1])) || g->config.play.battle == 2))) {
-								gp->bmsobj.notes[gp->bmsobj.size].bmsTiming = i / ((fBuf.length() - 7) / 2) + thisMeasure;
+								gp->bmsobj.notes[gp->bmsobj.size].bmsTiming = i / (float)((fBuf.length() - 7) / 2) + thisMeasure;
 								gp->bmsobj.notes[gp->bmsobj.size].val = Base36ToInt(*fBuf.atPos(ii), *fBuf.atPos(ii + 1)) + stage * 1296;
 								gp->bmsobj.notes[gp->bmsobj.size].op = channel + 10;
 								gp->bmsobj.size++;
