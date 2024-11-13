@@ -18,7 +18,6 @@ sending score to LR2IR is disabled to avoid accidents.
 # known issues
  - behavior mismatch on NONSTOP MIX
  - readme left click scroll is faster than original (not important)
- - some note doesn't disappear at last (standard, course)
  - banner load fails
 
 # libraries
