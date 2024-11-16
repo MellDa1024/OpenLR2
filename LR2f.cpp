@@ -9340,7 +9340,7 @@ int SaveResult(game *g, sqlite3* sql) {
 				return 0;
 			}
 
-			else if ((g->config.play.p1_assist == 1 || g->config.play.p2_assist == 1) || g->config.play.hsfix == 4 || (g->config.play.random[0] > 3 || g->config.play.random[1] > 3) && g->is_starter == 0) {
+			else if (((g->config.play.p1_assist == 1 || g->config.play.p2_assist == 1) || g->config.play.hsfix == 4 || (g->config.play.random[0] > 3 || g->config.play.random[1] > 3)) && g->is_starter == 0) { 
 				if (g->gameplay.replay.status == 2) return -1;
 
 				if (g->gameplay.player[0].clearType > 2) g->gameplay.player[0].clearType = 2;
