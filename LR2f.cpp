@@ -419,7 +419,7 @@ void ThreadProc_LoadBanner(void *param) {
 	game* g = (game*)param;
 
 	CSTR path;
-	CSTR dir = g->sSelect.bmsList[g->sSelect.cur_song].filepath.getDirectory();
+	CSTR dir(g->sSelect.bmsList[g->sSelect.cur_song].filepath.getDirectory());
 
 	if (g->sSelect.bmsList[g->sSelect.cur_song].isBanner && g->skstruct.reloadbanner == 1) {
 		path = dir;
@@ -19166,9 +19166,6 @@ int AddDrawingBuffer_JudgeCombo(DrawingBuf *drb, SRCstruct *jSrc, DSTstruct *jDs
 //49e780
 int ReloadImage(CSTR filename, int *grHandle) {
 	return ReloadGraph(filename, *grHandle, 0);
-
-	//DeleteGraph(*grHandle);
-	//return *grHandle = LoadGraph(filename, 0);
 }
 
 //49e7f0
@@ -19676,10 +19673,10 @@ int InitSkin(skstruct *sk, int p5, char font) {
 	DeleteGraph(sk->GrHandle[105]);
 	sk->GrHandle[105] = MakeGraph(640, 480);
 	DeleteGraph(sk->GrHandle[104]);
-	sk->GrHandle[104] = MakeGraph(640, 480);
+	sk->GrHandle[104] = MakeGraph(256, 256);
 	if (sk->GrHandle[100] == -1) sk->GrHandle[100] = MakeGraph(640, 480);
 	if (sk->GrHandle[101] == -1) sk->GrHandle[101] = MakeGraph(640, 480);
-	if (sk->GrHandle[102] == -1) sk->GrHandle[102] = MakeGraph(640, 480);
+	if (sk->GrHandle[102] == -1) sk->GrHandle[102] = MakeGraph(300, 80);
 	DeleteGraph(sk->GrHandle[110]);
 	sk->GrHandle[110] = LoadGraph("LR2files\\Config\\black.bmp");
 	DeleteGraph(sk->GrHandle[111]);

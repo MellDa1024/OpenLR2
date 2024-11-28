@@ -739,23 +739,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							CSTR dir(gs.sSelect.bmsList[gs.sSelect.cur_song].filepath.getDirectory());
 							if (gs.sSelect.bmsList[gs.sSelect.cur_song].isStagefile) {
 								CSTR oBuf;
-								if (FindAltImage(gs.sSelect.bmsList[gs.sSelect.cur_song].stagefile, dir, &oBuf) != -1)
+								if (FindAltImage(gs.sSelect.bmsList[gs.sSelect.cur_song].stagefile, dir, &oBuf) != 1)
 									gs.sSelect.bmsList[gs.sSelect.cur_song].isStagefile = 0;
 								gs.skstruct.GrHandle[100] = LoadGraph(oBuf, 0);
 								if (gs.skstruct.GrHandle[100] == -1) gs.sSelect.bmsList[gs.sSelect.cur_song].isStagefile = 0;
 							}
 							if (gs.sSelect.bmsList[gs.sSelect.cur_song].isBackBMP) {
 								CSTR oBuf;
-								if (FindAltImage(gs.sSelect.bmsList[gs.sSelect.cur_song].backBMP, dir, &oBuf) != -1)
+								if (FindAltImage(gs.sSelect.bmsList[gs.sSelect.cur_song].backBMP, dir, &oBuf) != 1)
 									gs.sSelect.bmsList[gs.sSelect.cur_song].isBackBMP = 0;
 								gs.skstruct.GrHandle[101] = LoadGraph(oBuf, 0);
 								if (gs.skstruct.GrHandle[101] == -1) gs.sSelect.bmsList[gs.sSelect.cur_song].isBackBMP = 0;
 							}
 							if (gs.sSelect.bmsList[gs.sSelect.cur_song].isBanner) {
 								CSTR oBuf;
-								if (FindAltImage(gs.sSelect.bmsList[gs.sSelect.cur_song].banner, dir, &oBuf) != -1) 
+								if (FindAltImage(gs.sSelect.bmsList[gs.sSelect.cur_song].banner, dir, &oBuf) != 1) 
 									gs.sSelect.bmsList[gs.sSelect.cur_song].isBanner = 0;
-								gs.skstruct.GrHandle[102] = LoadGraph(oBuf, 0);
+								gs.skstruct.GrHandle[102] = LoadGraph(oBuf, 0); //TOFIX : when banner size is not 300 80, this will break graph size and banner is not displayed until next song
 								if (gs.skstruct.GrHandle[102] == -1) gs.sSelect.bmsList[gs.sSelect.cur_song].isBanner = 0;
 							}
 							SetTransColor(0, 255, 0);
