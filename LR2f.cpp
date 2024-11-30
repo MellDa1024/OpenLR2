@@ -18149,7 +18149,7 @@ void LRDrawText(int* grHandle, DSTdraw *dstd, CSTR *str, ImageFont *imF) {
 					vCh += 0x7fc0;
 				}
 				else {
-					vCh = *str->atPos(i);
+					vCh = (uchar)*str->atPos(i);
 				}
 				if (vCh >= 0x3bce) vCh = 0x3f;
 
@@ -19845,7 +19845,7 @@ int LoadFontForText(ImageFont *imgfont, CSTR *str){
 			i += 2;
 		}
 		else {
-			twochar = *str->atPos(i);
+			twochar = (uchar)*str->atPos(i);
 			i++;
 		}
 
