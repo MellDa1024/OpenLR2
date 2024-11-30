@@ -18144,7 +18144,7 @@ void LRDrawText(int* grHandle, DSTdraw *dstd, CSTR *str, ImageFont *imF) {
 				if (IsMultibyte(ch)) {
 					vCh = (*str->atPos(i) << 8) + (uchar)*str->atPos(i + 1);
 
-					if (vCh > 0x9ffe) vCh += 0xbfbf;
+					if (vCh >= 0x9ffe) vCh += 0xbfbf;
 					vCh += 0x7fc0;
 				}
 				else {
@@ -20277,7 +20277,7 @@ int ReadSkin(skstruct *sk,CSTR FilePath, int unused, int skin_num, SkinUser* sku
 						}
 						else {
 							SplitCSV(fBuf, &csv, ",");
-							sk->fontHandle[sk->num_of_struct] = CreateFontToHandle(sk->fontname, csv.val[1], csv.val[2], csv.val[3], 0, -1, 0, -1);//, -1);
+							sk->fontHandle[sk->num_of_struct] = CreateFontToHandle(sk->fontname, csv.val[1], csv.val[2], csv.val[3], 0, -1, 0, -1, -1);
 							if (sk->fontHandle[sk->num_of_struct] == -1) {
 								sk->fontHandle[sk->num_of_struct] = 0;
 							}

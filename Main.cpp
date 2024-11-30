@@ -721,6 +721,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 								DeleteGraph(gs.gameplay.bgaHandle[i]);
 								gs.gameplay.bgaHandle[i] = -1;
 							}
+
+							gs.sSelect.panel_unk = -1;
 							ReadLR2SoundSet(&gs, gs.config.skin.skinFilePath[10], 0);
 							if (gs.config.play.is_extra && gs.audio.sysSound.exselect.load)
 								PlaySound(&gs.audio, &gs.audio.sysSound.exselect, gs.audio.chnBgm, -1);
