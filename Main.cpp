@@ -1,8 +1,8 @@
 ﻿#pragma once
+// /source-charset:shift-JIS /execution-charset:shift-JIS not supported in cl.exe on vs08. open your vs08 with locale emulation(cp932)
 #include <windows.h>
 #include <string>
 
-//#include "DXlib/DxDirectX.h"
 #include "DXlib/DxLib.h"
 #include "tinyxml/tinyxml.h"
 extern "C" {
@@ -37,9 +37,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	int tmp;
 	
 	//start of code
-	GetModuleFileName(NULL, curDir, 260);
+	GetModuleFileName(NULL, (LPCH)curDir, 260);
 	*(char*)(strrchr(curDir, '\\') + 1) = '\x00';
-	SetCurrentDirectory(curDir);
+	SetCurrentDirectory((LPCSTR)curDir);
 	gs.baseDirectory.assign(curDir, 0).add("\\");
 	gs.is_starter = false;
 	CopyFileA("LR2files\\Config\\keyconfig_def.xml", "LR2files\\Config\\keyconfig.xml", 1);
@@ -187,7 +187,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		ReadKeyConfig(&gs, "LR2files\\Config\\keyconfig.xml");
 		gs.is_clicked_screenModeChange = 0;
 		gs.flag_Screenshot = 0;
-		ReadOptionstrFile(gs.txtStruct.option_str, CSTR("LR2files\\Config\\optionstr.csv"));
+		ReadOptionstrFile(gs.txtStruct.option_str, "LR2files\\Config\\optionstr.csv");
 		gs.audio.is_fmod_disabled = gs.config.sound.disablefmod;
 		if (gs.config.sound.disablefmod != 0) {
 			gs.config.select.preview = 0;
@@ -258,10 +258,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		SetMultiThreadFlag(1);
 		SetUseFPUPreserveFlag(1);
-		SetUseDirectInputFlag(1); //not in original, but we need it to make same reaction.
+		//SetUseDirectInputFlag(1); //DXLIBVER: not in original, but we need it to make same reaction.
 		if (DxLib_Init() != -1) {
 			ChangeFont("", 0);
-			SetLogFontSize(12); //SetLogFontSize(14); //changed 14 to 12 because of dxlib version // TODO: make font same
+			SetLogFontSize(14); //DXLIBVER: change this for further dxlib version
 			SetSysCommandOffFlag(gs.config.system.disablesystemkey, 0);
 			SetDrawScreen(-2);
 			SetAlwaysRunFlag(1);
@@ -709,6 +709,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							}
 							gs.sSelect.toRoot = 0;
 							LoadFontForSongs(&gs, 0);
+
 							StopSysSound(&gs);
 							if (gs.is_recordmode == 0) {
 								for (int i = 0; i < 6480; i++) {
@@ -721,13 +722,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 								DeleteGraph(gs.gameplay.bgaHandle[i]);
 								gs.gameplay.bgaHandle[i] = -1;
 							}
+
+							gs.sSelect.panel_unk = -1;
 							ReadLR2SoundSet(&gs, gs.config.skin.skinFilePath[10], 0);
 							if (gs.config.play.is_extra && gs.audio.sysSound.exselect.load)
 								PlaySound(&gs.audio, &gs.audio.sysSound.exselect, gs.audio.chnBgm, -1);
 							else
 								PlaySound(&gs.audio, &gs.audio.sysSound.select, gs.audio.chnBgm, -1);
+
 							ProcS_Select(&gs);
 							break;
+
 						case 3:{
 							DeleteGraph(gs.skstruct.GrHandle[100]);
 							gs.skstruct.GrHandle[100] = -1;
@@ -739,30 +744,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							CSTR dir(gs.sSelect.bmsList[gs.sSelect.cur_song].filepath.getDirectory());
 							if (gs.sSelect.bmsList[gs.sSelect.cur_song].isStagefile) {
 								CSTR oBuf;
-								if (FindAltImage(gs.sSelect.bmsList[gs.sSelect.cur_song].stagefile, dir, &oBuf) != -1)
+								if (FindAltImage(gs.sSelect.bmsList[gs.sSelect.cur_song].stagefile, dir, &oBuf) != 1)
 									gs.sSelect.bmsList[gs.sSelect.cur_song].isStagefile = 0;
 								gs.skstruct.GrHandle[100] = LoadGraph(oBuf, 0);
 								if (gs.skstruct.GrHandle[100] == -1) gs.sSelect.bmsList[gs.sSelect.cur_song].isStagefile = 0;
 							}
 							if (gs.sSelect.bmsList[gs.sSelect.cur_song].isBackBMP) {
 								CSTR oBuf;
-								if (FindAltImage(gs.sSelect.bmsList[gs.sSelect.cur_song].backBMP, dir, &oBuf) != -1)
+								if (FindAltImage(gs.sSelect.bmsList[gs.sSelect.cur_song].backBMP, dir, &oBuf) != 1)
 									gs.sSelect.bmsList[gs.sSelect.cur_song].isBackBMP = 0;
 								gs.skstruct.GrHandle[101] = LoadGraph(oBuf, 0);
 								if (gs.skstruct.GrHandle[101] == -1) gs.sSelect.bmsList[gs.sSelect.cur_song].isBackBMP = 0;
 							}
 							if (gs.sSelect.bmsList[gs.sSelect.cur_song].isBanner) {
 								CSTR oBuf;
-								if (FindAltImage(gs.sSelect.bmsList[gs.sSelect.cur_song].banner, dir, &oBuf) != -1) 
+								if (FindAltImage(gs.sSelect.bmsList[gs.sSelect.cur_song].banner, dir, &oBuf) != 1) 
 									gs.sSelect.bmsList[gs.sSelect.cur_song].isBanner = 0;
-								gs.skstruct.GrHandle[102] = LoadGraph(oBuf, 0);
+								gs.skstruct.GrHandle[102] = LoadGraph(oBuf, 0); //TOFIX : when banner size is not 300 80, this will break graph size and banner is not displayed until next song
 								if (gs.skstruct.GrHandle[102] == -1) gs.sSelect.bmsList[gs.sSelect.cur_song].isBanner = 0;
 							}
 							SetTransColor(0, 255, 0);
 							LoadScene(&gs.skstruct, gs.config.skin.skinFilePath[6], gs.skinData.Data[gs.skinData.skinID[6]].informationP5, 0);
 							
 							StopSysSound(&gs);
-							ReadLR2SoundSet(&gs, gs.config.skin.skinFilePath[10], 0);
 							if (gs.config.play.is_extra && gs.audio.sysSound.exdecide.load)
 								PlaySound(&gs.audio, &gs.audio.sysSound.exselect, gs.audio.chnBgm, -1);
 							else
