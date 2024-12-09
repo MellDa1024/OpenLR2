@@ -10,10 +10,13 @@ extern "C" {
 }
 
 #include "strclass.h"
-#include "LR2startup.h"
 #include "LR2input.h"
+#include "LR2startup.h"
 #include "structure.h"
 #include "LR2f.h"
+
+#define LR2TITLE "LR2 beta3 version 100201"
+#define LR2VERSIONSTRING "LR2 beta3 version 100201 re-written 210807"
 
 using namespace std;
 
@@ -244,7 +247,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 
 		CSTR title;
-		cstrSprintf(&title, "LR2 beta3 version 100201"); ///define versionstring?
+		cstrSprintf(&title, LR2TITLE);
 		SetMainWindowText(title);
 		title.fillzero();
 		SetOutApplicationLogValidFlag(gs.config.system.outputlog);
@@ -297,7 +300,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			}
 			if (gs.is_starter == false) {
 				if (gs.cmd_directplay == false) {
-					printfDx("LR2 beta3 version 100201 re-written 210807");
+					printfDx(LR2VERSIONSTRING);
 					printfDx("\nPUSH ANY KEY\n");
 					if (backGrHandle > 0) {
 						DrawGraph(0, 0, backGrHandle, 0);
