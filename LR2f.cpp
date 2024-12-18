@@ -12577,18 +12577,18 @@ int ProcGame(game *g) {
 	double t142 = GetTimeLapse(142, &g->timer1);
 	double t41 = GetTimeLapse(41, &g->timer1);
 	for (int i = 0; i < 5; i++) {
-		if (g->gameplay.songStartTime[i] > 0) {
-			if (g->gameplay.songEndTime[i] > 0 && g->gameplay.songStartTime[i] - 100 <= t41 && t41 <= g->gameplay.songEndTime[i] + 100) {
-				double vol = ChangeValueByTime(0.0, 1.0, g->gameplay.songStartTime[i], g->gameplay.songEndTime[i], t41, 0);
+		if (g->gameplay.fadeinSOUNDstart[i] > 0) {
+			if (g->gameplay.fadeinSOUNDend[i] > 0 && g->gameplay.fadeinSOUNDstart[i] - 100 <= t41 && t41 <= g->gameplay.fadeinSOUNDend[i] + 100) {
+				double vol = ChangeValueByTime(0.0, 1.0, g->gameplay.fadeinSOUNDstart[i], g->gameplay.fadeinSOUNDend[i], t41, 0);
 				g->audio.param.stageBgmVolume[i] = vol;
 				g->audio.param.stageKeyVolume[i] = vol;
 				fx = true;
 			}
 		}
 
-		if (g->gameplay.fadeStartTime[i] > 0) {
-			if (g->gameplay.fadeStartTime[i] > 0 && g->gameplay.fadeEndTime[i] > 0 && g->gameplay.fadeStartTime[i] - 100 <= t41 && t41 <= g->gameplay.fadeEndTime[i] + 100) {
-				double vol = ChangeValueByTime(1.0, 0.0, g->gameplay.fadeStartTime[i], g->gameplay.fadeEndTime[i], t41, 0);
+		if (g->gameplay.fadeoutSOUNDstart[i] > 0) {
+			if (g->gameplay.fadeoutSOUNDstart[i] > 0 && g->gameplay.fadeoutSOUNDend[i] > 0 && g->gameplay.fadeoutSOUNDstart[i] - 100 <= t41 && t41 <= g->gameplay.fadeoutSOUNDend[i] + 100) {
+				double vol = ChangeValueByTime(1.0, 0.0, g->gameplay.fadeoutSOUNDstart[i], g->gameplay.fadeoutSOUNDend[i], t41, 0);
 				g->audio.param.stageBgmVolume[i] = vol;
 				g->audio.param.stageKeyVolume[i] = vol;
 				fx = true;
@@ -12598,11 +12598,11 @@ int ProcGame(game *g) {
 	if (fx) ApplySoundFX(&g->audio, 0, 0);
 
 	for (int i = 0; i < 5; i++) {
-		if (g->gameplay.connection_unkA[i] > 0 && g->gameplay.connection_unkB[i] > 0 && g->gameplay.connection_unkA[i] - 100 <= t41 && t41 <= g->gameplay.connection_unkB[i] + 100) {
-			g->gameplay.stageMixer[i] = ChangeValueByTime(0.0, 100.0, g->gameplay.connection_unkA[i], g->gameplay.connection_unkB[i], t41, 0);
+		if (g->gameplay.fadeinBGAstart[i] > 0 && g->gameplay.fadeinBGAend[i] > 0 && g->gameplay.fadeinBGAstart[i] - 100 <= t41 && t41 <= g->gameplay.fadeinBGAend[i] + 100) {
+			g->gameplay.stageMixer[i] = ChangeValueByTime(0.0, 100.0, g->gameplay.fadeinBGAstart[i], g->gameplay.fadeinBGAend[i], t41, 0);
 		}
-		if (g->gameplay.connection_unkC[i] > 0 && g->gameplay.connection_unkD[i] > 0 && g->gameplay.connection_unkC[i] - 100 <= t41 && t41 <= g->gameplay.connection_unkD[i] + 100) {
-			g->gameplay.stageMixer[i] = ChangeValueByTime(0.0, 100.0, g->gameplay.connection_unkC[i], g->gameplay.connection_unkD[i], t41, 0);
+		if (g->gameplay.fadeoutBGAstart[i] > 0 && g->gameplay.fadeoutBGAend[i] > 0 && g->gameplay.fadeoutBGAstart[i] - 100 <= t41 && t41 <= g->gameplay.fadeoutBGAend[i] + 100) {
+			g->gameplay.stageMixer[i] = ChangeValueByTime(100.0, 0.0, g->gameplay.fadeoutBGAstart[i], g->gameplay.fadeoutBGAend[i], t41, 0);
 		}
 	}
 		
@@ -22676,66 +22676,66 @@ int InitGameplay(gameplay *gp, CONFIG_PLAY *cfg) {
 		gp->keysound_filename[i].fillzero();
 		gp->BMP_filename[i].fillzero();
 	}
-	gp->songStartTime[0] = -1;
-	gp->songEndTime[0] = -1;
-	gp->fadeEndTime[0] = -1;
-	gp->connection_unkA[0] = -1;
-	gp->connection_unkB[0] = -1;
-	gp->connection_unkD[0] = -1;
-	gp->songStartTime[1] = -1;
-	gp->songEndTime[1] = -1;
-	gp->fadeEndTime[1] = -1;
-	gp->connection_unkA[1] = -1;
-	gp->connection_unkB[1] = -1;
-	gp->connection_unkD[1] = -1;
-	gp->songStartTime[2] = -1;
-	gp->songEndTime[2] = -1;
-	gp->fadeEndTime[2] = -1;
-	gp->connection_unkA[2] = -1;
-	gp->connection_unkB[2] = -1;
-	gp->connection_unkD[2] = -1;
-	gp->songStartTime[3] = -1;
-	gp->songEndTime[3] = -1;
-	gp->fadeEndTime[3] = -1;
-	gp->connection_unkA[3] = -1;
-	gp->connection_unkB[3] = -1;
-	gp->connection_unkD[3] = -1;
-	gp->songStartTime[4] = -1;
-	gp->songEndTime[4] = -1;
-	gp->fadeEndTime[4] = -1;
-	gp->connection_unkA[4] = -1;
-	gp->connection_unkB[4] = -1;
-	gp->connection_unkD[4] = -1;
-	gp->songStartTime[5] = -1;
-	gp->songEndTime[5] = -1;
-	gp->fadeEndTime[5] = -1;
-	gp->connection_unkA[5] = -1;
-	gp->connection_unkB[5] = -1;
-	gp->connection_unkD[5] = -1;
-	gp->songStartTime[6] = -1;
-	gp->songEndTime[6] = -1;
-	gp->fadeEndTime[6] = -1;
-	gp->connection_unkA[6] = -1;
-	gp->connection_unkB[6] = -1;
-	gp->connection_unkD[6] = -1;
-	gp->songStartTime[7] = -1;
-	gp->songEndTime[7] = -1;
-	gp->fadeEndTime[7] = -1;
-	gp->connection_unkA[7] = -1;
-	gp->connection_unkB[7] = -1;
-	gp->connection_unkD[7] = -1;
-	gp->songStartTime[8] = -1;
-	gp->songEndTime[8] = -1;
-	gp->fadeEndTime[8] = -1;
-	gp->connection_unkA[8] = -1;
-	gp->connection_unkB[8] = -1;
-	gp->connection_unkD[8] = -1;
-	gp->songStartTime[9] = -1;
-	gp->songEndTime[9] = -1;
-	gp->fadeEndTime[9] = -1;
-	gp->connection_unkA[9] = -1;
-	gp->connection_unkB[9] = -1;
-	gp->connection_unkD[9] = -1;
+	gp->fadeinSOUNDstart[0] = -1;
+	gp->fadeinSOUNDend[0] = -1;
+	gp->fadeoutSOUNDend[0] = -1;
+	gp->fadeinBGAstart[0] = -1;
+	gp->fadeinBGAend[0] = -1;
+	gp->fadeoutBGAend[0] = -1;
+	gp->fadeinSOUNDstart[1] = -1;
+	gp->fadeinSOUNDend[1] = -1;
+	gp->fadeoutSOUNDend[1] = -1;
+	gp->fadeinBGAstart[1] = -1;
+	gp->fadeinBGAend[1] = -1;
+	gp->fadeoutBGAend[1] = -1;
+	gp->fadeinSOUNDstart[2] = -1;
+	gp->fadeinSOUNDend[2] = -1;
+	gp->fadeoutSOUNDend[2] = -1;
+	gp->fadeinBGAstart[2] = -1;
+	gp->fadeinBGAend[2] = -1;
+	gp->fadeoutBGAend[2] = -1;
+	gp->fadeinSOUNDstart[3] = -1;
+	gp->fadeinSOUNDend[3] = -1;
+	gp->fadeoutSOUNDend[3] = -1;
+	gp->fadeinBGAstart[3] = -1;
+	gp->fadeinBGAend[3] = -1;
+	gp->fadeoutBGAend[3] = -1;
+	gp->fadeinSOUNDstart[4] = -1;
+	gp->fadeinSOUNDend[4] = -1;
+	gp->fadeoutSOUNDend[4] = -1;
+	gp->fadeinBGAstart[4] = -1;
+	gp->fadeinBGAend[4] = -1;
+	gp->fadeoutBGAend[4] = -1;
+	gp->fadeinSOUNDstart[5] = -1;
+	gp->fadeinSOUNDend[5] = -1;
+	gp->fadeoutSOUNDend[5] = -1;
+	gp->fadeinBGAstart[5] = -1;
+	gp->fadeinBGAend[5] = -1;
+	gp->fadeoutBGAend[5] = -1;
+	gp->fadeinSOUNDstart[6] = -1;
+	gp->fadeinSOUNDend[6] = -1;
+	gp->fadeoutSOUNDend[6] = -1;
+	gp->fadeinBGAstart[6] = -1;
+	gp->fadeinBGAend[6] = -1;
+	gp->fadeoutBGAend[6] = -1;
+	gp->fadeinSOUNDstart[7] = -1;
+	gp->fadeinSOUNDend[7] = -1;
+	gp->fadeoutSOUNDend[7] = -1;
+	gp->fadeinBGAstart[7] = -1;
+	gp->fadeinBGAend[7] = -1;
+	gp->fadeoutBGAend[7] = -1;
+	gp->fadeinSOUNDstart[8] = -1;
+	gp->fadeinSOUNDend[8] = -1;
+	gp->fadeoutSOUNDend[8] = -1;
+	gp->fadeinBGAstart[8] = -1;
+	gp->fadeinBGAend[8] = -1;
+	gp->fadeoutBGAend[8] = -1;
+	gp->fadeinSOUNDstart[9] = -1;
+	gp->fadeinSOUNDend[9] = -1;
+	gp->fadeoutSOUNDend[9] = -1;
+	gp->fadeinBGAstart[9] = -1;
+	gp->fadeinBGAend[9] = -1;
+	gp->fadeoutBGAend[9] = -1;
 	gp->stageMixer[1] = 0;
 	gp->stageMixer[2] = 0;
 	gp->stageMixer[3] = 0;

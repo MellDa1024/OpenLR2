@@ -1529,14 +1529,14 @@ struct gameplay {
 	int courseType; //-1:not_course 0:course 1:nonstop 2:grade
 	int courseConnection[10]; /* //nonstop 0:FADE 1:FADE+FIT 2:CUT 3:CUT+FIT 4:BALNK1 5:BALNK2 */
 	int courseStageNow;
-	int songStartTime[10];
-	int songEndTime[10];
-	int fadeStartTime[10];
-	int fadeEndTime[10];
-	int connection_unkA[10];
-	int connection_unkB[10];
-	int connection_unkC[10];
-	int connection_unkD[10];
+	int fadeinSOUNDstart[10];
+	int fadeinSOUNDend[10];
+	int fadeoutSOUNDstart[10];
+	int fadeoutSOUNDend[10];
+	int fadeinBGAstart[10];
+	int fadeinBGAend[10];
+	int fadeoutBGAstart[10];
+	int fadeoutBGAend[10];
 	int stageMixer[10];
 	int isPreviewLoad;
 	HANDLE hThreadPreview;

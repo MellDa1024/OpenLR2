@@ -1316,7 +1316,7 @@ int InitInputStructure(inputStructure *is){
 ///tmp
 //4b0690
 //TODO : rename variables
-//TODO : bga mismatch in NONSTOP MIX
+//TODO : test done CUT BLANK1, mismatched BLANK2 FADE
 //TOFIX : freq +12 autoplay endtime doesn't match (#STOP?)
 unsigned char channelConvert[] = { 0x00, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c,
 									0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
@@ -1422,38 +1422,38 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 	aud->param.stagePitch[0] = 1.0;
 	aud->param.stageBgmVolume[0] = 0.0;
 	aud->param.stageKeyVolume[0] = 1.0;
-	gp->songStartTime[0] = -1;
-	gp->songEndTime[0] = -1;
-	gp->fadeStartTime[0] = -1;
-	gp->fadeEndTime[0] = -1;
+	gp->fadeinSOUNDstart[0] = -1;
+	gp->fadeinSOUNDend[0] = -1;
+	gp->fadeoutSOUNDstart[0] = -1;
+	gp->fadeoutSOUNDend[0] = -1;
 	aud->param.stagePitch[1] = 1.0;
 	aud->param.stageKeyVolume[1] = 1.0;
 	aud->param.stageBgmVolume[1] = 0.0;
-	gp->songStartTime[1] = -1;
-	gp->songEndTime[1] = -1;
-	gp->fadeStartTime[1] = -1;
-	gp->fadeEndTime[1] = -1;
+	gp->fadeinSOUNDstart[1] = -1;
+	gp->fadeinSOUNDend[1] = -1;
+	gp->fadeoutSOUNDstart[1] = -1;
+	gp->fadeoutSOUNDend[1] = -1;
 	aud->param.stagePitch[2] = 1.0;
 	aud->param.stageKeyVolume[2] = 1.0;
 	aud->param.stageBgmVolume[2] = 0.0;
-	gp->songStartTime[2] = -1;
-	gp->songEndTime[2] = -1;
-	gp->fadeStartTime[2] = -1;
-	gp->fadeEndTime[2] = -1;
+	gp->fadeinSOUNDstart[2] = -1;
+	gp->fadeinSOUNDend[2] = -1;
+	gp->fadeoutSOUNDstart[2] = -1;
+	gp->fadeoutSOUNDend[2] = -1;
 	aud->param.stagePitch[3] = 1.0;
 	aud->param.stageKeyVolume[3] = 1.0;
 	aud->param.stageBgmVolume[3] = 0.0;
-	gp->songStartTime[3] = -1;
-	gp->songEndTime[3] = -1;
-	gp->fadeStartTime[3] = -1;
-	gp->fadeEndTime[3] = -1;
+	gp->fadeinSOUNDstart[3] = -1;
+	gp->fadeinSOUNDend[3] = -1;
+	gp->fadeoutSOUNDstart[3] = -1;
+	gp->fadeoutSOUNDend[3] = -1;
 	aud->param.stagePitch[4] = 1.0;
 	aud->param.stageKeyVolume[4] = 1.0;
 	aud->param.stageBgmVolume[4] = 0.0;
-	gp->songStartTime[4] = -1;
-	gp->songEndTime[4] = -1;
-	gp->fadeStartTime[4] = -1;
-	gp->fadeEndTime[4] = -1;
+	gp->fadeinSOUNDstart[4] = -1;
+	gp->fadeinSOUNDend[4] = -1;
+	gp->fadeoutSOUNDstart[4] = -1;
+	gp->fadeoutSOUNDend[4] = -1;
 	aud->param.stageBgmVolume[0] = 1.0;
 	aud->param.stageKeyVolume[0] = 1.0;
 	int total[2] = { 0, 0 }; 
@@ -2651,28 +2651,28 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 		}
 
 		if ((gp->courseConnection[stage] == 2 || gp->courseConnection[stage] == 3) && stage < stages - 1) { //CUT, CUT+FIT
-			gp->fadeStartTime[stage] = bpmt_realtime;
-			gp->fadeEndTime[stage] = bpmt_realtime + 200.0;
-			gp->songStartTime[stage+1] = bpmt_realtime - 200.0;
-			gp->songEndTime[stage+1] = bpmt_realtime;
+			gp->fadeoutSOUNDstart[stage] = bpmt_realtime;
+			gp->fadeoutSOUNDend[stage] = bpmt_realtime + 200.0;
+			gp->fadeinSOUNDstart[stage+1] = bpmt_realtime - 200.0;
+			gp->fadeinSOUNDend[stage+1] = bpmt_realtime;
 		}
 		else if ((gp->courseConnection[stage] == 1 || gp->courseConnection[stage] == 0) && stage < stages - 1) { //FADE, FADE+FIT
 			if (gp->courseConnection[stage] != 1) {
-				gp->fadeStartTime[stage] = bpmt_realtime;
-				gp->fadeEndTime[stage] = bpmt_realtime + 10000.0;
+				gp->fadeoutSOUNDstart[stage] = bpmt_realtime;
+				gp->fadeoutSOUNDend[stage] = bpmt_realtime + 10000.0;
 			}
 		}
 		else if (gp->courseConnection[stage] == 4 && stage < stages - 1) { //BLANK1
-			gp->songStartTime[stage+1] = bpmt_realtime - 5000.0;
-			gp->songEndTime[stage+1] = bpmt_realtime;
+			gp->fadeinSOUNDstart[stage+1] = bpmt_realtime - 5000.0;
+			gp->fadeinSOUNDend[stage+1] = bpmt_realtime;
 		}
 
-		gp->connection_unkC[stage + 1] = bpmt_realtime;
-		gp->connection_unkD[stage + 1] = bpmt_realtime + 3000.0;
+		gp->fadeoutBGAstart[stage] = bpmt_realtime;
+		gp->fadeoutBGAend[stage] = bpmt_realtime + 3000.0;
 
 		if (stage < stages - 1) {
-			gp->connection_unkA[stage + 1] = bpmt_realtime - 3000.0;
-			gp->connection_unkB[stage + 1] = bpmt_realtime;
+			gp->fadeinBGAstart[stage + 1] = bpmt_realtime - 3000.0;
+			gp->fadeinBGAend[stage + 1] = bpmt_realtime;
 		}
 
 		if (stage != 0 && oldbpmtCount > 0  && realDiff != 0.0) { 
@@ -3526,23 +3526,23 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 	if (cfg->system.isablebmsthread == 1 && gp->isPreviewLoad == 0) {
 		LoadBmsResource(gp, filename, aud, cfg, meta, bgaFlag, scratchSide, 0);
 	}
-	if (gp->songStartTime[0] <= 0 || gp->songEndTime[0] <= 0) {
+	if (gp->fadeinSOUNDstart[0] <= 0 || gp->fadeinSOUNDend[0] <= 0) {
 		aud->param.stageBgmVolume[0] = 1.0;
 		aud->param.stageKeyVolume[0] = 1.0;
 	}
-	if (gp->songStartTime[1] <= 0 || gp->songEndTime[1] <= 0) {
+	if (gp->fadeinSOUNDstart[1] <= 0 || gp->fadeinSOUNDend[1] <= 0) {
 		aud->param.stageBgmVolume[1] = 1.0;
 		aud->param.stageKeyVolume[1] = 1.0;
 	}
-	if (gp->songStartTime[2] <= 0 || gp->songEndTime[2] <= 0) {
+	if (gp->fadeinSOUNDstart[2] <= 0 || gp->fadeinSOUNDend[2] <= 0) {
 		aud->param.stageBgmVolume[2] = 1.0;
 		aud->param.stageKeyVolume[2] = 1.0;
 	}
-	if (gp->songStartTime[3] <= 0 || gp->songEndTime[3] <= 0) {
+	if (gp->fadeinSOUNDstart[3] <= 0 || gp->fadeinSOUNDend[3] <= 0) {
 		aud->param.stageBgmVolume[3] = 1.0;
 		aud->param.stageKeyVolume[3] = 1.0;
 	}
-	if (gp->songStartTime[4] <= 0 || gp->songEndTime[4] <= 0) {
+	if (gp->fadeinSOUNDstart[4] <= 0 || gp->fadeinSOUNDend[4] <= 0) {
 		aud->param.stageBgmVolume[4] = 1.0;
 		aud->param.stageKeyVolume[4] = 1.0;
 	}
