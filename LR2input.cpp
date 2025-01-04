@@ -1495,7 +1495,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 	avgBPM_notes = 0;
 	double bpmt_realtime = 0.0;
 	double bpmt_bmstime = 0.0;
-	double prevNoteRealtime = 0.0;
+	double prevNoteBmstime = 0.0;
 	nowBPM = 0.0;
 	endtime = 0.0;
 	avgBPM_bpmsum = 0.0;
@@ -2121,7 +2121,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 				ErrorLogFmtAdd("エラーノートを発見しました ch=%d\n", gp->bmsobj.notes[i].op);
 			}
 
-			if (gp->bmsobj.notes[i].bmsTiming != prevNoteRealtime) {
+			if (gp->bmsobj.notes[i].bmsTiming != prevNoteBmstime) {
 				if (stopRealtime) {
 					stopRealtime = (stopVal / 192.0) * (240000.0 / nowBPM); // STOP * 1/192 bar real millisec (240BPM 1bar = 1sec)
 
@@ -2154,16 +2154,17 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 					gp->bpmt_count++;
 				}
 				
-				double addRealtime = (240.0 / nowBPM * meaLength * (gp->bmsobj.notes[i].bmsTiming - prevNoteRealtime) * 1000.0);
+				double addRealtime = (240.0 / nowBPM * meaLength * (gp->bmsobj.notes[i].bmsTiming - prevNoteBmstime) * 1000.0);
 				bpmt_realtime += addRealtime + stopRealtime;
+				
 				if (cfg->play.hsfix == 4 || (gp->isCourse && gp->courseType == 1)) {
 					bpmt_bmstime += addRealtime * 1.2;
-					prevNoteRealtime = gp->bmsobj.notes[i].bmsTiming;
+					prevNoteBmstime = gp->bmsobj.notes[i].bmsTiming;
 					stopRealtime = 0.0;
 				}
 				else {
-					bpmt_bmstime += meaLength * 1920.0 * (gp->bmsobj.notes[i].bmsTiming - prevNoteRealtime);
-					prevNoteRealtime = gp->bmsobj.notes[i].bmsTiming;
+					bpmt_bmstime += meaLength * 1920.0 * (gp->bmsobj.notes[i].bmsTiming - prevNoteBmstime);
+					prevNoteBmstime = gp->bmsobj.notes[i].bmsTiming;
 					stopRealtime = 0.0;
 				}
 			}
@@ -2573,7 +2574,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 			if (gp->bmsobj.notes[bmsobj_stageFirst].bmsTiming <= 0 || gp->bmsobj.notes[bmsobj_stageFirst].realTiming <= 0 || gp->courseConnection[stage - 1] == 5) { //BLANK2
 				bpmt_realtime = unk2346c_realtime;
 				bpmt_bmstime = unk23484_bmstime;
-				prevNoteRealtime = _bPrevNoteTime;
+				prevNoteBmstime = _bPrevNoteTime;
 			}
 			else {
 				realDiff = gp->bmsobj.notes[k].realTiming - gp->bmsobj.notes[bmsobj_stageFirst].realTiming;
@@ -2586,14 +2587,14 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 				}
 				bpmt_realtime = unk2346c_realtime - realDiff;
 				bpmt_bmstime = unk23484_bmstime - bmsDiff;
-				prevNoteRealtime = _bPrevNoteTime - stageStartMeasure;
+				prevNoteBmstime = _bPrevNoteTime - stageStartMeasure;
 			}
 		}
 		else {
 			//same with -22?line
 			bpmt_realtime = unk2346c_realtime;
 			bpmt_bmstime = unk23484_bmstime;
-			prevNoteRealtime = _bPrevNoteTime;
+			prevNoteBmstime = _bPrevNoteTime;
 		}
 		// -2331 line
 		// 4033- line
