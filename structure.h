@@ -692,8 +692,8 @@ struct OptionString {
 
 struct LaneStruct {
     struct NoteStruct * notes; /* array pointer */
-    int size;
     int count;
+    int size;
     int note_count;
     int draw_count; //count of no need for draw(passed/processed)
     int noteVal;

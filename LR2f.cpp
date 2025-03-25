@@ -2191,7 +2191,7 @@ int DrawNotes(game *g, skstruct *sk, Timer *T, CONFIG_PLAY *cfg) {
 	}
 
 	int lineCount = 0;
-	for (int i = g->gameplay.bmsobj_line.draw_count; i < g->gameplay.bmsobj_line.size; i++) {
+	for (int i = g->gameplay.bmsobj_line.draw_count; i < g->gameplay.bmsobj_line.count; i++) {
 		
 		if (lineCount == 300) break; //max 300 measure_lines on screen
 		lineCount++;
@@ -2230,7 +2230,7 @@ int DrawNotes(game *g, skstruct *sk, Timer *T, CONFIG_PLAY *cfg) {
 
 		bool isDpGbattle = (key > 9 && g->gameplay.ghostBattle);
 
-		for (int i = g->gameplay.bmsobj_note[key].draw_count; i < g->gameplay.bmsobj_note[key].size; i++) {
+		for (int i = g->gameplay.bmsobj_note[key].draw_count; i < g->gameplay.bmsobj_note[key].count; i++) {
 			if (sk->dst_NOTE[key].dstCount > 0) {
 				if (sk->horizontal != 0 || sk->dst_NOTE[key].draw->y + cfg->basespeed / 100.0 * g->gameplay.speedmultiplier * speed * (songtimer - g->gameplay.bmsobj_note[key].notes[i].bmsTiming) / 600.0 <= drawStartHeight) {
 					if (sk->horizontal != 1 || (g->gameplay.bmsobj_note[key].notes[i].bmsTiming - songtimer) * g->gameplay.speedmultiplier * speed * (cfg->basespeed / 100.0) / 600.0 >= 640.0) {
@@ -4358,18 +4358,18 @@ int Proc_Auto2avi(game *g, CSTR directory, CSTR filename) {
 	GetSoundBuffer(&g->audio, g->gameplay.song_runtime, g->config.tools.mp3_volume);
 
 
-	for (int i = 0; i < g->gameplay.bmsobj.size; i++) {
+	for (int i = 0; i < g->gameplay.bmsobj.count; i++) {
 		double len = 0;
 		g->gameplay.bmsobj.notes[i].op;
 		if (g->gameplay.bmsobj.notes[i].op == 1 || (10 <= g->gameplay.bmsobj.notes[i].op  && g->gameplay.bmsobj.notes[i].op < 30)) {
-			if (i + 1 < g->gameplay.bmsobj.size) {
+			if (i + 1 < g->gameplay.bmsobj.count) {
 				double endtime = g->gameplay.keysound[(int)g->gameplay.bmsobj.notes[i].val].length;
 				if ((int)endtime < 0) {
 					endtime += 4294967296.0;
 				}
 				endtime += g->gameplay.bmsobj.notes[i].realTiming;
 
-				for (int j = i + 1; j < g->gameplay.bmsobj.size; j++) {
+				for (int j = i + 1; j < g->gameplay.bmsobj.count; j++) {
 					if (endtime <= g->gameplay.bmsobj.notes[j].realTiming) break;
 					
 					if (g->gameplay.bmsobj.notes[j].op == 1 || (10 <= g->gameplay.bmsobj.notes[i].op  && g->gameplay.bmsobj.notes[i].op < 30)) {
@@ -4415,17 +4415,17 @@ int RecordBmsSound(game *g, CSTR oPath) {
 		g->config.tools.mp3_volume;
 		GetSoundBuffer(&g->audio, g->gameplay.song_runtime, g->config.tools.mp3_volume);
 
-		for (int i = 0; i < g->gameplay.bmsobj.size; i++) {
+		for (int i = 0; i < g->gameplay.bmsobj.count; i++) {
 			double len = 0;
 			if (g->gameplay.bmsobj.notes[i].op == 1 || (10 <= g->gameplay.bmsobj.notes[i].op && g->gameplay.bmsobj.notes[i].op < 30)) {
-				if (i + 1 < g->gameplay.bmsobj.size) {
+				if (i + 1 < g->gameplay.bmsobj.count) {
 					double endtime = g->gameplay.keysound[(int)g->gameplay.bmsobj.notes[i].val].length;
 					if ((int)endtime < 0) {
 						endtime += 4294967296.0;
 					}
 					endtime += g->gameplay.bmsobj.notes[i].realTiming;
 
-					for (int j = i + 1; j < g->gameplay.bmsobj.size; j++) {
+					for (int j = i + 1; j < g->gameplay.bmsobj.count; j++) {
 						if (endtime <= g->gameplay.bmsobj.notes[j].realTiming) break;
 
 						if (g->gameplay.bmsobj.notes[j].op == 1 || (10 <= g->gameplay.bmsobj.notes[i].op  && g->gameplay.bmsobj.notes[i].op < 30)) {
@@ -7517,7 +7517,7 @@ int ProcSinglenote(game *g, int lane, int keypress, int timing, int player) {
 			note.active = -1;
 			g->gameplay.bmsobj_note[lane].note_count++;
 			
-			if (g->gameplay.bmsobj_note[lane].note_count < g->gameplay.bmsobj_note[lane].count && abs(timing - (int)g->gameplay.bmsobj_note[lane].notes[g->gameplay.bmsobj_note[lane].note_count].realTiming) <= g->gameplay.player[player].judgetime[2]) {
+			if (g->gameplay.bmsobj_note[lane].note_count < g->gameplay.bmsobj_note[lane].size && abs(timing - (int)g->gameplay.bmsobj_note[lane].notes[g->gameplay.bmsobj_note[lane].note_count].realTiming) <= g->gameplay.player[player].judgetime[2]) {
 				ProcSinglenote(g, lane, 1, timing, player);
 				return 1;
 			}
@@ -7635,9 +7635,9 @@ int ProcNoteOnTiming(game *g, int lane, int keypress, int timing, int player) {
 
 	if (!(0 <= note.stage && note.stage < 5)) note.stage = 0;
 	
-	if (g->gameplay.bmsobj_note[lane].size == 0 || g->gameplay.bmsobj_note[lane].autoplay != 0) return 0;
+	if (g->gameplay.bmsobj_note[lane].count == 0 || g->gameplay.bmsobj_note[lane].autoplay != 0) return 0;
 
-	if (g->gameplay.bmsobj_note[lane].note_count == g->gameplay.bmsobj_note[lane].size && g->gameplay.bmsobj_note[lane].noteVal > 0) {
+	if (g->gameplay.bmsobj_note[lane].note_count == g->gameplay.bmsobj_note[lane].count && g->gameplay.bmsobj_note[lane].noteVal > 0) {
 		if (keypress == 1) {
 			PlaySound(&g->audio, &g->gameplay.keysound[g->gameplay.bmsobj_note[lane].noteVal], g->audio.chnStageKey[note.stage], note.stage);
 		}
@@ -12892,7 +12892,7 @@ int ProcGame(game *g) {
 
 		g->gameplay.bmsobj.note_count++;
 
-		if (g->gameplay.bmsobj.size <= g->gameplay.bmsobj.note_count && g->gameplay.replay.status != 2) {
+		if (g->gameplay.bmsobj.count <= g->gameplay.bmsobj.note_count && g->gameplay.replay.status != 2) {
 			break;
 		}
 		if (g->gameplay.song_runtime < t142) {
@@ -13095,17 +13095,17 @@ void ProcGameThread(game *g) {
 		double recordnow = GetTimeWrap();
 		
 		//didn't check
-		for (int i = 0; i < g->gameplay.bmsobj.size; i++) {
+		for (int i = 0; i < g->gameplay.bmsobj.count; i++) {
 			double len = 0;
 			if (g->gameplay.bmsobj.notes[i].op == 1 || (10 <= g->gameplay.bmsobj.notes[i].op && g->gameplay.bmsobj.notes[i].op < 30)) {
-				if (i + 1 < g->gameplay.bmsobj.size) {
+				if (i + 1 < g->gameplay.bmsobj.count) {
 					double endtime = g->gameplay.keysound[(int)g->gameplay.bmsobj.notes[i].val].length;
 					if ((int)endtime < 0) {
 						endtime += 4294967296.0;
 					}
 					endtime += g->gameplay.bmsobj.notes[i].realTiming;
 
-					for (int j = i + 1; j < g->gameplay.bmsobj.size; j++) {
+					for (int j = i + 1; j < g->gameplay.bmsobj.count; j++) {
 						if (endtime <= g->gameplay.bmsobj.notes[j].realTiming) break;
 
 						if (g->gameplay.bmsobj.notes[j].op == 1) {
@@ -22345,13 +22345,13 @@ int ParseBMSMETA(BMSMETA *meta, CSTR filepath, char flag) {
 //4ac140
 int InitNoteBuffer(LaneStruct *lane, int count){
 
-	lane->count = count;
+	lane->size = count;
 	lane->notes = (NoteStruct *)malloc(count * sizeof(NoteStruct));
 	
-	lane->size = 0;
+	lane->count = 0;
 	lane->autoplay = 0;
 
-	for (int i = 0; i < lane->count; i++) {
+	for (int i = 0; i < lane->size; i++) {
 		lane->notes[i].bmsTiming_ln = -1.0;
 		lane->notes[i].realTiming_ln = -1.0;
 		lane->notes[i].active = -1;
@@ -22370,11 +22370,11 @@ int ExpandNoteBuffer(LaneStruct *lane, int addsize){
 
 	int oldCount;
 
-	oldCount = lane->count;
-	lane->count += addsize;
-	lane->notes = (NoteStruct*)realloc(lane->notes, (lane->count) * sizeof(NoteStruct));
+	oldCount = lane->size;
+	lane->size += addsize;
+	lane->notes = (NoteStruct*)realloc(lane->notes, (lane->size) * sizeof(NoteStruct));
 
-	for (int i = oldCount; i < lane->count; i++) {
+	for (int i = oldCount; i < lane->size; i++) {
 		lane->notes[i].bmsTiming_ln = -1.0;
 		lane->notes[i].realTiming_ln = -1.0;
 		lane->notes[i].active = -1;
@@ -22467,8 +22467,8 @@ int InitGameplay(gameplay *gp, CONFIG_PLAY *cfg) {
 	PlayerCheckAndSwap(gp);
 	gp->bpmt_start = 1;
 	gp->isPreviewLoad = 0;
-	if (gp->bmsobj.size == 0) InitNoteBuffer(&gp->bmsobj, 1000);
-	for (int i = 0; i < gp->bmsobj.count; i++) {
+	if (gp->bmsobj.count == 0) InitNoteBuffer(&gp->bmsobj, 1000);
+	for (int i = 0; i < gp->bmsobj.size; i++) {
 		gp->bmsobj.notes[i].bmsTiming_ln = -1.0;
 		gp->bmsobj.notes[i].realTiming_ln = -1.0;
 		gp->bmsobj.notes[i].active = -1;
@@ -22479,15 +22479,15 @@ int InitGameplay(gameplay *gp, CONFIG_PLAY *cfg) {
 		gp->bmsobj.notes[i].mine = -1;
 		gp->bmsobj.notes[i].stage = 0;
 	}
-	gp->bmsobj.size = 0;
+	gp->bmsobj.count = 0;
 	gp->bmsobj.draw_count = 0;
 	gp->bmsobj.note_count = 0;
 	gp->bmsobj.autoplay = 0;
 	gp->bmsobj.noteVal = -1;
 
 	for (int lane = 0; lane < 20; lane++) {
-		if (gp->bmsobj_note[lane].size == 0) InitNoteBuffer(&gp->bmsobj_note[lane], 100);
-		for (int i = 0; i < gp->bmsobj_note[lane].count; i++) {
+		if (gp->bmsobj_note[lane].count == 0) InitNoteBuffer(&gp->bmsobj_note[lane], 100);
+		for (int i = 0; i < gp->bmsobj_note[lane].size; i++) {
 			gp->bmsobj_note[lane].notes[i].bmsTiming_ln = -1.0;
 			gp->bmsobj_note[lane].notes[i].realTiming_ln = -1.0;
 			gp->bmsobj_note[lane].notes[i].active = -1;
@@ -22498,15 +22498,15 @@ int InitGameplay(gameplay *gp, CONFIG_PLAY *cfg) {
 			gp->bmsobj_note[lane].notes[i].mine = -1;
 			gp->bmsobj_note[lane].notes[i].stage = 0;
 		}
-		gp->bmsobj_note[lane].size = 0;
+		gp->bmsobj_note[lane].count = 0;
 		gp->bmsobj_note[lane].draw_count = 0;
 		gp->bmsobj_note[lane].note_count = 0;
 		gp->bmsobj_note[lane].autoplay = 0;
 		gp->bmsobj_note[lane].noteVal = -1;
 	}
 
-	if (gp->bmsobj_line.size == 0) InitNoteBuffer(&gp->bmsobj_line, 100);
-	for (int i = 0; i < gp->bmsobj_line.count; i++) {
+	if (gp->bmsobj_line.count == 0) InitNoteBuffer(&gp->bmsobj_line, 100);
+	for (int i = 0; i < gp->bmsobj_line.size; i++) {
 		gp->bmsobj_line.notes[i].bmsTiming_ln = -1.0;
 		gp->bmsobj_line.notes[i].realTiming_ln = -1.0;
 		gp->bmsobj_line.notes[i].active = -1;
@@ -22517,7 +22517,7 @@ int InitGameplay(gameplay *gp, CONFIG_PLAY *cfg) {
 		gp->bmsobj_line.notes[i].mine = -1;
 		gp->bmsobj_line.notes[i].stage = 0;
 	}
-	gp->bmsobj_line.size = 0;
+	gp->bmsobj_line.count = 0;
 	gp->bmsobj_line.draw_count = 1;
 	gp->bmsobj_line.note_count = 0;
 	gp->bmsobj_line.autoplay = 0;
@@ -22779,7 +22779,7 @@ int LoadBmsResource(gameplay *gp, CSTR BMSfilepath, AUDIO *aud, ConfigStruct *cf
 	}
 
 	gp->flag_0note = 1;
-	for (int i = 0; i < gp->bmsobj.size; i++) {
+	for (int i = 0; i < gp->bmsobj.count; i++) {
 		if ( (10 <= gp->bmsobj.notes[i].op && gp->bmsobj.notes[i].op < 30)
 			&& (0 < gp->bmsobj.notes[i].val && gp->bmsobj.notes[i].val < 6480.0)
 			&& gp->keysound[(int)gp->bmsobj.notes[i].val].load) {
@@ -22824,7 +22824,7 @@ int LoadBmsResource(gameplay *gp, CSTR BMSfilepath, AUDIO *aud, ConfigStruct *cf
 
 	if (gp->isAutoplay == 1) {
 
-		for (int i = 0; i < gp->bmsobj.size; i++) {
+		for (int i = 0; i < gp->bmsobj.count; i++) {
 			if (!(gp->bmsobj.notes[i].op >= 10 && gp->bmsobj.notes[i].op < 30)) {
 				if (gp->bmsobj.notes[i].op == 1) {
 					if (0 < gp->bmsobj.notes[i].val && gp->bmsobj.notes[i].val < 6480.0) { //TODO : is it okay to delete compiler code dealing unsigned?
@@ -22895,7 +22895,7 @@ int InitGameplay_retry(gameplay *gp, AUDIO *snd, game *g) {
 	gp->bpmt_start = 1;
 	gp->procGameCallCount = 0;
 
-	for (int i = 0; i < gp->bmsobj.count; i++) {
+	for (int i = 0; i < gp->bmsobj.size; i++) {
 		gp->bmsobj.notes[i].active = 0;
 	}
 	gp->bmsobj.draw_count = 0;
@@ -22903,7 +22903,7 @@ int InitGameplay_retry(gameplay *gp, AUDIO *snd, game *g) {
 	gp->bmsobj.noteVal = -1;
 
 	for (int lane = 0; lane < 20; lane++) {
-		for (int i = 0; i < gp->bmsobj_note[lane].count; i++) {
+		for (int i = 0; i < gp->bmsobj_note[lane].size; i++) {
 			gp->bmsobj_note[lane].notes[i].active = 0;
 		}
 		gp->bmsobj_note[lane].draw_count = 0;
@@ -22911,7 +22911,7 @@ int InitGameplay_retry(gameplay *gp, AUDIO *snd, game *g) {
 		gp->bmsobj_note[lane].noteVal = -1;
 	}
 
-	for (int i = 0; i < gp->bmsobj_line.count; i++) {
+	for (int i = 0; i < gp->bmsobj_line.size; i++) {
 		gp->bmsobj_line.notes[i].active = 0;
 	}
 	gp->bmsobj_line.draw_count = 1;
@@ -22983,7 +22983,7 @@ int InitGameplay_retry(gameplay *gp, AUDIO *snd, game *g) {
 	gp->fxChangeInRecording = false;
 
 	for (int i = 0; i < 20; i++) {
-		if(gp->bmsobj_note[i].size <= 0)
+		if(gp->bmsobj_note[i].count <= 0)
 			gp->bmsobj_note[i].noteVal = -1;
 		else
 			gp->bmsobj_note[i].noteVal = (int)gp->bmsobj_note[i].notes[0].val;
@@ -23055,7 +23055,7 @@ int CMP_CCARRbyID(const void *p1, const void *p2) {
 //4ad8d0
 int SplitNotesToDP(LaneStruct *lane, int start, CHARTCONVERTER *cc, int end) {
 
-	for (int i = start; i < lane->size; i++) {
+	for (int i = start; i < lane->count; i++) {
 		if (lane->notes[i].op == 2) break;
 
 		if (11 <= lane->notes[i].op && lane->notes[i].op <= 17) {
@@ -23082,7 +23082,7 @@ int RightLaneTo2P(LaneStruct *lane, int start, CHARTCONVERTER *cc) {
 		}
 	}
 	
-	for (int i = start; i < lane->size; i++) {
+	for (int i = start; i < lane->count; i++) {
 		if (lane->notes[i].op == 2) break;
 		if (lane->notes[i].op == op) {
 			lane->notes[i].op += 10;
@@ -23112,7 +23112,7 @@ int Move3rdLaneTo2P(LaneStruct *lane, int start, CHARTCONVERTER *cc) {
 		}
 	}
 
-	for (int i = start; i < lane->size; i++) {
+	for (int i = start; i < lane->count; i++) {
 		if (lane->notes[i].op == 2) break;
 		if ( (lane->notes[i].op == laneB && laneC < laneA) || lane->notes[i].op == laneD) {
 			lane->notes[i].op += 10;
@@ -23129,7 +23129,7 @@ int DPsplitLane(LaneStruct *lane, int start, CHARTCONVERTER *cc) {
 	int laneCount = 0;
 	int totalNoteCount = 0;
 
-	for (int i = start; i < lane->size; i++) {
+	for (int i = start; i < lane->count; i++) {
 		if (lane->notes[i].op == 2) break;
 		if (10 <= lane->notes[i].op && lane->notes[i].op <= 17) {
 			laneNoteCount[lane->notes[i].op - 10]++; //maybe right
@@ -23171,7 +23171,7 @@ int DPsplit(LaneStruct *lane, int start, CHARTCONVERTER *cc) {
 	int laneNoteCount[8] = { 0, };
 	int laneCount = 0;
 
-	for (int i = start; i < lane->size; i++) {
+	for (int i = start; i < lane->count; i++) {
 		if (lane->notes[i].op == 2) break;
 		if ((11 <= lane->notes[i].op && lane->notes[i].op <= 17) || (21 <= lane->notes[i].op && lane->notes[i].op <= 27)) {
 			if (cc->arr3[(int)lane->notes[i].val].soundLoadID == cc->arr2[0].ID) {
@@ -23192,7 +23192,7 @@ int DPsplit(LaneStruct *lane, int start, CHARTCONVERTER *cc) {
 	}
 
 	if (laneCount > 3) {
-		for (int i = start; i < lane->size; i++) {
+		for (int i = start; i < lane->count; i++) {
 			if (lane->notes[i].op == 2) break;
 			if ((11 <= lane->notes[i].op && lane->notes[i].op <= 17) || (21 <= lane->notes[i].op && lane->notes[i].op <= 27)) {
 				if (21 <= lane->notes[i].op && lane->notes[i].op <= 27)
@@ -23216,9 +23216,9 @@ void MakeExtraChart(gameplay *gp, CHARTCONVERTER *cc) {  //test completed
 
 	int notecount = 0;
 	double endtime;
-	qsort(gp->bmsobj.notes, gp->bmsobj.size, sizeof(NoteStruct), CMP_NotesByRealTimingOp);
+	qsort(gp->bmsobj.notes, gp->bmsobj.count, sizeof(NoteStruct), CMP_NotesByRealTimingOp);
 
-	for (int i = 0; i < gp->bmsobj.size; i++) {
+	for (int i = 0; i < gp->bmsobj.count; i++) {
 		if (10 <= gp->bmsobj.notes[i].op && gp->bmsobj.notes[i].op <= 30) {
 			notecount++;
 			endtime = gp->bmsobj.notes[i].bmsTiming;
@@ -23254,7 +23254,7 @@ void MakeExtraChart(gameplay *gp, CHARTCONVERTER *cc) {  //test completed
 		int Lane[20] = { 0, };
 		laneOfSound[i] = -1;
 
-		for (int j = 0; j < gp->bmsobj.size; j++) {
+		for (int j = 0; j < gp->bmsobj.count; j++) {
 			if (10 <= gp->bmsobj.notes[j].op && gp->bmsobj.notes[j].op <= 30) {
 				if ((int)gp->bmsobj.notes[j].val == i) {
 					Lane[gp->bmsobj.notes[j].op-10]++;
@@ -23379,7 +23379,7 @@ void MakeExtraChart(gameplay *gp, CHARTCONVERTER *cc) {  //test completed
 	}
 
 	double lastRealTiming = 0.0;
-	for (int i = 0; i < gp->bmsobj.size; i++) {
+	for (int i = 0; i < gp->bmsobj.count; i++) {
 		if (gp->bmsobj.notes[i].realTiming == lastRealTiming) {
 			if (10 <= gp->bmsobj.notes[i].op && gp->bmsobj.notes[i].op < 30) {
 				laneA[gp->bmsobj.notes[i].op-10] = 2;
@@ -23399,7 +23399,7 @@ void MakeExtraChart(gameplay *gp, CHARTCONVERTER *cc) {  //test completed
 				}
 			}
 
-			for (int j = i; j < gp->bmsobj.size; j++) {
+			for (int j = i; j < gp->bmsobj.count; j++) {
 				if (mingap <= gp->bmsobj.notes[j].realTiming - lastRealTiming) break;
 
 				if (10 <= gp->bmsobj.notes[j].op && gp->bmsobj.notes[j].op < 30 && laneA[gp->bmsobj.notes[j].op - 10] == 0) {
@@ -23500,7 +23500,7 @@ void MakeExtraChart(gameplay *gp, CHARTCONVERTER *cc) {  //test completed
 		if (gp->bmsobj.notes[i].bmsTiming > endtime) break;
 	}
 
-	qsort(gp->bmsobj.notes, gp->bmsobj.size, sizeof(NoteStruct), CMP_NotesByRealTimingOp);
+	qsort(gp->bmsobj.notes, gp->bmsobj.count, sizeof(NoteStruct), CMP_NotesByRealTimingOp);
 }
 
 //4ae8d0
@@ -23509,14 +23509,14 @@ void DPtoSP(gameplay *gp) { //test completed
 	int mingap;
 	char laneA[10], laneB[10];
 
-	qsort(gp->bmsobj.notes, gp->bmsobj.size, sizeof(NoteStruct), CMP_NotesByRealTimingOp);
+	qsort(gp->bmsobj.notes, gp->bmsobj.count, sizeof(NoteStruct), CMP_NotesByRealTimingOp);
 	
 	if (gp->BPM_fix <= 0.0 || (int)(30000.0 / gp->BPM_fix) < 125)
 		mingap = 125;
 	else
 		mingap = (30000.0 / gp->BPM_fix);
 
-	for (int i = 0; i < gp->bmsobj.size; i++) {
+	for (int i = 0; i < gp->bmsobj.count; i++) {
 
 		int op = gp->bmsobj.notes[i].op;
 		if (op == 3 || op == 8) {
@@ -23546,7 +23546,7 @@ void DPtoSP(gameplay *gp) { //test completed
 			}
 			
 
-			for (int next = i+1; next < gp->bmsobj.size; next++) {
+			for (int next = i+1; next < gp->bmsobj.count; next++) {
 				if (10 <= gp->bmsobj.notes[next].op && gp->bmsobj.notes[next].op <= 19) {
 					laneA[gp->bmsobj.notes[next].op - 10] = 1;
 					if (gp->bmsobj.notes[next].bmsTiming == gp->bmsobj.notes[i].bmsTiming) {
@@ -23593,7 +23593,7 @@ void DPtoSP(gameplay *gp) { //test completed
 			}
 		}
 	}
-	qsort(gp->bmsobj.notes, gp->bmsobj.size, sizeof(NoteStruct), CMP_NotesByRealTimingOp);
+	qsort(gp->bmsobj.notes, gp->bmsobj.count, sizeof(NoteStruct), CMP_NotesByRealTimingOp);
 	return;
 }
 
@@ -23618,7 +23618,7 @@ void PMStoSP(gameplay *gp) { //test&fix completed
 	else
 		mingap = (30000.0 / gp->BPM_fix);
 
-	qsort(gp->bmsobj.notes, gp->bmsobj.size, sizeof(NoteStruct), CMP_NotesByRealTimingOp);
+	qsort(gp->bmsobj.notes, gp->bmsobj.count, sizeof(NoteStruct), CMP_NotesByRealTimingOp);
 	int prev = 0; //prevMeasureStart
 	int measure = 0;
 	memset(laneA, 0, sizeof(laneA));
@@ -23626,7 +23626,7 @@ void PMStoSP(gameplay *gp) { //test&fix completed
 	right = 1;
 	measureLaneCount = 0;
 
-	for (int i = 0; i < gp->bmsobj.size; i++) {
+	for (int i = 0; i < gp->bmsobj.count; i++) {
 
 		int op = gp->bmsobj.notes[i].op;
 		if (op == 3 || op == 8) {
@@ -23759,7 +23759,7 @@ void PMStoSP(gameplay *gp) { //test&fix completed
 						}
 
 
-						for (int next = j + 1; next < gp->bmsobj.size; next++) {
+						for (int next = j + 1; next < gp->bmsobj.count; next++) {
 							if (10 <= gp->bmsobj.notes[next].op && gp->bmsobj.notes[next].op <= 19) {
 								laneB[gp->bmsobj.notes[next].op - 10] = 1;
 								if (gp->bmsobj.notes[next].bmsTiming == gp->bmsobj.notes[j].bmsTiming) {
@@ -23854,9 +23854,9 @@ void PMStoSP(gameplay *gp) { //test&fix completed
 		}
 	}
 
-	qsort(gp->bmsobj.notes, gp->bmsobj.size, sizeof(NoteStruct), CMP_NotesByRealTimingOp);
+	qsort(gp->bmsobj.notes, gp->bmsobj.count, sizeof(NoteStruct), CMP_NotesByRealTimingOp);
 	measure = 0;
-	for (int i = 0; i < gp->bmsobj.size; i++) {
+	for (int i = 0; i < gp->bmsobj.count; i++) {
 		if (gp->bmsobj.notes[i].op == 2)
 			measure++;
 
@@ -23877,7 +23877,7 @@ int DPsplitLaneScratch(LaneStruct *lane, int start, CHARTCONVERTER *cc) {
 	int nNotesP2 = 0;
 	int nNotesSC = 0;
 
-	for (int i = start; i < lane->size; i++) {
+	for (int i = start; i < lane->count; i++) {
 		int op = lane->notes[i].op;
 		
 		if (op == 2) break;
@@ -23901,7 +23901,7 @@ int DPsplitLaneScratch(LaneStruct *lane, int start, CHARTCONVERTER *cc) {
 	int scratchNoteID = -1, oldScratchNoteID = -1;
 	int LaneA[20];
 
-	for (int i = start; i < lane->size; i++) {
+	for (int i = start; i < lane->count; i++) {
 
 		if (lane->notes[i].realTiming > realTimeLastNote) {
 			realTimeLastNote = lane->notes[i].realTiming;
@@ -23921,7 +23921,7 @@ int DPsplitLaneScratch(LaneStruct *lane, int start, CHARTCONVERTER *cc) {
 							if (12 <= lane->notes[j].op && lane->notes[j].op <= 17) lane->notes[j].op += 10;
 						}
 
-						for (int j = scratchNoteID; j < lane->size; j++) {
+						for (int j = scratchNoteID; j < lane->count; j++) {
 							if (lane->notes[j].op == 2) break;
 							if (lane->notes[j].realTiming - cc->RealTimingSplitScratch >= 200) break;
 							if (12 <= lane->notes[j].op && lane->notes[j].op <= 17) lane->notes[j].op += 10;
@@ -23936,7 +23936,7 @@ int DPsplitLaneScratch(LaneStruct *lane, int start, CHARTCONVERTER *cc) {
 							if (21 <= lane->notes[j].op && lane->notes[j].op <= 26) lane->notes[j].op -= 10;
 						}
 
-						for (int j = scratchNoteID; j < lane->size; j++) {
+						for (int j = scratchNoteID; j < lane->count; j++) {
 							if (lane->notes[j].op == 2) break;
 							if (lane->notes[j].realTiming - cc->RealTimingSplitScratch >= 200) break;
 							if (21 <= lane->notes[j].op && lane->notes[j].op <= 26) lane->notes[j].op -= 10;
@@ -23975,7 +23975,7 @@ int SPtoDP(LaneStruct *lane, int baseNoteID, CHARTCONVERTER *cc) {
 		cc->arr1[i].field3_0xc = -1;
 		cc->arr3[i].field3_0xc = -1;
 	}
-	for (int i = baseNoteID + 1; i < lane->size; i++) {
+	for (int i = baseNoteID + 1; i < lane->count; i++) {
 		if (lane->notes[i].op == 2) break;
 		if (10 <= lane->notes[i].op && lane->notes[i].op <= 17) {
 			cc->noteCountPerLane[lane->notes[i].op - 11]++;
@@ -24053,7 +24053,7 @@ int SPtoDP(LaneStruct *lane, int baseNoteID, CHARTCONVERTER *cc) {
 	}
 
 	qsort(&cc->arr1, 1296, sizeof(cc->arr1), CMP_CCARRbyID);
-	for (int i = baseNoteID + 1; i < lane->size; i++) {
+	for (int i = baseNoteID + 1; i < lane->count; i++) {
 
 		if (lane->notes[i].op == 2) break;
 		if (11 <= lane->notes[i].op && lane->notes[i].op <= 17) {

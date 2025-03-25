@@ -397,8 +397,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			}
 			gs.skstruct.drBuf.flagImageFont = (gs.config.skin.disableimagefont != 0);
 			gs.gameplay.bmsobj.notes = NULL;
-			gs.gameplay.bmsobj.size = 0;
 			gs.gameplay.bmsobj.count = 0;
+			gs.gameplay.bmsobj.size = 0;
 			gs.gameplay.bmsobj.note_count = 0;
 			gs.gameplay.bmsobj.draw_count = 0;
 			gs.gameplay.bmsobj.noteVal = 0;
@@ -407,8 +407,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			gs.gameplay.player[1].flag_active = 0;
 			memset(gs.gameplay.bmsobj_note, '\0', sizeof(LaneStruct)*20);
 			gs.gameplay.bmsobj_line.notes = NULL;
-			gs.gameplay.bmsobj_line.size = 0;
 			gs.gameplay.bmsobj_line.count = 0;
+			gs.gameplay.bmsobj_line.size = 0;
 			gs.gameplay.bmsobj_line.note_count = 0;
 			gs.gameplay.bmsobj_line.draw_count = 0;
 			gs.gameplay.bmsobj_line.noteVal = 0;
