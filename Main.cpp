@@ -9,11 +9,10 @@ extern "C" {
 #include "sqlite/sqlite3.h"
 }
 
-#include "strclass.h"
-#include "LR2input.h"
-#include "LR2startup.h"
 #include "structure.h"
-#include "LR2f.h"
+#include "Engine.h"
+#include "LR2.h"
+#include "Scenes.h"
 
 #define LR2TITLE "LR2 beta3 version 100201"
 #define LR2VERSIONSTRING "LR2 beta3 version 100201 re-written 210807"
