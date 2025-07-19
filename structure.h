@@ -1558,10 +1558,13 @@ struct Timer {
 	double FPSclock;
 	double rhythmTick;
 	double Rhythm; /* //1beat=1000,reset on line */
-	int flag; /* //char,bool */
+	char flagMovieTimer; /* //char,bool */
+	undefined padding1;
+	undefined padding2;
+	undefined padding3;
 	int unused;
-	double bga;
-	double bgaFramerate;
+	double movieTimer;
+	double movieFramerate;
 };
 
 struct NETWORK {
