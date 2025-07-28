@@ -1116,12 +1116,13 @@ int ReadSkin(skstruct *sk,CSTR FilePath, int unused, int skin_num, SkinUser* sku
 						sk->image.srcSize++;
 					}
 					else if (fBuf.left(10).isSame("#DST_IMAGE") && sk->image.srcSize > 0) {
+						int oldDstCount = sk->image.dst[sk->image.srcSize - 1].dstCount;
 						SplitCSV(fBuf, &csv, ",");
 						ReadDST(&sk->image.dst[sk->image.srcSize - 1], &csv, tSkin_num);
 						if (sk->image.dst[sk->image.srcSize - 1].dstCount < 1 || sk->image.dst[sk->image.srcSize - 1].dataSize < 1) {
 							ErrorLogFmtAdd("スキン読み込みエラー %d行目\n%s\nDSTの登録に失敗しました。DSTの一番最初がエラーを起こしている可能性があります。\n", line, fBuf);
 						}
-						else if (sk->image.dst[sk->image.srcSize - 1].dstCount == sk->image.dst[sk->image.srcSize - 1].dstCount){
+						else if (sk->image.dst[sk->image.srcSize - 1].dstCount == oldDstCount){
 							ErrorLogFmtAdd("スキン読み込みエラー %d行目\n%s\nDSTの登録に失敗しました。この行の登録のみ失敗しました。\n", line, fBuf);
 						}
 					}
