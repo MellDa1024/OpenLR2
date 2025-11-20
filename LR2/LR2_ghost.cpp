@@ -692,7 +692,6 @@ int PLAYSCORE::DecodeGhostData(CSTR data) {
 		if (*data.atPos(i) >= 0x40 && *data.atPos(i) <= 0x45) {
 			if (rep >= 0) {
 				if (rep == 0) rep = 1;
-
 				while (rep > 0) {
 					decode.add(data.getSliced(pos, 1));
 					rep--;
@@ -707,7 +706,7 @@ int PLAYSCORE::DecodeGhostData(CSTR data) {
 		}
 
 	}
-	//if (rep == 0) rep = 1; //TOFIX : ghostdata last note problem
+	if (rep == 0) rep = 1;
 	while(rep > 0) {
 		decode.add(data.getSliced(pos, 1));
 		rep--;
