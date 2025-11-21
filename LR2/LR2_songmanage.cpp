@@ -1320,6 +1320,7 @@ int ReloadSongsByQuery(CSTR query, sqlite3 *sql, CONFIG_JUKEBOX *jb) {
 	}
 	sqlite3_finalize(pStmt);
 	GetTimeWrap();
+
 	if (cAlready == 0 && cNot == 0) {
 		if(cChange == 0){
 			ErrorLogFmtAdd("曲が見つかりません\n");
@@ -1912,6 +1913,7 @@ int LoadFilteredBmsListFromDB(CSTR query, sqlite3 *sql, SONGSELECT *ss, int *dif
 				break;
 		}
 	}
+
 	GetTimeWrap();
 	SQL_prepare(query, sql, &pStmt);
 	int count = 0;
@@ -2314,8 +2316,8 @@ int LoadFilteredBmsListFromDB(CSTR query, sqlite3 *sql, SONGSELECT *ss, int *dif
 		ss->prevList[i].difficultyExist[4] = diffExist[4];
 	}
 	sqlite3_finalize(pStmt);
-
 	GetTimeWrap();
+
 	if (ss->unk5000 == 1 && count <= 0) {
 		ss->unk5000 = 0;
 		ErrorLogAdd("適正な曲が見つかりません。リトライも行いません。\n");
