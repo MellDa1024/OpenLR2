@@ -7,7 +7,7 @@
 //401090
 bool CheckScoreSaveConditon(game *g){ //TOFIX : p2_assist == 1 but no battle, doesn't match with actual condition
 	if ( (g->config.play.battle == 0 || g->config.play.battle == 4) && g->config.play.is_extra != 1
-		&& g->config.play.m_addlong == 0 && g->config.play.unused_f2 == 0 && g->config.play.m_loudness <= 0 
+		&& g->config.play.m_addlong == 0 && g->config.play.unk_f2 == 0 && g->config.play.m_loudness <= 0 
 		&& g->config.play.m_lunaris == 0 && g->config.play.hsfix != 4 && g->config.play.m_addmine == 0 
 		&& (g->config.play.m_addnote == 0 && g->config.play.is_extra == 0) && g->config.play.autokey == 0
 		&& (g->config.play.unknown_1 == 0 || g->sSelect.metaSelected.keymode < 10) 
@@ -22,7 +22,7 @@ bool CheckScoreSaveConditon(game *g){ //TOFIX : p2_assist == 1 but no battle, do
 int CheckClearLampChallenge(game *g){ //TOFIX : p2_assist == 1 but no battle, doesn't match with actual condition
 	int gauge;
 
-	if (g->config.play.m_addlong == 1 || g->config.play.unused_f2 || g->config.play.m_loudness > 0
+	if (g->config.play.m_addlong == 1 || g->config.play.unk_f2 || g->config.play.m_loudness > 0
 		|| g->config.play.m_lunaris || g->config.play.m_addlong > 0
 		|| g->config.play.m_addmine || g->config.play.m_addnote || g->config.play.battle == 1) {
 		return 0;

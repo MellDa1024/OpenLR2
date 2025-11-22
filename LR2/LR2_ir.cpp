@@ -520,7 +520,7 @@ RANKING::RANKING() {
 int NETWORK::Init() {
 
 	InitializeCriticalSection((LPCRITICAL_SECTION)&this->criticalSection);
-	this->unused234 = 0;
+	this->unk234 = 0;
 	this->waitForHandle = '\0';
 	this->domain = "www.dream-pro.info";
 	this->timeout = 15000;
@@ -836,7 +836,7 @@ int NETWORK::GetTargetInfo(int mode, CSTR songmd5, CSTR *oData, CSTR *oName, int
 //4bcc50
 NETWORK::NETWORK(){
 	InitializeCriticalSection(&criticalSection);
-	unused234 = 0;
+	unk234 = 0;
 	waitForHandle = '\0';
 	domain = "www.dream-pro.info";
 	timeout = 15000;

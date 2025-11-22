@@ -279,7 +279,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			InitInputStructure(&gs.KeyInput);
 			SetFirstSkins(&gs);
 			clsDx();
-			gs.net.unused234 = 1;
+			gs.net.unk234 = 1;
 			gs.net.Init();
 			if (gs.config.network.lr2ir == 1 && gs.is_starter == 0 && gs.cmd_nosave == 0) {
 				gs.net.IR_pass = gs.config.player.pass;
@@ -1177,7 +1177,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 									gs.config.play.unk_f1 = 0;
 									gs.config.play.m_wave = 0;
 									gs.config.play.m_tornado = 0;
-									gs.config.play.unused_f2 = '\0';
+									gs.config.play.unk_f2 = '\0';
 									gs.audio.param.pitch_amount = 0;
 									gs.audio.param.pitch_on = 0;
 									ApplySoundFX(&gs.audio, 1, 0);

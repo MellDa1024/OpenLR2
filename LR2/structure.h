@@ -125,7 +125,6 @@ struct CONFIG_JUKEBOX {
 	int customfolder;
 	CSTR newsongfolder;
 	int titleflash;
-	int unused_fb4;
 	int rival[20];
 };
 
@@ -198,11 +197,9 @@ struct CONFIG_PLAY {
 	int m_sidejump;
 	int is_extra;
 	int m_extra;
-	undefined4 sssssss;
 	char m_lunaris;
 	char unk_f1;
-	char unused_f2;
-	undefined field59_0xf3;
+	char unk_f2;
 	int gomiscore; 
 	int disablecurspeedchange; 
 	int disableleftclickexit; 
@@ -233,7 +230,6 @@ struct CONFIG_SELECT {
 	int control; 
 	int buttonselect; 
 	int folderlamp;
-	undefined4 unused_28;
 	int difficultychangetype;
 	int ignorekeyall; 
 	int ignorekeysingle; 
@@ -343,7 +339,6 @@ struct CONFIG_TOOLS {
 	int autowavtoogg;
 	int autobmptopng;
 	int autofumensearch;
-	undefined4 field15_0x3c;
 };
 
 typedef struct ConfigStruct ConfigStruct, *PConfigStruct;
@@ -533,13 +528,6 @@ struct DSTstruct { /* 44bytes.4*0x0b */
 	int dstCount;
 };
 
-typedef struct Event Event, *PEvent;
-
-struct Event {
-	CSTR field0_0x0[2];
-	int field1_0x8[8];
-};
-
 typedef struct FontChar FontChar, *PFontChar;
 
 struct FontChar {
@@ -640,7 +628,6 @@ typedef uchar BYTE;
 
 struct RECORDING {
 	HDC srcHDC; /* struct_entry */
-	undefined4 unk4;
 	double framerate;
 	int bitdepth;
 	CSTR filename;
@@ -657,7 +644,6 @@ struct RECORDING {
 	HBITMAP hBIT;
 	HGDIOBJ hGDI;
 	int recMode; /* 1:auto2avi 2:replay2avi 3:bga2avi 4:movie */
-	undefined4 unkac;
 
 	RECORDING();
 	bool RefreshCurFrame();
@@ -700,9 +686,6 @@ struct RANKING {
 	void * unused48;
 	void * unused44;
 	char showRanking; /* char */
-	undefined field23_0x4d;
-	undefined field24_0x4e;
-	undefined field25_0x4f;
 	int myRanking;
 	int myID;
 	int rivalRanking;
@@ -733,17 +716,12 @@ struct RAWSOUND {
 struct SOUNDDATA {
 	char load;
 	char loop;
-	undefined field2_0x2;
-	undefined field3_0x3;
 	CSTR filename;
 	uint length;
 	int unused0C;
 	int soundHandle;
 	struct RAWSOUND raw;
 	char flag2c;
-	undefined field10_0x2d;
-	undefined field11_0x2e;
-	undefined field12_0x2f;
 	struct FMOD_SOUND * fmod_sound;
 	struct FMOD_CHANNEL * fmod_channel;
 };
@@ -867,7 +845,7 @@ struct skstruct {
 	struct DSTstruct dst_BAR_LEVEL[10];
 	struct SRCstruct src_BAR_LAMP[10];
 	struct DSTstruct dst_BAR_LAMP[10];
-	undefined unused[2240];
+	//undefined unused[2240];
 	struct SRCstruct src_BAR_MY_LAMP[10];
 	struct DSTstruct dst_BAR_MY_LAMP[10];
 	struct SRCstruct src_BAR_RIVAL_LAMP[10];
@@ -936,7 +914,6 @@ struct skstruct {
 	CSTR customfileRANDOM[100];
 	CSTR customfile[100];
 	int customfile_count;
-	CSTR field103_0x9f70;
 	int reloadbanner;
 	struct SRCstruct src_EVENT_MODE_CURSOR;
 	struct DSTstruct dst_EVENT_MODE_CURSOR_ON[10];
@@ -945,7 +922,6 @@ struct skstruct {
 	int event_FADEOUT[10];
 	struct DSTstruct dst_EVENT_LOADINGBG[5];
 	int horizontal;
-	undefined4 sussus;
 };
 
 struct MYRANKING {
@@ -1037,10 +1013,6 @@ struct AUDIO_PARAM {
 	float fadePreviewStartVolume;
 	float fadePreviewTargetVolume;
 	char fadePreviewIsQuiet;
-	undefined field30_0x169;
-	undefined field31_0x16a;
-	undefined field32_0x16b;
-	undefined4 unk5a4;
 };
 
 struct AUDIO {
@@ -1059,8 +1031,6 @@ struct AUDIO {
 	int is_fmod_disabled;
 	bool cmd_mediaOut;
 	bool replay2avi;
-	undefined field15_0x5ae;
-	undefined field16_0x5af;
 	double aviTimer;
 };
 
@@ -1070,13 +1040,11 @@ struct NoteStruct {
 	double val;
 	int active;
 	bool lnHeadFast;
-	undefined4 unk1c;
 	double bmsTiming_ln;
 	double realTiming_ln;
 	int op; /* channel */
 	int mine; /* soundchannel/mine */
 	int stage;
-	undefined4 unk3c;
 };
 
 struct SONGSELECT {
@@ -1119,9 +1087,6 @@ struct SONGSELECT {
 	char is_clicked_autoplay_replay;
 	char is_clicked_keyconfig;
 	char is_clicked_skinselect;
-	char unused4ef1;
-	char unused4ef2;
-	char unused4ef3;
 	CSTR playerPassMD5;
 	CSTR playerID;
 	char is_clicked_tagedit;
@@ -1131,20 +1096,10 @@ struct SONGSELECT {
 	struct STATUS old;
 	char flag_folderlamp;
 	char flag_maniacPanel;
-	char unused4f6e;
-	char unused4f6f;
 	int maniac_cursor; 
 	char unk4f74; /* //clear screen flag? */
-	char unused4f75;
-	char unused4f76;
-	char unused4f77;
 	int unk4f78;
-	char unk4f7c;
-	char unk4f7d;
 	char fExtraCmdDone;
-	char unk4f7e;
-	int unused4f80;
-	int unk4f84;
 	int oldIRrank;
 	int titleflash;
 	int queryCount; /* struct Head */
@@ -1155,7 +1110,6 @@ struct SONGSELECT {
 	int unk4fb8[2]; /* folder map? */
 	int unk4fc0;
 	char unk4fc4[3];
-	undefined field75_0x4fc7;
 	int searchFocused; /* about active? 2,4:multithread */
 	int filterDifficulty; 
 	int filterKey; 
@@ -1168,31 +1122,19 @@ struct SONGSELECT {
 	int selKey; 
 	CSTR searchInput; /* struct finish here or far */
 	int text_num;
-	int unk4ff8;
 	int filter_clicked;
 	char unk5000;
 	char isDifficultyFilterOn;
-	undefined field92_0x5002;
-	undefined field93_0x5003;
 	int unk5004_difficultycount;
 	int isRandomFolder;
 	int reloadType;
 	char buttonObjClicked;
 	char toRoot;
-	undefined field99_0x5012;
-	undefined field100_0x5013;
-	undefined field101_0x5014;
-	undefined field102_0x5015;
-	undefined field103_0x5016;
-	undefined field104_0x5017;
 	double levelsOfSong[5];
 	double levelBarGraph[5];
 	double levelIndicatorAnimation[5];
 	struct CONFIG_SELECT filter;
 	char isRankingAutoUpdateThread; /* IR */
-	undefined field110_0x50f9;
-	undefined field111_0x50fa;
-	undefined field112_0x50fb;
 	int rivalID;
 	struct COURSESELECT course;
 	int isExLevel;
@@ -1224,7 +1166,6 @@ struct TextStruct {
 	int st_text_num;
 	struct README readme;
 	struct OptionString option_str[25];
-	int unused;
 };
 
 struct REPLAY {
@@ -1267,7 +1208,6 @@ struct PLAYERSTATUS {
 	int judgecount2[6] = {}; /* 0unknown 1poor 2bad 3good 4great 5pgreat */
 	int total_note = 0;
 	int note_current2 = 0;
-	int field11_0x54 = 0;
 	double HP = 0.;
 	double HP_unk = 0.;
 	double HP_print = 0.;
@@ -1342,7 +1282,6 @@ struct PLAYERSTATISTIC {
 	int fail;
 	int combo;
 	int maxcombo;
-	CSTR field11_0x2c;
 	CSTR passMD5;
 	int grade7;
 	int grade5;
@@ -1391,51 +1330,19 @@ struct gameplay {
 	int courseLayer1ChangeTime[10];
 	int courseLayer2ChangeTime[10]; /* not used. */
 	char isBgaPlaying;
-	undefined field27_0x73b65;
-	undefined field28_0x73b66;
-	undefined field29_0x73b67;
 	int unused_73b68;
 	int lastMissTime;
 	int misslayerTime[2]; 
 	int lastMeasure;
-	undefined field34_0x73b7c;
-	undefined field35_0x73b7d;
-	undefined field36_0x73b7e;
-	undefined field37_0x73b7f;
 	double BPM_fix;
 	int loadObject_loaded;
 	int loadObject_total;
 	double BPM;
-	undefined field42_0x73b98;
-	undefined field43_0x73b99;
-	undefined field44_0x73b9a;
-	undefined field45_0x73b9b;
-	undefined field46_0x73b9c;
-	undefined field47_0x73b9d;
-	undefined field48_0x73b9e;
-	undefined field49_0x73b9f;
-	undefined field50_0x73ba0;
-	undefined field51_0x73ba1;
-	undefined field52_0x73ba2;
-	undefined field53_0x73ba3;
-	undefined field54_0x73ba4;
-	undefined field55_0x73ba5;
-	undefined field56_0x73ba6;
-	undefined field57_0x73ba7;
-	undefined field58_0x73ba8;
-	undefined field59_0x73ba9;
-	undefined field60_0x73baa;
-	undefined field61_0x73bab;
-	undefined field62_0x73bac;
-	undefined field63_0x73bad;
-	undefined field64_0x73bae;
-	undefined field65_0x73baf;
 	struct PLAYERSTATUS player[2];
 	double song_runtime; 
 	char flag_threadExist;
 	char flag_closingPhase;
-	undefined1 bmsResourceLoaded; 
-	undefined field71_0x73deb;
+	char bmsResourceLoaded; 
 	int autojudge_midsum;//TODO : need to init = 0;
 	int autojudge_midcount;//TODO : need to init = 0;
 	int isAutoplay;
@@ -1444,39 +1351,20 @@ struct gameplay {
 	struct GRAPHDATAB rategraph[2]; /* 0:high 1:target? */
 	struct PLAYERSTATISTIC playerstat;
 	int randomseed;
-	undefined field80_0x7bb74;
-	undefined field81_0x7bb75;
-	undefined field82_0x7bb76;
-	undefined field83_0x7bb77;
 	struct REPLAY replay;
 	struct PLAYSCORE p1Score;
 	struct PLAYSCORE highScore;
 	struct PLAYSCORE targetScore;
 	char isGhostDisabled;
-	undefined field89_0x7bef5;
-	undefined field90_0x7bef6;
-	undefined field91_0x7bef7;
 	int targetType;
 	char soundonly;
-	undefined field94_0x7befd;
-	undefined field95_0x7befe;
-	undefined field96_0x7beff;
 	double freqSpeedMultiplier;
 	char fxChangeInRecording;
-	undefined field99_0x7bf09;
-	undefined field100_0x7bf0a;
-	undefined field101_0x7bf0b;
 	int procGameCallCount;
 	bool isSpeedChanged; 
-	undefined1 trialClear; 
-	undefined field105_0x7bf12;
-	undefined field106_0x7bf13;
+	char trialClear; 
 	int lanecoverDoubleclickTimeP1; 
 	int lanecoverDoubleclickTimeP2; 
-	undefined field109_0x7bf1c;
-	undefined field110_0x7bf1d;
-	undefined field111_0x7bf1e;
-	undefined field112_0x7bf1f;
 	double speedmultiplier;
 	double maxBPM;
 	double minBPM;
@@ -1493,22 +1381,17 @@ struct gameplay {
 	float nabeatsu_x;
 	float nabeatsu_y;
 	float unusedX_7bf50;
-	float unusedY_7bf54;
+	float unusedY_7bf54;	
 	float earthquake_x;
 	float earthquake_y;
 	int bpmChangedRealtime; /* timer142 */
 	int bpmChangedBmstime; /* bpm change timing */
 	char unused_7bf68;
 	char ghostBattle; 
-	undefined field136_0x7bf6a;
-	undefined field137_0x7bf6b;
 	struct CONFIG_PLAY targetCfg; /* //1p_speed ~ struct */
 	int delayDetectedCount;
 	int delayCheckCount;
-	undefined1 isCourse; 
-	undefined field142_0x7c075;
-	undefined field143_0x7c076;
-	undefined field144_0x7c077;
+	char isCourse; 
 	int courseStageCount;
 	CSTR courseFilepath[5];
 	int courseType; //-1:not_course 0:course 1:nonstop 2:grade
@@ -1524,9 +1407,6 @@ struct gameplay {
 	int fadeoutBGAend[10];
 	int bgaMixer[10];
 	char isPreviewLoad;
-	char padding1;
-	char padding2;
-	char padding3;
 	HANDLE hThreadPreview;
 	int previewStatus; /* 1:start 2:loaded */
 	CSTR previewBMShash;
@@ -1551,7 +1431,6 @@ struct SkinCustom {
 	int dst_op_start;
 	int dst_op_count;
 	int labelCapacity; /* 100 */
-	int undefined; /* 0 */
 };
 
 struct Timer {
@@ -1566,10 +1445,6 @@ struct Timer {
 	double rhythmTick;
 	double Rhythm; /* //1beat=1000,reset on line */
 	char flagMovieTimer; /* //char,bool */
-	undefined padding1;
-	undefined padding2;
-	undefined padding3;
-	int unused;
 	double movieTimer;
 	double movieFramerate;
 
@@ -1600,10 +1475,8 @@ struct NETWORK {
 	int rivalcount;
 	int getrival;
 	CSTR domain;
-	undefined unused234;
+	undefined unk234;
 	char waitForHandle;
-	undefined field20_0x236;
-	undefined field21_0x237;
 	int timeout;
 	CSTR request_result;
 	int loginResult;
@@ -1639,16 +1512,7 @@ struct game {
 	struct skstruct skstruct;
 	struct skstruct skstruct2;
 	struct SkinManage skinData;
-	undefined4 unk1d588;
 	struct inputStructure KeyInput;
-	undefined field7_0x1fe40;
-	undefined field8_0x1fe41;
-	undefined field9_0x1fe42;
-	undefined field10_0x1fe43;
-	undefined field11_0x1fe44;
-	undefined field12_0x1fe45;
-	undefined field13_0x1fe46;
-	undefined field14_0x1fe47;
 	struct Timer timer1;
 	struct Timer timer2;
 	struct RECORDING rec;
@@ -1659,21 +1523,13 @@ struct game {
 	int po4_unk23d88;
 	char po4flagSceneStart;
 	char po4flagSceneEnd;
-	undefined field26_0x23d8e;
-	undefined field27_0x23d8f;
 	int po4nextProc;
 	int po4sceneTimerID	;
 	int po4sceneTimerIDNext;
 	int po4sceneFadeout;
 	int po4cur_song;
-	undefined field33_0x23da4;
-	undefined field34_0x23da5;
-	undefined field35_0x23da6;
-	undefined field36_0x23da7;
 	char po4_23da8;
 	char po4_23da9;
-	undefined field39_0x23daa;
-	undefined field40_0x23dab;
 	int po4_hThread_ParseBMS;
 	int po4MainMenuCursor;
 	int procSelecter; /* 2:select 3:deciide 4:play 5:result 6:keyconfig 7:skinselect */
@@ -1681,33 +1537,19 @@ struct game {
 	int hThreadBanner;
 	struct gameplay gameplay;
 	CRITICAL_SECTION criticalSection;
-	undefined field48_0xa002c;
-	undefined field49_0xa002d;
-	undefined field50_0xa002e;
-	undefined field51_0xa002f;
 	char is_clicked_screenModeChange;
-	undefined field53_0xa0031;
-	undefined field54_0xa0032;
-	char field55_0xa0033;
 	int isSkipDrawTick; /* skip frame? */
 	int flag_Screenshot; /* char */
 	char flag_unk420;
 	char flag_showFPS;
 	char cmd_nosave;
 	int cmd_directplay;
-	char field62_0xa0043;
 	char cmd_auto;
 	char cmd_n;
 	char is_recordmode;
 	char auto2avi;
-	char flag_unkA0048;
-	char flag_unkA0049;
-	undefined field69_0xa004a;
-	undefined field70_0xa004b;
-	CSTR field71_0xa004c;
 	CSTR directoryPath;
 	CSTR directoryFilename;
-	CSTR field74_0xa0058[10];
 	CSTR baseDirectory;
 	int is_starter;
 	struct NETWORK net;
@@ -1719,7 +1561,6 @@ struct SkinHeader { /* SkinInfo */
 	CSTR title;
 	CSTR maker;
 	enum SKINTYPE type;
-	int undefined1;
 	int unused18;
 	int informationP5;
 	struct SkinCustom customs[100];
@@ -1778,17 +1619,16 @@ struct struct_0x14 {
 
 struct struct_0x14_2 {
 	int soundLoadID;
-	undefined4 field1_0x4;
-	undefined4 field2_0x8;
-	undefined4 field3_0xc;
-	undefined4 field4_0x10;
+	int field1_0x4;
+	int field2_0x8;
+	int field3_0xc;
+	int field4_0x10;
 };
 
 struct CHARTCONVERTER {
 	struct struct_0x14 arr1[1296];
 	struct struct_0x14 arr2[1296];
 	int arr1count;
-	int field3_0xca84[1296];
 	struct struct_0x14_2 arr3[1296];
 	int unused14404;
 	int noteCountPerLane[7];
@@ -1797,15 +1637,10 @@ struct CHARTCONVERTER {
 	int unk1442c;
 	int unk14430;
 	char flagSplitScratch;
-	undefined field12_0x14435;
-	undefined field13_0x14436;
-	undefined field14_0x14437;
 	int unk14438;
 	int RealTimingSplitScratch;
 	char flagSplitUnknown;
 	char flagSplit;
-	undefined field19_0x14442;
-	undefined field20_0x14443;
 	int assist1p;
 	int assist2p;
 	int playlevel;
