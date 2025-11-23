@@ -163,9 +163,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			else if (tStr2.left(2).isSame("-a")) {
 				gs.cmd_auto = '\x01';
 			}
-			else if (tStr2.left(2).isSame("-n")) {
+			/*else if (tStr2.left(2).isSame("-n")) {
 				atol(tStr1.right(tStr1.length() - 2));
-			}
+			}*/
 		}
 		gs.config.system.thread = 0;
 		cstrSprintf(&pathScoreDB, "LR2files/Database/Score/%s.db", gs.config.player.id);
@@ -440,7 +440,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			gs.gameplay.previewStatus = 0;
 			InitializeCriticalSection(&gs.gameplay.criticalSection);
 			InitializeCriticalSection(&gs.criticalSection);
-			gs.gameplay.hThreadPreview = 0;
+			if (gs.gameplay.hThreadPreview.joinable()) {
+				gs.gameplay.hThreadPreview.join();
+			}
 			gs.gameplay.courseType = -1;
 			gs.gameplay.courseStageNow = 0;
 			gs.gameplay.timetick = GetTimeWrap();
@@ -448,7 +450,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			InitSkin(&gs.skstruct, 0, 0);
 			gs.skstruct.fontname.assign(&gs.config.skin.fontname);
 			gs.skstruct.unused_disableimagefont = gs.config.skin.disableimagefont;
-			gs.hThreadBanner = 0;
+			if(gs.hThreadBanner.joinable()) gs.hThreadBanner.join();
 			for (int i = 0; i < 6480; i++) gs.gameplay.keysound->load = 0;
 			for (int i = 0; i < 200; i++) gs.skstruct2.caption[i].fillzero();
 			for (int i = 0; i < 10; i++) gs.skstruct2.helpfilePath[i].fillzero();

@@ -525,7 +525,9 @@ int NETWORK::Init() {
 	this->domain = "www.dream-pro.info";
 	this->timeout = 15000;
 	this->IRstatus = 0;
-	this->hHandle = NULL;
+	if (this->hHandle.joinable()) {
+		this->hHandle.join();
+	}
 	this->isOnline = 0;
 	this->IR_ID = 0;
 	this->rankingData.target_ID = 0;
@@ -684,12 +686,11 @@ int NETWORK::HTTPrequest() {
 void NETWORK::WaitAndInitRanking() {
 	GetTimeWrap();
 	this->waitForHandle = 1;
-	if (this->hHandle != NULL) {
-		WaitForSingleObject(this->hHandle, 5000);
+	if (hHandle.joinable()) {
+		hHandle.join();
 	}
 	this->waitForHandle = 0;
 	this->rankingData.Init();
-	return;
 }
 
 //4bc2f0
@@ -778,9 +779,6 @@ void IRsendScore(NETWORK *ir) {
 		ir->IRresultMessage = "サーバーとの接続に失敗しました";
 	}
 	ErrorLogAdd("送信終了\n");
-	ir->hHandle = NULL;
-
-	return;
 }
 
 //4bc970
@@ -841,7 +839,6 @@ NETWORK::NETWORK(){
 	domain = "www.dream-pro.info";
 	timeout = 15000;
 	IRstatus = 0;
-	hHandle = NULL;
 	rankUpdateDelayLevel = 0;
 	IR_ID = 0;
 }
@@ -976,13 +973,13 @@ int NETWORK::Login(int isDirectPlay) {
 int NETWORK::MakeIRsendScoreThread() {
 	GetTimeWrap();
 	this->waitForHandle = true;
-	if (this->hHandle) {
-		WaitForSingleObject(this->hHandle, 5000);
+	if (hHandle.joinable()) {
+		hHandle.join();
 	}
 	this->waitForHandle = false;
 	this->rankingData.Init();
 	this->IRstatus = 1;
-	this->hHandle = (HANDLE)_beginthread((void(*)(void*))IRsendScore, 0, this);
+	this->hHandle = std::jthread(IRsendScore, this);
 	return 0;
 }
 

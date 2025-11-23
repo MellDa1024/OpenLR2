@@ -4,6 +4,7 @@
 #include <vfw.h>
 #include <vector>
 #include <array>
+#include <thread>
 #include "FMOD/fmod.h"
 #include "strclass.h"
 typedef unsigned char   undefined;
@@ -1407,7 +1408,7 @@ struct gameplay {
 	int fadeoutBGAend[10];
 	int bgaMixer[10];
 	char isPreviewLoad;
-	HANDLE hThreadPreview;
+	std::jthread hThreadPreview;
 	int previewStatus; /* 1:start 2:loaded */
 	CSTR previewBMShash;
 	CSTR previewBMSfilepath;
@@ -1482,7 +1483,7 @@ struct NETWORK {
 	int loginResult;
 	struct RANKING rankingData;
 	struct MYRANKING myRanking;
-	HANDLE hHandle;
+	std::jthread hHandle;
 	int IRstatus; /* 0:notIR 1:loading 2:loaded -1:playerNotExist -3:connection_fail -2:bansong 3:waitUpadate 4:connection 5:IRbusy */
 	CSTR IRresultMessage;
 
@@ -1534,7 +1535,7 @@ struct game {
 	int po4MainMenuCursor;
 	int procSelecter; /* 2:select 3:deciide 4:play 5:result 6:keyconfig 7:skinselect */
 	int procPhase;
-	int hThreadBanner;
+	std::jthread hThreadBanner;
 	struct gameplay gameplay;
 	CRITICAL_SECTION criticalSection;
 	char is_clicked_screenModeChange;
