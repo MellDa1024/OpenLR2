@@ -308,19 +308,8 @@ int CheckMission(game *g){
 
 	//converge 7 14 25 35 40
 	//constant 15 23 24 34 39
-	if (g->gameplay.isNosave) {
-		if(g->gameplay.playerstat.trial != 7
-		&& g->gameplay.playerstat.trial != 14
-		&& g->gameplay.playerstat.trial != 25
-		&& g->gameplay.playerstat.trial != 35
-		&& g->gameplay.playerstat.trial != 40
-		&& g->gameplay.playerstat.trial != 15 
-		&& g->gameplay.playerstat.trial != 23
-		&& g->gameplay.playerstat.trial != 24
-		&& g->gameplay.playerstat.trial != 34
-		&& g->gameplay.playerstat.trial != 39)
-			return 0;
-	}
+	if (g->gameplay.isNosave) 
+		return 0;
 
 	if (g->gameplay.playerstat.trial <= 0) 
 		g->gameplay.playerstat.trial = 1;
