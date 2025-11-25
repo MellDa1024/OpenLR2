@@ -6,6 +6,7 @@
 #include "Scenes.h"
 
 #include <windows.h>
+#include <filesystem>
 #include <string>
 #include <thread>
 
@@ -40,22 +41,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	int lr1ir;
 	int lr2ir;
 	game gs;
-	char curDir[260];
 
 	const bool use_dx9 = getenv("OPENLR2_NO_DX9") == nullptr; // chown2: crashes on DxLib_Init with DX9 for me
 
 	int tmp;
-	
+
 	//start of code
+	char curDir[260];
 	GetModuleFileName(NULL, (LPCH)curDir, 260);
 	*(char*)(strrchr(curDir, '\\') + 1) = '\x00';
 	SetCurrentDirectory((LPCSTR)curDir);
 	gs.baseDirectory.assign(curDir, 0).add("\\");
 	gs.is_starter = false;
-	CopyFileA("LR2files\\Config\\keyconfig_def.xml", "LR2files\\Config\\keyconfig.xml", 1);
-	CopyFileA("LR2files\\Config\\keyconfig_5_def.xml", "LR2files\\Config\\keyconfig_5.xml", 1);
-	CopyFileA("LR2files\\Config\\keyconfig_p_def.xml", "LR2files\\Config\\keyconfig_p.xml", 1);
-	CopyFileA("LR2files\\Config\\midi_def.xml", "LR2files\\Config\\midi.xml", 1);
+	auto copy_if_not_exists = [](auto&& from, auto&& to_) {
+		std::filesystem::path to = to_;
+		std::error_code ec; // ignore errors
+		if (!std::filesystem::exists(to, ec))
+			std::filesystem::copy(from, to, ec);
+	};
+	copy_if_not_exists("LR2files/Config/keyconfig_def.xml", "LR2files/Config/keyconfig.xml");
+	copy_if_not_exists("LR2files/Config/keyconfig_5_def.xml", "LR2files/Config/keyconfig_5.xml");
+	copy_if_not_exists("LR2files/Config/keyconfig_p_def.xml", "LR2files/Config/keyconfig_p.xml");
+	copy_if_not_exists("LR2files/Config/midi_def.xml", "LR2files/Config/midi.xml");
 	ErrorLogAdd("コンフィグを読み込みます…");
 	
 	if (!ReadConfig(&gs, "LR2files\\Config\\config.xml") && gs.is_starter == false) {
@@ -189,12 +196,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		if (gs.config.play.bga == 3) gs.config.play.bga = 1;
 		if (gs.config.select.disabledifficultyfilter == 1) gs.config.select.ignoredifficultyall = 0;
 		memcpy(&gs.sSelect.filter, &gs.config.select, sizeof(CONFIG_SELECT));
-		cstrSprintf(&newPath, "LR2files/Replay/%s", gs.config.player.id);
-		CreateDirectoryA(newPath, NULL);
-		cstrSprintf(&newPath, "LR2files/Ghost/%s", gs.config.player.id);
-		CreateDirectoryA(newPath, NULL);
-		CreateDirectoryA("LR2files/SkinCustomize", NULL);
-		CreateDirectoryA("screenshot", NULL);
+		{
+			std::error_code ec; // ignore errors
+			cstrSprintf(&newPath, "LR2files/Replay/%s", gs.config.player.id.body);
+			std::filesystem::create_directories(newPath.body, ec);
+			cstrSprintf(&newPath, "LR2files/Ghost/%s", gs.config.player.id.body);
+			std::filesystem::create_directories(newPath.body, ec);
+			std::filesystem::create_directories("LR2files/SkinCustomize", ec);
+			std::filesystem::create_directories("screenshot", ec);
+		}
 		ReadKeyConfig(&gs, "LR2files\\Config\\keyconfig.xml");
 		gs.is_clicked_screenModeChange = 0;
 		gs.flag_Screenshot = 0;
@@ -1544,7 +1554,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 											if ( abs(gs.skstruct.dst_JUDGELINE[1].draw->w - gs.skstruct.image.dst[i].draw[gs.skstruct.image.dst[i].dstCount - 1].w) <= 10.0 
 												&& abs(gs.skstruct.dst_JUDGELINE[1].draw->x - gs.skstruct.image.dst[i].draw[gs.skstruct.image.dst[i].dstCount - 1].x) <= 5.0
 												&& (gs.skstruct.dst_JUDGELINE[1].draw->y >= gs.skstruct.image.dst[i].draw[gs.skstruct.image.dst[i].dstCount - 1].y || gs.skstruct.image.dst[i].draw[gs.skstruct.image.dst[i].dstCount - 1].h < 0.0)) {
-													
+
 												objx = gs.skstruct.adjust.note_2p_x;
 												objy = gs.skstruct.adjust.note_2p_y;
 											}
@@ -1552,7 +1562,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 									}
 								}
 							}
-							
+
 							if (gs.skstruct.image.dst[i].opt4 == 1) {
 								AddDrawingBuffer_Scratch(&gs.skstruct.drBuf, &gs.skstruct.image.src[i], &gs.skstruct.image.dst[i], &gs.timer1, gs.skstruct.scratchAngle_1);
 							}
@@ -1588,7 +1598,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							}
 						}
 					}
-					
+
 				}
 
 				if (gs.procSelecter == 4 || gs.is_starter) {
@@ -1842,7 +1852,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							}
 							else if (gs.KeyInput.inputID[KEY_INPUT_DOWN] == 1 && gs.config.select.disabledifficultyfilter == 0) {
 								gs.sSelect.bmsList[gs.sSelect.cur_song].difficulty++;
-								
+
 								if (gs.sSelect.bmsList[gs.sSelect.cur_song].difficulty >= 6)
 									gs.sSelect.bmsList[gs.sSelect.cur_song].difficulty = 1;
 								else if (gs.sSelect.bmsList[gs.sSelect.cur_song].difficulty < 1)

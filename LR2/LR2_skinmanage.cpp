@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "LR2_configsave.h"
 
+#include <filesystem>
 
 //maybe deleted by compiler, restored it for convenience
 int SetFirstSkin(SkinManage *sm, SKINTYPE type, CSTR *skinName) {
@@ -325,34 +326,21 @@ int ParseLR2SkinCustom(SkinManage *skm, CSTR filepath) {
 
 //4a8230 MakeSkinList
 int MakeSkinList(SkinManage *skm, CSTR dir) {
-	HANDLE hFindFile, hFindFileOld;
-	_WIN32_FIND_DATAA findFileData;
-	CSTR filter;
-	bool isLR2Skin;
-	if (dir.right(1).isDiff("\\")) 
+	if (dir.right(1).isDiff("\\") && dir.right(1).isDiff("/"))
 		dir.add("\\");
-	
-	filter.assign(&dir).add("*");
-	hFindFile = FindFirstFileA(filter, &findFileData);
-	do{
-		if ( (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-			filter.assign(&dir).add(findFileData.cFileName);
-			isLR2Skin = false;
-			if (filter.right(8).isSame(".lr2skin"))		isLR2Skin = true;
-			else if (filter.right(6).isSame(".lr2ss"))	isLR2Skin = true;
-			
-			if (isLR2Skin) ParseLR2SkinCustom(skm, filter); 
-		}
-		else {  //logic arranged
-		if (strcmp("..", findFileData.cFileName) && strcmp(".", findFileData.cFileName)) {
-			filter.assign(&dir).add(findFileData.cFileName).add("\\");
+#ifndef _WIN32
+	dir.replace("\\", "/");
+#endif // _WIN32
+	CSTR filter;
+	for (const auto& entry : std::filesystem::directory_iterator(dir.body)) {
+		if (entry.is_directory()) {
+			filter.assign(&dir).add(entry.path().filename().string().c_str());
 			MakeSkinList(skm, filter);
+		} else {
+			filter.assign(&dir).add(entry.path().filename().string().c_str());
+			if (filter.right(8).isSame(".lr2skin") || filter.right(6).isSame(".lr2ss"))
+				ParseLR2SkinCustom(skm, filter);
 		}
-		}
-		hFindFileOld = hFindFile;
-		if (FindNextFileA(hFindFile, &findFileData) == 0) {
-			FindClose(hFindFileOld);
-			return 0;
-		}
-	} while (true);
+	}
+	return 0;
 }
