@@ -4,7 +4,7 @@
 
 //40d680
 int RunMP3Encoder(ConfigStruct *cfg, CSTR wavPath, CSTR mp3Path, char deleteWav, char movie) {
-
+#ifdef _WIN32
 	if (cfg->tools.mp3enc_body.canOpenFile() == 0) {
 		MessageBoxA(NULL, "MP3エンコーダーが見つかりません。\nコンフィグプログラムのJUKEBOX→詳細設定で設定して下さい。", "エラー", 0);
 		return 0;
@@ -34,16 +34,19 @@ int RunMP3Encoder(ConfigStruct *cfg, CSTR wavPath, CSTR mp3Path, char deleteWav,
 	sinfo.dwFlags = 0;
 	sinfo.lpReserved2 = 0;
 	CreateProcessA(NULL, cmd, 0, 0, 0, 0, 0, 0, (LPSTARTUPINFOA)&sinfo, &pinfo);
-	WaitForSingleObject(pinfo.hProcess, -1);
+	WaitForSingleObject(pinfo.hProcess, INFINITE);
 	if (deleteWav) {
 		remove(wavPath);
 	}
 	return 1;
+#else
+	return {}; // FIXME(linux): stub
+#endif // _WIN32
 }
 
 //40d840
-int Proc_Auto2avi(game *g, CSTR directory, CSTR filename) {
-
+int Proc_Auto2avi(game *g, CSTR /*directory*/, CSTR filename) {
+#ifdef _WIN32
 	printfDx("BMSを読み込み中です。しばらくお待ち下さい。");
 	ScreenFlip();
 	ClsDrawScreen();
@@ -98,7 +101,7 @@ int Proc_Auto2avi(game *g, CSTR directory, CSTR filename) {
 	CSTR ext = filename.right(3).lower();
 	if(ext.isSame("mp3")) {
 		CSTR tPath = g->baseDirectory;
-		tPath.add("LR2files\\temp.wav");
+		tPath.add("LR2files/temp.wav");
 		WriteSoundFile(&g->audio, tPath, 0);
 		RunMP3Encoder(&g->config, tPath, filename, 1, 0);
 	}
@@ -107,11 +110,14 @@ int Proc_Auto2avi(game *g, CSTR directory, CSTR filename) {
 	}
 
 	return 1;
+#else
+	return {}; // FIXME(linux): stub
+#endif // _WIN32
 }
 
 //40dc30
 int RecordBmsSound(game *g, CSTR oPath) {
-
+#ifdef _WIN32
 	int startTime = g->rec.GetCurTime();
 	ErrorLogFmtAdd("音声の記録を開始します　曲開始時間+%dです。\n", startTime);
 	printfDx("処理中です。しばらくお待ち下さい。");
@@ -155,11 +161,11 @@ int RecordBmsSound(game *g, CSTR oPath) {
 	CSTR wavPath;
 	if (g->config.tools.movie_audio == 0) {
 		wavPath = g->baseDirectory;
-		wavPath.add("LR2files\\movie_temp.wav");
+		wavPath.add("LR2files/movie_temp.wav");
 		WriteSoundFile(&g->audio, wavPath, GetTimeWrap()*44100.0 / 1000.0 * 2);
 
 		CSTR mp3Path(g->baseDirectory);
-		mp3Path.add("LR2files\\movie_temp.mp3");
+		mp3Path.add("LR2files/movie_temp.mp3");
 		if (RunMP3Encoder(&g->config, wavPath, mp3Path, 1, 1) == 1) {
 			g->rec.InsertAudioToMovie(mp3Path, true);
 		}
@@ -169,7 +175,7 @@ int RecordBmsSound(game *g, CSTR oPath) {
 	}
 	else if (g->config.tools.movie_audio == 1) {
 		wavPath = g->baseDirectory;
-		wavPath.add("LR2files\\movie_temp.wav");
+		wavPath.add("LR2files/movie_temp.wav");
 		WriteSoundFile(&g->audio, wavPath, GetTimeWrap()*44100.0 / 1000.0 * 2);
 		g->rec.InsertAudioToMovie(wavPath, true);
 	}
@@ -182,4 +188,7 @@ int RecordBmsSound(game *g, CSTR oPath) {
 
 	g->rec.Release();
 	return 1;
+#else
+	return {}; // FIXME(linux): stub
+#endif // _WIN32
 }

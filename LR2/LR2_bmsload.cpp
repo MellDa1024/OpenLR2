@@ -2,6 +2,8 @@
 #include "Engine.h"
 #include "LR2_replay.h"
 
+#include <algorithm>
+
 //4081d0
 int StopAllKeysound(game *g){
 	for (int i = 0; i < 6480; i++) {
@@ -79,6 +81,7 @@ int ExpandNoteBuffer(LaneStruct *lane, int addsize){
 	oldCount = lane->size;
 	lane->size += addsize;
 	lane->notes = (NoteStruct*)realloc(lane->notes, (lane->size) * sizeof(NoteStruct));
+	assert(lane->notes != nullptr);
 
 	for (int i = oldCount; i < lane->size; i++) {
 		lane->notes[i].bmsTiming_ln = -1.0;
@@ -473,7 +476,7 @@ int InitGameplay(gameplay *gp, CONFIG_PLAY *cfg) {
 }
 
 //4acc60
-int LoadBmsResource(gameplay *gp, CSTR BMSfilepath, AUDIO *aud, ConfigStruct *cfg, BMSMETA *meta, char bga, char flip, char noVideo){
+int LoadBmsResource(gameplay *gp, CSTR /*BMSfilepath*/, AUDIO *aud, ConfigStruct *cfg, BMSMETA */*meta*/, char /*bga*/, char /*flip*/, char noVideo){
 
 	int Rtmp, Gtmp, Btmp;
 
@@ -513,7 +516,9 @@ int LoadBmsResource(gameplay *gp, CSTR BMSfilepath, AUDIO *aud, ConfigStruct *cf
 		return 1;
 	}
 	
+#ifdef _WIN32
 	if (cfg->system.isablebmsthread == 0) CoInitialize(NULL);
+#endif // _WIN32
 	GetTransColor(&Rtmp,&Gtmp,&Btmp);
 	SetTransColor(0,0,0);
 	for (int i = 0; i < 6480; i++) {
@@ -530,13 +535,17 @@ int LoadBmsResource(gameplay *gp, CSTR BMSfilepath, AUDIO *aud, ConfigStruct *cf
 		}
 
 		if (gp->flag_closingPhase) {
+#ifdef _WIN32
 			if (cfg->system.isablebmsthread == 0) CoUninitialize();
+#endif // _WIN32
 			return 1;
 		}
 	}
 
 	SetTransColor(Rtmp, Gtmp, Btmp);
+#ifdef _WIN32
 	if (cfg->system.isablebmsthread == 0) CoUninitialize();
+#endif // _WIN32
 	if (gp->bgaHandle[0] != -1) gp->missLayer = 0;
 
 	if (gp->isAutoplay == 1) {
@@ -1744,14 +1753,14 @@ int SPtoDP(LaneStruct *lane, int baseNoteID, CHARTCONVERTER *cc) {
 				}
 				cc->flagSplitUnknown ^= 1;
 			}
-			else if (0 < 0) {
+			else /*if (0 < 0)*/ {
 				cc->arr1[i].field3_0xc = 1;
 				unkArr[1] += cc->arr1[i].count;
 			}
-			else {
-				cc->arr1[i].field3_0xc = 0;
-				unkArr[0] += cc->arr1[i].count;
-			}
+			//else {
+			//	cc->arr1[i].field3_0xc = 0;
+			//	unkArr[0] += cc->arr1[i].count;
+			//}
 		}
 	}
 	
@@ -2033,7 +2042,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 			ErrorLogAdd("BMSを開けません。\n");
 			return -1;
 		}
-		if (isPMS = filename.right(4).lower().isSame(".pms")) {
+		if (isPMS = filename.right(4).lower().isSame(".pms"); isPMS) {
 			is9key = 1;
 		}
 		else if (meta->keymode == 9) {
@@ -2608,6 +2617,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 					if (gp->bpmt_count == gp->bpmt_buffersize) {
 						gp->bpmt_buffersize += 100;
 						gp->bpmt_data = (BPMtiming*)realloc(gp->bpmt_data, gp->bpmt_buffersize * sizeof(BPMtiming));
+						assert(gp->bpmt_data != nullptr);
 						for (int i = gp->bpmt_buffersize - 100; i < gp->bpmt_buffersize; i++) {
 							gp->bpmt_data[i].BPM = 0;
 							gp->bpmt_data[i].converted = 0;
@@ -2622,6 +2632,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 					if (gp->bpmt_count == gp->bpmt_buffersize) {
 						gp->bpmt_buffersize += 100;
 						gp->bpmt_data = (BPMtiming*)realloc(gp->bpmt_data, gp->bpmt_buffersize * sizeof(BPMtiming));
+						assert(gp->bpmt_data != nullptr);
 						for (int i = gp->bpmt_buffersize - 100; i < gp->bpmt_buffersize; i++) {
 							gp->bpmt_data[i].BPM = 0;
 							gp->bpmt_data[i].converted = 0;
@@ -2719,6 +2730,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 					if (gp->bpmt_count == gp->bpmt_buffersize) {
 						gp->bpmt_buffersize += 100;
 						gp->bpmt_data = (BPMtiming*)realloc(gp->bpmt_data, gp->bpmt_buffersize * sizeof(BPMtiming));
+						assert(gp->bpmt_data != nullptr);
 						for (int i = gp->bpmt_buffersize - 100; i < gp->bpmt_buffersize; i++) {
 							gp->bpmt_data[i].BPM = 0;
 							gp->bpmt_data[i].converted = 0;
@@ -2738,6 +2750,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 						if (gp->bpmt_count == gp->bpmt_buffersize) {
 							gp->bpmt_buffersize += 100;
 							gp->bpmt_data = (BPMtiming*)realloc(gp->bpmt_data, gp->bpmt_buffersize * sizeof(BPMtiming));
+							assert(gp->bpmt_data != nullptr);
 							for (int i = gp->bpmt_buffersize - 100; i < gp->bpmt_buffersize; i++) {
 								gp->bpmt_data[i].BPM = 0;
 								gp->bpmt_data[i].converted = 0;
@@ -2762,6 +2775,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 					if (gp->bpmt_count == gp->bpmt_buffersize) {
 						gp->bpmt_buffersize += 100;
 						gp->bpmt_data = (BPMtiming*)realloc(gp->bpmt_data, gp->bpmt_buffersize * sizeof(BPMtiming));
+						assert(gp->bpmt_data != nullptr);
 						for (int i = gp->bpmt_buffersize - 100; i < gp->bpmt_buffersize; i++) {
 							gp->bpmt_data[i].BPM = 0;
 							gp->bpmt_data[i].converted = 0;
@@ -2802,6 +2816,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 					if (gp->bpmt_count == gp->bpmt_buffersize) {
 						gp->bpmt_buffersize += 100;
 						gp->bpmt_data = (BPMtiming*)realloc(gp->bpmt_data, gp->bpmt_buffersize * sizeof(BPMtiming));
+						assert(gp->bpmt_data != nullptr);
 						for (int i = gp->bpmt_buffersize - 100; i < gp->bpmt_buffersize; i++) {
 							gp->bpmt_data[i].BPM = 0;
 							gp->bpmt_data[i].converted = 0;
@@ -3763,7 +3778,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 			if (recover <= 0) recover = 1;
 
 			double dmg_totalbase = 100.0 / (double)recover;
-			double dmg = max(dmg_notebase * 10, dmg_totalbase) / 10.0;
+			double dmg = std::max(dmg_notebase * 10, dmg_totalbase) / 10.0;
 
 			if (!gp->isCourse) {
 				gp->player[p].judge_damage[0][5] = total[p] / (float)notes;
@@ -3977,19 +3992,19 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 	if (gp->soundonly == 1 && bgaFlag && (cfg->play.bga == 3 || cfg->play.bga == 1 || (cfg->play.bga == 2 && gp->isAutoplay)) && cfg->play.autojudge != 2) {
 		DeleteGraph(gp->bgaHandle[1295]);
 		gp->bgaHandle[1295] = -1;
-		CSTR defaultMovieFile = GetRandomFile("LR2files\\Movie\\*.mpg", 0);
+		CSTR defaultMovieFile = GetRandomFile("LR2files/Movie/*.mpg", 0);
 		if (defaultMovieFile.isDiff("ERROR")) gp->bgaHandle[1295] = LoadGraph(defaultMovieFile);
 		if (gp->bgaHandle[1295] == -1) {
-			defaultMovieFile = GetRandomFile("LR2files\\Movie\\*.avi", 0);
+			defaultMovieFile = GetRandomFile("LR2files/Movie/*.avi", 0);
 			if (defaultMovieFile.isDiff("ERROR")) gp->bgaHandle[1295] = LoadGraph(defaultMovieFile);
 			if (gp->bgaHandle[1295] == -1) {
-				defaultMovieFile = GetRandomFile("LR2files\\Movie\\*.wmv", 0);
+				defaultMovieFile = GetRandomFile("LR2files/Movie/*.wmv", 0);
 				if (defaultMovieFile.isDiff("ERROR")) gp->bgaHandle[1295] = LoadGraph(defaultMovieFile);
 				if (gp->bgaHandle[1295] == -1) {
-					defaultMovieFile = GetRandomFile("LR2files\\Movie\\*.mp4", 0);
+					defaultMovieFile = GetRandomFile("LR2files/Movie/*.mp4", 0);
 					if (defaultMovieFile.isDiff("ERROR")) gp->bgaHandle[1295] = LoadGraph(defaultMovieFile);
 					if (gp->bgaHandle[1295] == -1) {
-						defaultMovieFile = GetRandomFile("LR2files\\Movie\\*.ogv", 0);
+						defaultMovieFile = GetRandomFile("LR2files/Movie/*.ogv", 0);
 						if (defaultMovieFile.isDiff("ERROR")) gp->bgaHandle[1295] = LoadGraph(defaultMovieFile);
 					}
 				}

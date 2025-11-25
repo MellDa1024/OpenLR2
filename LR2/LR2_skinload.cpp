@@ -75,6 +75,7 @@ int ReadDST(DSTstruct *dst, CSVbuf *csv, int order){
 	if (dst->dataSize == dst->dstCount) {
 		dst->dataSize = dst->dataSize + 10;
 		dst->draw = (DSTdraw*)realloc(dst->draw, dst->dataSize * sizeof(DSTdraw));
+		assert(dst->draw != nullptr);
 		for (int i = dst->dstCount; i < dst->dataSize; i++) {
 			InitDSTdraw(&dst->draw[i]);
 		}
@@ -103,8 +104,6 @@ int ReadDST(DSTstruct *dst, CSVbuf *csv, int order){
 
 //49eae0
 int ReadSRC(SRCstruct *src, CSVbuf *csv, skstruct *sk){
-	int div_count;
-
 	src->n = csv->val[1];
 	src->cycle = csv->val[9];
 	src->timer = csv->val[10];
@@ -125,6 +124,7 @@ int ReadSRC(SRCstruct *src, CSVbuf *csv, skstruct *sk){
 		src->count = src->graphcount;
 		src->grHandles = (int*)realloc(src->grHandles, src->graphcount * sizeof(int));
 	}
+	assert(src->grHandles != nullptr);
 	for (int i = 0; i < src->count; i++) {
 		src->grHandles[i] = -1;
 	}
@@ -170,7 +170,7 @@ int ReadSRC_BAR_TITLE(SRCstruct *src, CSVbuf *csv, skstruct *sk){
 
 
 //49ed50 InitSkin
-int InitSkin(skstruct *sk, int p5, char font) {
+int InitSkin(skstruct *sk, int /*unused*/, char font) {
 	SetTransColor(0, 255, 0);
 	sk->startinput_start = 0;
 	sk->startinput_rank = 0;
@@ -492,9 +492,9 @@ int InitSkin(skstruct *sk, int p5, char font) {
 	if (sk->GrHandle[101] == -1) sk->GrHandle[101] = MakeGraph(640, 480);
 	if (sk->GrHandle[102] == -1) sk->GrHandle[102] = MakeGraph(300, 80);
 	DeleteGraph(sk->GrHandle[110]);
-	sk->GrHandle[110] = LoadGraph("LR2files\\Config\\black.bmp");
+	sk->GrHandle[110] = LoadGraph("LR2files/Config/black.bmp");
 	DeleteGraph(sk->GrHandle[111]);
-	sk->GrHandle[111] = LoadGraph("LR2files\\Config\\white.bmp");
+	sk->GrHandle[111] = LoadGraph("LR2files/Config/white.bmp");
 	sk->reloadbanner = 0;
 	for (int i = 0; i < 10; i++) {
 		InitSRC(&sk->src_BAR_RANK[i]);
@@ -543,6 +543,10 @@ int InitImageFont(ImageFont *imgfont) {
 
 //4a0480
 int ReadImageFont(CSTR filename, ImageFont *imgfont) {
+#ifndef _WIN32 // TODO(linux): check if needed
+	filename.replace("\\" ,"/");
+#endif // _WIN32
+
 	CSTR str1;
 	
 	str1 = filename.getDirectory();
@@ -919,7 +923,9 @@ int ClearSkinGraph(skstruct *sk){
 int ExpandSkinObjectMax(SkinObject *so, int add) {
 	if (so->dstSize - 1 == so->srcSize) {
 		so->src = (SRCstruct*)realloc(so->src, (so->dstSize + add) * sizeof(SRCstruct));
+		assert(so->src != nullptr);
 		so->dst = (DSTstruct*)realloc(so->dst, (so->dstSize + add) * sizeof(DSTstruct));
+		assert(so->dst != nullptr);
 		for (int i = so->dstSize; i < so->dstSize + add; i++) {
 			memset(&so->src[i], 0, sizeof(SRCstruct));
 			InitSRC(&so->src[i]);
@@ -1061,6 +1067,9 @@ int ReadSkin(skstruct *sk,CSTR FilePath, int unused, int skin_num, SkinUser* sku
 						}
 						else {
 							SplitCSV(fBuf, &csv, ",");
+#ifndef _WIN32 // TODO(linux): check if needed
+							csv.str[1].replace("\\" ,"/");
+#endif // _WIN32
 							if (csv.str[1].isSame("CONTINUE")) {
 								sk->caption[sk->count].assign("CONTINUE");
 								sk->count++;
@@ -1674,8 +1683,11 @@ int ReadSkin(skstruct *sk,CSTR FilePath, int unused, int skin_num, SkinUser* sku
 					}
 					else if (fBuf.left(8).isSame("#LR2FONT") && !flag_skipFont) {
 						SplitCSV(fBuf, &csv, ",");
+#ifndef _WIN32 // TODO(linux): check if needed
+						csv.str[1].replace("\\" ,"/");
+#endif // _WIN32
 						if (sk->num_of_ImageFont == 10) {
-							ErrorLogFmtAdd(	"スキン読み込みエラー %d行目\n%s\nこれ以上の登録はできま せん。\n", line, fBuf);
+							ErrorLogFmtAdd("スキン読み込みエラー %d行目\n%s\nこれ以上の登録はできません。\n", line, fBuf.body);
 						}
 						else if (csv.val[2] == 1 || sk->disableimagefont == 0) {
 							if (csv.str[1].isDiff("CONTINUE")) {
@@ -1696,6 +1708,9 @@ int ReadSkin(skstruct *sk,CSTR FilePath, int unused, int skin_num, SkinUser* sku
 						}
 					}
 					else if (fBuf.left(9).isSame("#HELPFILE")) {
+#ifndef _WIN32 // TODO(linux): check if needed
+						csv.str[1].replace("\\" ,"/");
+#endif // _WIN32
 						SplitCSV(fBuf, &csv, ",");
 						if (sk->helpfileCount < 10) {
 							sk->helpfilePath[sk->helpfileCount].assign(&csv.str[1]);
@@ -1730,6 +1745,9 @@ int ReadSkin(skstruct *sk,CSTR FilePath, int unused, int skin_num, SkinUser* sku
 					}
 					else if (fBuf.left(8).isSame("#INCLUDE")) {
 						SplitCSV(fBuf, &csv, ",");
+#ifndef _WIN32 // TODO(linux): check if needed
+						csv.str[1].replace("\\" ,"/");
+#endif // _WIN32
 						for (int i = 0; i < sk->customfile_count; i++) {
 							if (sk->customfileRANDOM[i].isSame(csv.str[1].left(sk->customfileRANDOM[i].length()))
 								&& sk->customfile[i].isDiff("RANDOM") && sk->customfile[i].isDiff("ERROR")
@@ -1747,6 +1765,9 @@ int ReadSkin(skstruct *sk,CSTR FilePath, int unused, int skin_num, SkinUser* sku
 					}
 					else if (fBuf.left(11).isSame("#CUSTOMFILE")) {
 						SplitCSV(fBuf, &csv, ",");
+#ifndef _WIN32 // TODO(linux): check if needed
+						csv.str[2].replace("\\" ,"/");
+#endif // _WIN32
 						sk->customfileRANDOM[sk->customfile_count].assign(&csv.str[2]);
 						sk->customfile[sk->customfile_count].assign(&sku->customize_filename[sk->customfile_count]);
 						if (sk->customfile[sk->customfile_count].isSame("RANDOM")) {
@@ -1756,6 +1777,9 @@ int ReadSkin(skstruct *sk,CSTR FilePath, int unused, int skin_num, SkinUser* sku
 					}
 					else if (fBuf.left(13).isSame("#CUSTOMFOLDER")) {
 						SplitCSV(fBuf, &csv, ",");
+#ifndef _WIN32 // TODO(linux): check if needed
+						csv.str[2].replace("\\" ,"/");
+#endif // _WIN32
 						sk->customfileRANDOM[sk->customfile_count].assign(&csv.str[2]);
 						sk->customfile[sk->customfile_count].assign(&sku->customize_filename[sk->customfile_count]);
 						sk->customfile_count++;
@@ -1820,7 +1844,7 @@ int ReadSkin(skstruct *sk,CSTR FilePath, int unused, int skin_num, SkinUser* sku
 				SetMovieVolumeToGraph(0, sk->GrHandle[i]);
 			}
 		}
-		ErrorLogFmtAdd("スキンの読み込みに成功しました。 %s\n", FilePath);
+		ErrorLogFmtAdd("スキンの読み込みに成功しました。 %s\n", FilePath.body);
 		ErrorLogTabSub();
 		SetTransColor(0, 0xff, 0);
 		if (flipside != '\0') {
@@ -1828,7 +1852,7 @@ int ReadSkin(skstruct *sk,CSTR FilePath, int unused, int skin_num, SkinUser* sku
 		}
 		return 1;
 	}
-	ErrorLogFmtAdd("子スキンの読み込みに成功しました。 %s\n", FilePath);
+	ErrorLogFmtAdd("子スキンの読み込みに成功しました。 %s\n", FilePath.body);
 	ErrorLogTabSub();
 	return tSkin_num;
 }
@@ -1839,7 +1863,7 @@ int LoadScene(skstruct *sk, CSTR skinfile, int p5, char font) {
 	CSTR tStr;
 	InitSkin(sk, p5, font);
 	sk->skinMD5.assign(MD5str(skinfile));
-	cstrSprintf(&tStr, "LR2files\\SkinCustomize\\%s.xml",sk->skinMD5.body);
+	cstrSprintf(&tStr, "LR2files/SkinCustomize/%s.xml",sk->skinMD5.body);
 	ReadSkinCustomize(&tsku, tStr);
 	(sk->adjust).shift_x = tsku.adjust.shift_x;
 	(sk->adjust).shift_y = tsku.adjust.shift_y;

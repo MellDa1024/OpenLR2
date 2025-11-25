@@ -3,7 +3,7 @@
 
 //4c03c0 //TODO suspection about usage of cstrsprintf
 int MoveReplayFile(CSTR songMD5, CSTR localID){
-
+#ifdef _WIN32
 	if (songMD5.length() > 36) {
 		songMD5 = MD5str(songMD5);
 	}
@@ -29,6 +29,9 @@ int MoveReplayFile(CSTR songMD5, CSTR localID){
 	ErrorLogFmtAdd("リプレイの移動終了 stage%d\n", stage);
 
 	return (stage != 0);
+#else
+	return {}; // FIXME(linux): stub
+#endif
 }
 
 //4c05e0
@@ -161,7 +164,7 @@ int ReleaseReplayBuffer(REPLAY *rp){
 
 
 //4c0c00
-int AddReplayData(REPLAY *rp, int timing, char op, short value){
+int AddReplayData(REPLAY *rp, int timing, uchar op, short value){
 
 	if (rp->max < 1) {
 		return 0;
@@ -169,6 +172,7 @@ int AddReplayData(REPLAY *rp, int timing, char op, short value){
 	if (rp->max == rp->count) {
 		rp->max += 10000;
 		rp->data = (ReplayData *)realloc(rp->data, rp->max * sizeof(ReplayData));
+		assert(rp->data != nullptr);
 	}
 	rp->data[rp->count].op = op;
 	rp->data[rp->count].timing = timing;

@@ -81,7 +81,7 @@ void ThreadProc_LoadBanner(void *param) { // TODO: take game&
 }
 
 //4021a0
-int SetBmsFilter(game *g, sqlite3 *sql){
+int SetBmsFilter(game *g, sqlite3 */*sql*/){
 
 	g->sSelect.searchType = 0;
 	g->sSelect.searchFocused = 1;
@@ -604,7 +604,7 @@ int LoadFontForSongs(game *gs, char flag) {
 
 //40b320
 int ShowReadmes(game *g) {
-
+#ifdef _WIN32
 	CSTR search;
 	HANDLE hFindFile;
 	WIN32_FIND_DATA FindFileData;
@@ -685,6 +685,10 @@ int ShowReadmes(game *g) {
 
 	g->txtStruct.readme.y = g->skstruct.src_README[0].op1 * g->txtStruct.readme.lines;
 	return 1;
+#else
+	// TODO: reimplement with std::filesystem
+	return {};
+#endif // _WIN32
 }
 
 //40b720
@@ -710,7 +714,11 @@ int ShowReadme(game *g, CSTR path) {
 
 	CSTR fBuf(0x400);
 
+#ifdef _WIN32
 	fopen_s(&pFile, g->txtStruct.readme.path, "r");
+#else
+	pFile = fopen(g->txtStruct.readme.path, "r");
+#endif // _WIN32
 
 	char *pFbuf = fBuf.outstr();
 	if (pFile != NULL) {
@@ -980,7 +988,6 @@ CSTR GetMissonString(int missionLevel, int line) {
 			else 
 				return "";
 	}
-	return "";
 }
 
 
@@ -1452,7 +1459,7 @@ void CheckNewSong(glb_dbgame *glb) {
 	sqlite3_stmt *pStmt;
 	char buf[1024];
 	int filDiff, filKey;
-	int err = 0;
+	bool err = false;
 
 	std::unique_lock l{g_db_lock};
 	glb->pGame->sSelect.searchFocused = 2;
@@ -1475,11 +1482,11 @@ void CheckNewSong(glb_dbgame *glb) {
 		if (err) {
 			ErrorLogAdd("未設定の#DIFFICULTYを設定します。\n");
 			SetUndefinedDifficulty(glb->pSql);
-			sqlite3_exec(glb->pSql, "DELETE FROM folder WHERE path=\'LR2files\\CustomFolder\\newsong.lr2folder\'", 0, 0, 0);
+			sqlite3_exec(glb->pSql, "DELETE FROM folder WHERE path=\'LR2files/CustomFolder/newsong.lr2folder\'", 0, 0, 0);
 			sqlite3_snprintf(1024, buf, "SELECT * FROM song WHERE adddate > %d", GetNowUnixtime() - jb.titleflash * 3600);
 			sqlite3_prepare(glb->pSql, buf, -1, &pStmt, NULL);
 			if (sqlite3_step(pStmt) == 100) {
-				jb.path[jb.numOfPath] = "LR2files\\CustomFolder\\newsong.lr2folder";
+				jb.path[jb.numOfPath] = "LR2files/CustomFolder/newsong.lr2folder";
 				GetFolderDataFromPath(jb.path[jb.numOfPath], glb->pSql);
 			}
 			sqlite3_finalize(pStmt);
@@ -1586,7 +1593,7 @@ void ThreadProc_RankingAutoUpdate(void *param) { // TODO: take game&
 	SetTimeLapse(177, &g->timer1);
 	g->net.IRstatus = 3;
 	while (GetTimeLapse(177, &g->timer1) <g->net.waitTime) {
-		Sleep(4);
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
 		if (g->net.waitForHandle || (isIR2 && (g->KeyInput.p1_buttonInput[4] == 2 || g->KeyInput.p2_buttonInput[4] == 2))) {
 			g->sSelect.isRankingAutoUpdateThread = 0;
 			ResetTimeLapse(177, &g->timer1);
@@ -1742,7 +1749,9 @@ int ProcS_Select(game *g) {
 	
 	SetObjectString(30, g->sSelect.stack_searchTitle[g->sSelect.cur], g->txtStruct.objectStr);
 	SetTarget(g);
+#ifdef WIN32
 	DeleteKeyInput(g->txtStruct.hKeyInput);
+#endif // _WIN32
 	g->txtStruct.st_text_num = -1;
 	g->sSelect.metaSelected.artist = g->sSelect.bmsList[g->sSelect.cur_song].artist;
 	g->sSelect.metaSelected.filepath = g->sSelect.bmsList[g->sSelect.cur_song].filepath;
@@ -1811,7 +1820,7 @@ void SubProcI_Select(game *g, sqlite3 *sql) {
 				else if (GetTimeLapse(175, &g->timer1) > 120.0) {
 					ResetTimeLapse(175, &g->timer1);
 					SetTimeLapse(176, &g->timer1);
-					g->sSelect.prevListCount = min(g->net.rankingData.rankingCount, 999);
+					g->sSelect.prevListCount = std::min(g->net.rankingData.rankingCount, 999);
 					for (int i = 0; i < g->sSelect.prevListCount; i++) {
 						InitSongData(&g->sSelect.prevList[i]);
 						COPY_SONGDATA(&g->sSelect.prevList[i], &g->sSelect.bmsList[g->sSelect.cur_song]);
@@ -1901,19 +1910,19 @@ void SubProcI_Select(game *g, sqlite3 *sql) {
 		if (g->KeyInput.inputID[KEY_INPUT_F8] == 1) {
 			if (g->sSelect.stack_query[g->sSelect.cur].findStrPos("parent") != -1) {
 				SetBmsFilter(g, sql);
-				g->sSelect.unk4fa4[0] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM song WHERE parent = \'%s\'", g->sSelect.stack_query[g->sSelect.cur].right(9).left(8));
+				g->sSelect.unk4fa4[0] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM song WHERE parent = \'%s\'", g->sSelect.stack_query[g->sSelect.cur].right(9).left(8).body);
 				if (g->sSelect.bmsList[g->sSelect.cur_song].keymode < 1 || g->sSelect.cur < 1) {
 					g->sSelect.reloadType = 3;
-					g->sSelect.unk4fa4[1] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM folder WHERE parent = \'%s\'", g->sSelect.stack_query[g->sSelect.cur].right(9).left(8));
-					g->sSelect.unk4fa4[2] = sqlite3_snprintf(1024, buf, "SELECT path, date FROM song WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath));
-					g->sSelect.unk4fa4[3] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM folder WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath));
+					g->sSelect.unk4fa4[1] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM folder WHERE parent = \'%s\'", g->sSelect.stack_query[g->sSelect.cur].right(9).left(8).body);
+					g->sSelect.unk4fa4[2] = sqlite3_snprintf(1024, buf, "SELECT path, date FROM song WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath).body);
+					g->sSelect.unk4fa4[3] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM folder WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath).body);
 				}
 				else {
 					g->sSelect.reloadType = 2;
-					g->sSelect.unk4fa4[1] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM folder WHERE parent = \'%s\'", g->sSelect.stack_query[g->sSelect.cur].right(9).left(8));
-					g->sSelect.unk4fa4[2] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM folder WHERE parent = \'%s\'", g->sSelect.stack_query[g->sSelect.cur - 1].right(9).left(8));
+					g->sSelect.unk4fa4[1] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM folder WHERE parent = \'%s\'", g->sSelect.stack_query[g->sSelect.cur].right(9).left(8).body);
+					g->sSelect.unk4fa4[2] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM folder WHERE parent = \'%s\'", g->sSelect.stack_query[g->sSelect.cur - 1].right(9).left(8).body);
 				}
-				g->sSelect.unk4fb4 = sqlite3_snprintf(1024, buf, "SELECT difficulty,folder,mode,path FROM song WHERE parent = \'%s\'", g->sSelect.stack_query[g->sSelect.cur].right(9).left(8));
+				g->sSelect.unk4fb4 = sqlite3_snprintf(1024, buf, "SELECT difficulty,folder,mode,path FROM song WHERE parent = \'%s\'", g->sSelect.stack_query[g->sSelect.cur].right(9).left(8).body);
 				g->sSelect.filter_clicked = 4;
 			}
 
@@ -2322,8 +2331,8 @@ void SubProcI_Select(game *g, sqlite3 *sql) {
 					if (g->sSelect.bmsList[g->sSelect.cur_song].tag.length() > 2 && g->sSelect.bmsList[g->sSelect.cur_song].tag.isDiff("(null)")) {
 						g->sSelect.queryCount = 3;
 						g->sSelect.curQuery[0] = sqlite3_snprintf(1024, buf, "SELECT * FROM song LEFT JOIN score ON song.hash = score.hash WHERE %s", g->sSelect.bmsList[g->sSelect.cur_song].tag);
-						g->sSelect.curQuery[2] = sqlite3_snprintf(1024, buf, "SELECT * FROM folder WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath));
-						g->sSelect.curQuery[1] = sqlite3_snprintf(1024, buf, "SELECT * FROM song LEFT JOIN score ON song.hash = score.hash WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath));
+						g->sSelect.curQuery[2] = sqlite3_snprintf(1024, buf, "SELECT * FROM folder WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath.body).body);
+						g->sSelect.curQuery[1] = sqlite3_snprintf(1024, buf, "SELECT * FROM song LEFT JOIN score ON song.hash = score.hash WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath).body);
 						(g->sSelect).unk4fb8[0] = 0;
 						(g->sSelect).unk4fc0 = 1;
 						(g->sSelect).unk4fb8[1] = 0;
@@ -2336,11 +2345,11 @@ void SubProcI_Select(game *g, sqlite3 *sql) {
 							g->sSelect.reloadType = 1;
 						}
 						g->sSelect.queryCount = 2;
-						g->sSelect.unk4fa4[1] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM folder WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath));
-						g->sSelect.unk4fa4[0] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM song WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath));
-						g->sSelect.unk4fb4 = sqlite3_snprintf(1024, buf, "SELECT difficulty,folder,mode,path FROM song WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath));
-						g->sSelect.curQuery[1] = sqlite3_snprintf(1024, buf, "SELECT * FROM folder WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath));
-						g->sSelect.curQuery[0] = sqlite3_snprintf(1024, buf, "SELECT * FROM song LEFT JOIN score ON song.hash = score.hash WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath));
+						g->sSelect.unk4fa4[1] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM folder WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath).body);
+						g->sSelect.unk4fa4[0] = sqlite3_snprintf(1024, buf, "SELECT path,date FROM song WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath).body);
+						g->sSelect.unk4fb4 = sqlite3_snprintf(1024, buf, "SELECT difficulty,folder,mode,path FROM song WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath).body);
+						g->sSelect.curQuery[1] = sqlite3_snprintf(1024, buf, "SELECT * FROM folder WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath).body);
+						g->sSelect.curQuery[0] = sqlite3_snprintf(1024, buf, "SELECT * FROM song LEFT JOIN score ON song.hash = score.hash WHERE parent = \'%s\'", AssignCRC32(g->sSelect.bmsList[g->sSelect.cur_song].filepath).body);
 						g->sSelect.unk4fb8[1] = 1;
 						g->sSelect.unk4fb8[0] = 0;
 						g->sSelect.unk4fc4[0] = 0;
@@ -3041,12 +3050,14 @@ int InitBmsList(SONGSELECT *ss) {
 	ss->bmsListSize = 1000;
 	ss->cur = 0;
 	ss->bmsList = (SONGDATA*)malloc(sizeof(SONGDATA) * 1000);
+	assert(ss->bmsList != nullptr);
 	for (int i = 0; i < ss->bmsListSize; i++) {
 		memset(&ss->bmsList[i], 0, sizeof(SONGDATA));
 	}
 
 	ss->prevListSize = 1000;
 	ss->prevList = (SONGDATA*)malloc(sizeof(SONGDATA) * 1000);
+	assert(ss->prevList != nullptr);
 	for (int i = 0; i < ss->prevListSize; i++) {
 		memset(&ss->prevList[i], 0, sizeof(SONGDATA));
 	}

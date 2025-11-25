@@ -2,6 +2,12 @@
 #include <md5.h>
 #include "DxLib/DxLib.h" //log
 
+#ifndef _WIN32
+#include <chrono>
+#include <filesystem>
+#include <sys/stat.h>
+#endif // _WIN32
+
 //437210
 //437260
 //4372c0
@@ -44,14 +50,20 @@ int makeFileHash(LPCSTR filepath, LPCSTR oBuf) {
 
 //TODO : posix 2038y problem
 //437de0
-time_t GetNowUnixtime(void){
+time_t GetNowUnixtime() {
+#ifdef _WIN32
 	SYSTEMTIME systime;
-	_FILETIME filetime;
-
 	GetSystemTime((LPSYSTEMTIME)&systime);
+
+	_FILETIME filetime;
 	SystemTimeToFileTime(&systime, &filetime);
-		
+
 	return GetUnixtimeFromFiletime(filetime);
+#else
+	// TODO(linux): seconds? milliseconds?
+	return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch())
+		.count();
+#endif // _WIN32
 }
 
 //437e90
@@ -62,12 +74,13 @@ time_t GetUnixtimeFromFiletime(FILETIME &filetime) {
 
 //437f00
 time_t GetFileUnixtime(CSTR str) {
+#ifdef _WIN32
 	WIN32_FIND_DATA FindFileData;
 	LPWIN32_FIND_DATAA lpFindFileData;
 	HANDLE hFindFile;
 
-	if ( str.right(1).isSame("\\") ) {
-		str.nullAtPos( str.length() - 1 );
+	if (str.right(1).isSame("\\") ||  str.right(1).isSame("/")) {
+		str.nullAtPos(str.length() - 1);
 	}
 
 	lpFindFileData = (LPWIN32_FIND_DATAA)&FindFileData;
@@ -76,18 +89,26 @@ time_t GetFileUnixtime(CSTR str) {
 		ErrorLogFmtAdd("ファイルのLR2TIME取得エラー:%sが見つからない\n", str);
 		return -1;
 	}
-	else {
-		FindClose(hFindFile);
-		return GetUnixtimeFromFiletime(FindFileData.ftLastWriteTime);
+
+	FindClose(hFindFile);
+	return GetUnixtimeFromFiletime(FindFileData.ftLastWriteTime);
+#else
+	// TODO(linux): seconds? milliseconds?
+	struct stat sb;
+	int ret = stat(str.body, &sb);
+	if (ret != 0) {
+		return -1;
 	}
+	return static_cast<time_t>(sb.st_mtim.tv_sec);
+#endif
 }
 
 //438040
 CSTR GetRandomFileOnDir(CSTR path, char fOnlyName) {
+#ifdef _WIN32
 	CSTR oBuf;
 	//CSTR str1,str2,str3;
 	WIN32_FIND_DATA FindFileData;
-	LPWIN32_FIND_DATAA lpFindFileData;
 	HANDLE hFindFile;
 	int fileCount = 0;
 	CSTR str1( path.left(path.findStrPos("*")) );
@@ -99,52 +120,50 @@ CSTR GetRandomFileOnDir(CSTR path, char fOnlyName) {
 		//oBuf = CSTR("ERROR");
 		return CSTR("ERROR");
 	}
-	else {
-		do {
-			if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-				if (strcmp("..", (char*)FindFileData.cFileName) && strcmp(".", (char*)FindFileData.cFileName)) fileCount++;
-			}
-		} while (FindNextFileA(hFindFile, (LPWIN32_FIND_DATAA)&FindFileData));
-		FindClose(hFindFile);
-		if (fileCount > 0) {
-			fileCount = GetRand(fileCount - 1);
-
-			hFindFile = FindFirstFileA(str3, (LPWIN32_FIND_DATAA)&FindFileData);
-			if (hFindFile != (HANDLE)-1) {
-				do {
-					if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-						if (strcmp("..", (char*)FindFileData.cFileName) && strcmp(".", (char*)FindFileData.cFileName)) {
-							//LAB_00438327
-							int i = 0;
-							while (i < fileCount) {
-								FindNextFileA(hFindFile, (LPWIN32_FIND_DATAA)&FindFileData);
-								if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-									if (strcmp("..", (char*)FindFileData.cFileName) && strcmp(".", (char*)FindFileData.cFileName)) i++;
-								}
-							}
-							FindClose(hFindFile);
-							path.assign(&str1);
-							path.add((char*)FindFileData.cFileName);
-							path.add(&str2);
-							if (fOnlyName) {
-								//oBuf = CSTR(FindFileData.cFileName);
-								return CSTR((char*)FindFileData.cFileName);
-							}
-							else {
-								//oBuf = CSTR(path);
-								return CSTR(path);
-							}
-							return oBuf;
-						}
-					}
-					FindNextFileA(hFindFile, (LPWIN32_FIND_DATAA)&FindFileData);
-				} while (true);
-			}
+	do {
+		if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+			if (strcmp("..", (char*)FindFileData.cFileName) && strcmp(".", (char*)FindFileData.cFileName)) fileCount++;
 		}
-		//oBuf = CSTR("ERROR");
-		return CSTR("ERROR");
+	} while (FindNextFileA(hFindFile, (LPWIN32_FIND_DATAA)&FindFileData));
+	FindClose(hFindFile);
+	if (fileCount > 0) {
+		fileCount = GetRand(fileCount - 1);
+
+		hFindFile = FindFirstFileA(str3, (LPWIN32_FIND_DATAA)&FindFileData);
+		if (hFindFile != (HANDLE)-1) {
+			do {
+				if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+					if (strcmp("..", (char*)FindFileData.cFileName) && strcmp(".", (char*)FindFileData.cFileName)) {
+						//LAB_00438327
+						int i = 0;
+						while (i < fileCount) {
+							FindNextFileA(hFindFile, (LPWIN32_FIND_DATAA)&FindFileData);
+							if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+								if (strcmp("..", (char*)FindFileData.cFileName) && strcmp(".", (char*)FindFileData.cFileName)) i++;
+							}
+						}
+						FindClose(hFindFile);
+						path.assign(&str1);
+						path.add((char*)FindFileData.cFileName);
+						path.add(&str2);
+						if (fOnlyName) {
+							//oBuf = CSTR(FindFileData.cFileName);
+							return CSTR((char*)FindFileData.cFileName);
+						}
+						//oBuf = CSTR(path);
+						return CSTR(path);
+					}
+				}
+				FindNextFileA(hFindFile, (LPWIN32_FIND_DATAA)&FindFileData);
+			} while (true);
+		}
 	}
-	return oBuf;
+	//oBuf = CSTR("ERROR");
+	return CSTR("ERROR");
+#else
+	// FIXME(linux): stub
+	return CSTR("ERROR");
+#endif // _WIN32
 }
 
 //438540
@@ -311,20 +330,13 @@ bool IsLR2Folder(CSTR str) {
 
 //439510
 bool IsFileExist(CSTR path) {
+#ifdef _WIN32
 	HANDLE hFindFile;
 	_WIN32_FIND_DATAA findFileData;
-	bool isDir = false;
 	char *cur;
 	char dirFlag = 0;
 
-	if (path.right(1).isSame("\\") == true) {
-		isDir = true;
-	}
-	else if (path.right(1).isSame("/") == true) {
-		isDir = true;
-	}
-
-	if (isDir) {
+	if (path.right(1).isSame("\\") || path.right(1).isSame("/")) {
 		cur = path.atPos(path.length() - 1);
 		*cur = 0;
 	}
@@ -337,16 +349,19 @@ bool IsFileExist(CSTR path) {
 		FindClose(-1);
 	}*/
 	return hFindFile != (HANDLE)-1;
+#else // TODO(refactor): is this implementation enough?
+	return std::filesystem::exists(path.body);
+#endif // _WIN32
 }
 
 //4396b0 //0:already_exist 1:not_exist 2:changed
 int IsFileChanged(unsigned int oldUnixtime, CSTR filepath, int *oNewtime) { 
-
+#ifdef _WIN32
 	HANDLE hFindFile;
 	char* lpFileName;
 	_WIN32_FIND_DATAA findFileData;
 
-	if (filepath.right(1).isSame("\\")) {
+	if (filepath.right(1).isSame("\\") || filepath.right(1).isSame("/")) {
 		filepath.nullAtPos(filepath.length() - 1);
 	}
 	lpFileName = filepath;
@@ -368,6 +383,12 @@ int IsFileChanged(unsigned int oldUnixtime, CSTR filepath, int *oNewtime) {
 		FindClose(hFindFile);
 		return 0;
 	}
+#else
+	// FIXME(linux): stub
+	if (!IsFileExist(filepath))
+		return 1;
+	return 0;
+#endif // _WIN32
 }
 
 //439820
@@ -395,7 +416,7 @@ int DealWhiteSpace(CSTR *str) {
 }
 
 //439a30 SplitCSV
-int SplitCSV(CSTR csvStr, CSVbuf *oBuf, const char *splitter) {
+int SplitCSV(CSTR csvStr, CSVbuf *oBuf, const char */*splitter*/) {
 	int pos,i;
 	bool bEnd = false;
 	
@@ -606,7 +627,7 @@ int FindAltImage(CSTR filename, CSTR dir, CSTR *oBuf) {
 		}
 	}
 
-	path.assign(dir).add("..\\").add(filename);
+	path.assign(dir).add("../").add(filename);
 	if (IsFileExist(path)) {
 		oBuf->assign(path);
 		return 1;
@@ -690,7 +711,7 @@ int FindAltSound(CSTR filename, CSTR dir, CSTR *oBuf) {
 		}
 	}
 
-	path.assign(dir).add("..\\").add(filename);
+	path.assign(dir).add("../").add(filename);
 	if (IsFileExist(path)) {
 		oBuf->assign(path);
 		return 1;
@@ -736,19 +757,18 @@ int FindAltSound(CSTR filename, CSTR dir, CSTR *oBuf) {
 
 //43a900
 CSTR GetRandomFile(CSTR path, char fOnlyName) {
-	WIN32_FIND_DATA FindFileData;
-	LPWIN32_FIND_DATAA lpFindFileData;
-	HANDLE hFindFile;
 	CSTR oBuf;
 	int count;
 
 	//call function if wildcard is on directory
 	if (path.findStrPos("*/") != -1 || path.findStrPos("*\\") != -1 || path.right(1).isSame("*")) {
-		return CSTR(GetRandomFileOnDir(path, fOnlyName));
+		return GetRandomFileOnDir(path, fOnlyName);
 	}
 
+#ifdef _WIN32
+	WIN32_FIND_DATA FindFileData;
 	//count files for random
-	hFindFile = FindFirstFileA(path, (LPWIN32_FIND_DATAA)&FindFileData);
+	HANDLE hFindFile = FindFirstFileA(path, (LPWIN32_FIND_DATAA)&FindFileData);
 	if (hFindFile == (HANDLE)-1) return CSTR("ERROR");
 	
 	count = 0;
@@ -773,11 +793,21 @@ CSTR GetRandomFile(CSTR path, char fOnlyName) {
 		path.assign((char*)FindFileData.cFileName);
 		path.nullAtPos(path.findStrPos("."));
 	}
-	return CSTR(path);
+	return path;
+#else
+	// FIXME(linux): stub
+	path.replace("\\", "/");
+	return path;
+#endif // _WIN32
 }
 
 //43abe0
 CSTR GetRandomFileNoError(CSTR path, CSTR dir) {
+#ifndef _WIN32
+	// TODO(linux): check if needed
+	path.replace("\\" ,"/");
+	dir.replace("\\" ,"/");
+#endif // _WIN32
 	CSTR filepath;
 	filepath.assign(GetRandomFile(path, 0));
 	if (filepath.isDiff("ERROR")) return CSTR(filepath);
@@ -789,6 +819,10 @@ CSTR GetRandomFileNoError(CSTR path, CSTR dir) {
 
 //443550 _ need simplification
 void MD5byte(char **iStr, uint len, char *oByte){
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4554) // ignore >> precedence
+#endif
 	int iVar1;
 	int iVar2;
 	int iVar3;
@@ -819,9 +853,9 @@ void MD5byte(char **iStr, uint len, char *oByte){
 	uVar13 = iVar20 + 0x80 + len;
 	piVar12 = (int *)realloc(*iStr, uVar13);
 	*iStr = (char *)piVar12;
-	memset((undefined *)((int)piVar12 + len), 0, iVar21);
-	piVar16 = (int *)((int)piVar12 + iVar21 + len);
-	*(undefined *)((int)piVar12 + len) = 0x80;
+	memset((undefined *)((uintptr_t)piVar12 + len), 0, iVar21);
+	piVar16 = (int *)((uintptr_t)piVar12 + iVar21 + len);
+	*(undefined *)((uintptr_t)piVar12 + len) = 0x80;
 	*piVar16 = len * 8;
 	piVar16[1] = len >> 0x1d;
 	iVar20 = 0x67452301;
@@ -977,7 +1011,9 @@ void MD5byte(char **iStr, uint len, char *oByte){
 	*(int *)oByte = iVar20;
 	*(uint *)(oByte + 8) = uVar19;
 	*(uint *)(oByte + 0xc) = uVar17;
-	return;
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 }
 
 //443ff0

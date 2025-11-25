@@ -328,7 +328,7 @@ int ReadLR2SoundSet(game *g, CSTR filepath, char reFlag) {
 	if (g->audio.is_fmod_disabled == 0) FMOD_System_Update(g->audio.fmodSys);
 
 	CSTR path;
-	cstrSprintf(&path, "LR2files\\SkinCustomize\\%s.xml", MD5str(filepath));
+	cstrSprintf(&path, "LR2files/SkinCustomize/%s.xml", MD5str(filepath));
 	ReadSkinCustomize(&sku, path);
 	
 	CSTR dir(filepath.getDirectory());
@@ -417,6 +417,9 @@ int ReadLR2SoundSet(game *g, CSTR filepath, char reFlag) {
 				}
 			}
 
+#ifndef _WIN32 // TODO(linux): check if needed
+			csv.str[1].replace("\\" ,"/");
+#endif // _WIN32
 			if (fBuf.left(7).isSame("#SELECT") && !load_select) {
 				LoadSound(&g->audio, &g->audio.sysSound.select, GetRandomFileNoError(csv.str[1], dir), 1, g->config.sound.disabledsp, 0);
 				if (g->audio.sysSound.select.load) load_select = true;

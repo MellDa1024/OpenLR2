@@ -38,6 +38,7 @@ int AllocDrawingBuffer(DrawingBuf *drb){
 int ReallocDrawingBuffer(DrawingBuf *drb){
 	drb->max = drb->max + 1000;
 	drb->dstd = (DSTdraw *)realloc(drb->dstd, drb->max * 0x50);
+	assert(drb->dstd != nullptr);
 	if (drb->dstd == (DSTdraw *)0x0) {
 		ErrorLogAdd("描画用バッファのメモリ再取得に失敗しました。\n");
 		return -1;
@@ -458,7 +459,7 @@ int AddDrawingBuffer_Gauge(DrawingBuf *drb, SRCstruct *src, DSTstruct *dst, Time
 }
 
 //49d990
-int AddDrawingBuffer_BGA(DrawingBuf *drb, SRCstruct *src, DSTstruct *dst, Timer *T, int grHandle, char flag) {
+int AddDrawingBuffer_BGA(DrawingBuf *drb, SRCstruct */*src*/, DSTstruct *dst, Timer *T, int grHandle, char flag) {
 	DSTdraw tDstd;
 	int x, y;
 
@@ -731,8 +732,7 @@ int AddDrawingBuffer_Slider(DrawingBuf *drb, SRCstruct *src, DSTstruct *dst, Tim
 
 //49e550
 int AddDrawingBuffer_JudgeCombo(DrawingBuf *drb, SRCstruct *jSrc, DSTstruct *jDst, SRCstruct *cSrc, DSTstruct *cDst, Timer *T, int combo, int optX, int optY) {
-	DSTdraw tDstd;// , tDstd2;
-	int grh;
+	DSTdraw tDstd;
 	int digit;
 	float pos, posn;
 
@@ -1012,6 +1012,7 @@ void LRDrawText(int* grHandle, DSTdraw *dstd, CSTR *str, ImageFont *imF) {
 
 //49b7c0
 void LRDrawTextInput(int* hFont, DSTdraw *dstd, int* hInput, ImageFont *imgfont) {
+#ifdef _WIN32
 	IMEINPUTDATA* pIME;
 	CSTR buf(0x401);
 	int grLen;
@@ -1067,6 +1068,9 @@ void LRDrawTextInput(int* hFont, DSTdraw *dstd, int* hInput, ImageFont *imgfont)
 			LRDrawText(hFont, dstd, &buf, imgfont);
 		}
 	}
+#else
+	// FIXME(linux): stub
+#endif // _WIN32
 }
 
 //49bc50

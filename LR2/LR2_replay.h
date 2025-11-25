@@ -10,7 +10,7 @@ int LoadReplayFile(REPLAY * rp, CSTR songMD5, CSTR localID);
 int SaveReplay(REPLAY * rp, CSTR songMD5, CSTR localID);
 
 //write replay
-int AddReplayData(REPLAY * rp, int timing, char op, short value);
+int AddReplayData(REPLAY * rp, int timing, uchar op, short value);
 int AddReplayDataHeader(CONFIG_PLAY * cfg, REPLAY * rp, AUDIO * snd, gameplay * gp);
 int InputToReplay(REPLAY * rp, inputStructure * is, int timing, int scratchSide);
 

@@ -1,10 +1,20 @@
-﻿#pragma comment(lib,"vfw32.lib")
-#include "En_recordmovie.h"
-#include "DxLib/DxLib.h"
+﻿#include "En_recordmovie.h"
+
+#include <cstring>
+
+#include "structure.h"
+
+#include <DxLib/DxLib.h>
+
+#ifdef _WIN32
+#pragma comment(lib,"vfw32.lib")
+ #include <windows.h>
+ #include <vfw.h>
+#endif
 
 //4bf4f0
 RECORDING::RECORDING() {
-	memset(this, 0, sizeof(RECORDING));
+	memset(this, 0, sizeof(RECORDING)); // FIXME: bad memset
 }
 
 //4bf510
@@ -20,15 +30,19 @@ int RECORDING::GetCurTime() {
 
 //4bf540
 int RECORDING::CpyScreenToAVI() {
+#ifdef _WIN32
 	this->srcHDC = GetDC(this->hwnd);
 	BitBlt(this->dstHDC, 0, 0, this->bmiHeader.biWidth, this->bmiHeader.biHeight, this->srcHDC, 0, 0, SRCCOPY);
 	ReleaseDC(this->hwnd, this->srcHDC);
 	return AVIStreamWrite(this->pAVIstream, this->writeSamplePos++, 1, this->buf, this->bmiHeader.biSizeImage, AVIIF_KEYFRAME, 0, 0); //watch out that ++
+#else
+	return {};
+#endif // _WIN32
 }
 
 //4bf5b0
 bool RECORDING::Release() {
-	
+#ifdef _WIN32
 	if (this->compvars.hic) {
 		ICCompressorFree(&this->compvars);
 		this->compvars.hic = NULL;
@@ -44,10 +58,14 @@ bool RECORDING::Release() {
 		this->pAVIFILE = NULL;
 	}
 	return true;
+#else
+	return {};
+#endif // _WIN32
 }
 
+#ifdef _WIN32
 //4bf610
-int REC_CpyAVIStreamToFile(PAVIFILE pfile, PAVISTREAM pavi, int unused) {
+static int REC_CpyAVIStreamToFile(PAVIFILE pfile, PAVISTREAM pavi, int /*unused*/) {
 
 	unsigned int lpos;
 	AVISTREAMINFOA si;
@@ -77,8 +95,9 @@ int REC_CpyAVIStreamToFile(PAVIFILE pfile, PAVISTREAM pavi, int unused) {
 		for (; lpos <= totalLength; lpos += samples) {
 			if (!(AVIStreamRead(pavi, lpos, -1, NULL, 0, &sz, &samples) == 0 && sz > 0 && samples > 0)) break;
 			if (AVIStreamRead(pavi, lpos, 4096, NULL, 0, &sz, &samples) != 0) break;
-			lpFormat = realloc(lpFormat, sz);
-			if (lpFormat == NULL) break;
+			auto* format = realloc(lpFormat, sz);
+			if (format == nullptr) break;
+			lpFormat = format;
 			if (AVIStreamRead(pavi, lpos, samples, lpFormat, sz, &sz, &samples) != 0) break;
 			if (AVIStreamWrite(pNewavi, lpos, samples, lpFormat, sz, 0, NULL, NULL) != 0) break;
 		}
@@ -90,7 +109,7 @@ int REC_CpyAVIStreamToFile(PAVIFILE pfile, PAVISTREAM pavi, int unused) {
 }
 
 //4bf7f0
-int CreateStream(CSTR filename, int framerate, COMPVARS *compvars, BITMAPINFOHEADER* lpbmi, PAVIFILE* pAVIFILE, PAVISTREAM* pAVIstream) {
+static int CreateStream(CSTR filename, int framerate, COMPVARS *compvars, BITMAPINFOHEADER* lpbmi, PAVIFILE* pAVIFILE, PAVISTREAM* pAVIstream) {
 
 	IAVIFile* pFile;
 	AVISTREAMINFOA si;
@@ -139,10 +158,11 @@ int CreateStream(CSTR filename, int framerate, COMPVARS *compvars, BITMAPINFOHEA
 	AVIStreamRelease(pavi);
 	return 1;
 }
+#endif // _WIN32
 
 //4bfa10
 bool RECORDING::PrepareAVIRecord(double framerate, int bit, CSTR filename, uint frameLen, HWND hwnd) {
-	
+#ifdef _WIN32
 	tagRECT cRect;
 
 	this->framerate = framerate;
@@ -153,7 +173,7 @@ bool RECORDING::PrepareAVIRecord(double framerate, int bit, CSTR filename, uint 
 	this->curFrame = 0;
 
 	remove(filename);
-	CSTR dat("LR2files\\Config\\compvars.dat");
+	CSTR dat("LR2files/Config/compvars.dat");
 
 	if (dat.canOpenFile()) {
 		FILE* pFile = fopen(dat, "rb");
@@ -166,7 +186,7 @@ bool RECORDING::PrepareAVIRecord(double framerate, int bit, CSTR filename, uint 
 		memset(&this->compvars, 0, sizeof(COMPVARS));
 		this->compvars.cbSize = 64;
 		if (ICCompressorChoose(NULL,0,NULL,NULL,&this->compvars,NULL) == 0) return false;
-		FILE *pFile = fopen("LR2files\\Config\\compvars.dat", "wb");
+		FILE *pFile = fopen("LR2files/Config/compvars.dat", "wb");
 		fwrite(&this->compvars, sizeof(COMPVARS), 1, pFile);
 		fclose(pFile);
 		MessageBoxA(NULL, "圧縮設定が保存されました。\n設定の変更はJUKEBOXタブ→詳細設定→動画圧縮設定で行えます。", "報告", 0);
@@ -199,11 +219,14 @@ bool RECORDING::PrepareAVIRecord(double framerate, int bit, CSTR filename, uint 
 	this->hBIT = CreateDIBSection(NULL, (BITMAPINFO*)&this->bmiHeader, 0, &this->buf, NULL, 0); //it needs bitmapInfo(44bytes), not bitmapInfoHeader(40bytes)
 	this->hGDI = SelectObject(this->dstHDC, this->hBIT);
 	return 1;
+#else
+	return {};
+#endif // _WIN32
 }
 
+#ifdef _WIN32
 //4bfcb0
 int RECORDING::InsertAudioToMovie(CSTR pathAudio, bool deleteFlag) {
-
 	CSTR path(pathAudio);
 	bool isMp3 = path.lower().right(3).isSame("mp3");
 
@@ -239,9 +262,10 @@ int RECORDING::InsertAudioToMovie(CSTR pathAudio, bool deleteFlag) {
 
 	return 1;
 }
+#endif // _WIN32
 
 //4bfec0
-int REC_COPYFILE(FILE *oFile, FILE *iFile, uint size){
+static int REC_COPYFILE(FILE *oFile, FILE *iFile, uint size){
 	void *buf;
 	uint bufSize;
 	uint _Count;

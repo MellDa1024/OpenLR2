@@ -7,6 +7,8 @@
 #include "LR2_statplay.h"
 #include "Scenes.h"
 
+#include <DxLib/DxLib.h>
+
 //40e790 // _mRet __mRet : return ret, ret : return !ret
 bool GetOptionFlag_dst(game *gs, int option) {
 	int t = 0;
@@ -2676,7 +2678,11 @@ int Proc_Text(game *g, sqlite3 *sql, char flag) {
 	}
 
 	if ( (g->KeyInput.mouse_buttonL == 3) || (g->KeyInput.mouse_buttonR == 3) ) {
+#ifdef WIN32
 		DeleteKeyInput(g->txtStruct.hKeyInput);
+#else
+		// FIXME(linux): stub
+#endif // WIN32
 		g->txtStruct.st_text_num = -1;
 	}
 
@@ -2688,6 +2694,7 @@ int Proc_Text(game *g, sqlite3 *sql, char flag) {
 				&& MouseOnObject(&g->skstruct.otherObject[0].dst[i], &g->timer1, &g->KeyInput.mouse_oldX, &g->KeyInput.mouse_oldY)) {
 				g->sSelect.is_mouseOnTextInput = 1;
 				if (g->KeyInput.mouse_buttonL == 3) {
+#ifdef WIN32
 					InitKeyInput();
 
 					int st = g->skstruct.otherObject[0].src[i].st;
@@ -2715,6 +2722,9 @@ int Proc_Text(game *g, sqlite3 *sql, char flag) {
 					if (g->txtStruct.st_text_num != 30) {
 						SetKeyInputString(GetStringFromArray(g->txtStruct.st_text_num, g->txtStruct.objectStr), g->txtStruct.hKeyInput);
 					}
+#else
+					// FIXME(linux): stub
+#endif // WIN32
 				}
 			}
 			AddDrawingBuffer_Text(&g->skstruct.drBuf, &g->skstruct.otherObject[0].src[i], &g->skstruct.otherObject[0].dst[i], &g->timer1);
@@ -2725,6 +2735,7 @@ int Proc_Text(game *g, sqlite3 *sql, char flag) {
 	if (g->txtStruct.st_text_num != -1) {
 		g->sSelect.is_mouseOnTextInput = 1;
 
+#ifdef _WIN32
 		if (CheckKeyInput(g->txtStruct.hKeyInput) >= 1 && flag == 0) {
 			//CheckKeyInput() 0:doing 1:done 2:cancle -1:error
 			if (CheckKeyInput(g->txtStruct.hKeyInput) == 1) {
@@ -2796,7 +2807,6 @@ int Proc_Text(game *g, sqlite3 *sql, char flag) {
 					g->sSelect.is_coursemaking_done = 1;
 					break;
 				case 27:
-					atol(buf);
 					if ((0 <= atol(buf) && atol(buf) < 100) || (g->sSelect.bmsList[g->sSelect.cur_song].keymode == 0)) {
 						SetObjectString(g->txtStruct.st_text_num - 10, buf, g->txtStruct.objectStr);
 						SetObjectString(g->txtStruct.st_text_num, buf, g->txtStruct.objectStr);
@@ -2897,6 +2907,9 @@ int Proc_Text(game *g, sqlite3 *sql, char flag) {
 			g->txtStruct.st_text_num = -1;
 			SetTimeLapse(4, &g->timer1);
 		}
+#else
+					// FIXME(linux): stub
+#endif // WIN32
 	}
 
 	g->KeyInput.mouse_buttonL = mouseL;
@@ -3583,13 +3596,13 @@ int SetObjectValue_Button(game *g, skstruct *sk, Timer *T, char flag) {
 					g->KeyInput.config_key = -1;
 					switch (g->KeyInput.config_keymode) {
 						case 0:
-							ReadKeyConfig(g, "LR2files\\Config\\keyconfig.xml");
+							ReadKeyConfig(g, "LR2files/Config/keyconfig.xml");
 							break;
 						case 1:
-							ReadKeyConfig(g, "LR2files\\Config\\keyconfig_p.xml");
+							ReadKeyConfig(g, "LR2files/Config/keyconfig_p.xml");
 							break;
 						case 2:
-							ReadKeyConfig(g, "LR2files\\Config\\keyconfig_5.xml");
+							ReadKeyConfig(g, "LR2files/Config/keyconfig_5.xml");
 							break;
 					}
 					ProcS_Keyconfig(g);
@@ -3650,7 +3663,7 @@ int SetObjectValue_Button(game *g, skstruct *sk, Timer *T, char flag) {
 					g->skinData.previewCustomID = 0;
 					CSTR tcstr;
 					SkinUser sku;
-					cstrSprintf(&tcstr, "LR2files\\SkinCustomize\\%s.xml", MD5str(g->skinData.Data[g->skinData.previewID].skinFile));
+					cstrSprintf(&tcstr, "LR2files/SkinCustomize/%s.xml", MD5str(g->skinData.Data[g->skinData.previewID].skinFile));
 					ReadSkinCustomize(&sku, tcstr);
 
 					for (int j = 0; j < 100; j++) { // VULNERABILITY : out of index sku (array size 40, but access to 100)
@@ -3709,7 +3722,7 @@ int SetObjectValue_Button(game *g, skstruct *sk, Timer *T, char flag) {
 					g->skinData.previewCustomID = 0;
 					CSTR tcstr;
 					SkinUser sku;
-					cstrSprintf(&tcstr, "LR2files\\SkinCustomize\\%s.xml", MD5str(g->skinData.Data[g->skinData.previewID].skinFile));
+					cstrSprintf(&tcstr, "LR2files/SkinCustomize/%s.xml", MD5str(g->skinData.Data[g->skinData.previewID].skinFile));
 					ReadSkinCustomize(&sku, tcstr);
 
 					for (int j = 0; j < 100; j++) { // VULNERABILITY : out of index sku (array size 40, but access to 100)
@@ -3804,7 +3817,7 @@ int SetObjectValue_Button(game *g, skstruct *sk, Timer *T, char flag) {
 
 					CSTR tcstr;
 					SkinUser sku;
-					cstrSprintf(&tcstr, "LR2files\\SkinCustomize\\%s.xml", MD5str(g->skinData.Data[g->skinData.previewID].skinFile));
+					cstrSprintf(&tcstr, "LR2files/SkinCustomize/%s.xml", MD5str(g->skinData.Data[g->skinData.previewID].skinFile));
 					ReadSkinCustomize(&sku, tcstr);
 
 					for (int j = 0; j < 100; j++) { // VULNERABILITY : out of index sku (array size 40, but access to 100)
@@ -4038,19 +4051,15 @@ int MouseOnDSTD(DSTdraw *dstd, int *x, int *y){ //1 right 2 left
 
 //49c070
 int MouseOnObject(DSTstruct *dst, Timer *T, int *x, int *y){
-	DSTdraw _dstd;
-	DSTdraw local_a0;
-	double time;
+	double time = GetTimeLapse(dst->timer, T);
 	DSTstruct _dst;
-
-	time = GetTimeLapse(dst->timer, T);
 	memcpy(&_dst, dst, sizeof(DSTstruct));
-	_dstd = SetDSTdrawByTime(_dst, time);
+	DSTdraw _dstd = SetDSTdrawByTime(_dst, time);
 	return MouseOnDSTD(&_dstd, x, y);
 }
 
 //49c0e0 maybe done
-int SliderByTime(DrawingBuf *drb, SRCstruct *src, DSTstruct *dst, Timer *T, int min, int max, int *value, inputStructure *input, int objectID) {
+int SliderByTime(DrawingBuf */*drb*/, SRCstruct *src, DSTstruct *dst, Timer *T, int min, int max, int *value, inputStructure *input, int objectID) {
 	DSTdraw dstdTemp;
 	DSTstruct dstsTemp;
 	int newVal, newX=0, newY=0;
@@ -4151,7 +4160,7 @@ int SliderByTime(DrawingBuf *drb, SRCstruct *src, DSTstruct *dst, Timer *T, int 
 }
 
 //49c560
-int ButtonByInput(DrawingBuf *drb, SRCstruct *src, DSTstruct *dst, Timer *T, inputStructure *input, int *target, int min, int max, int panel) { //return 1:just clicked 2:changed 0:not changed
+int ButtonByInput(DrawingBuf */*drb*/, SRCstruct *src, DSTstruct *dst, Timer *T, inputStructure *input, int *target, int min, int max, int panel) { //return 1:just clicked 2:changed 0:not changed
 	DSTdraw dstd;
 	int mouse, ret;
 	

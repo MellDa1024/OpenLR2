@@ -6,9 +6,17 @@
 #define pi2 6.2831853
 #define pi_half 1.570796
 
-#include <process.h> //beginthread
 #include "Engine.h"
 #include "LR2.h"
+
+#ifndef _WIN32
+#include <iostream>
+#define GetMainWindowHandle() nullptr
+static void MessageBoxA(const char*,const char* title,const char*desc,const char*)
+{
+	std::cout << "\n" << title << "\n\n" << desc << "\n" << std::flush;
+}
+#endif // _WIN32
 
 static int PerformGAS(gameplay& gameplay, int playerIdx, CONFIG_PLAY& cfg) {
 	PLAYERSTATUS& player = gameplay.player[playerIdx];
@@ -276,7 +284,6 @@ int ApplyJudgeMine(int judge, game *g, int _player, int lane, int damage) {
 int DrawNotes(game *g, skstruct *sk, Timer *T, CONFIG_PLAY *cfg) {
 	//TODO : refactor, test maniac mode
 	DSTdraw tDdraw;
-	int key;
 
 	SoundGetCurrentTime(&g->audio, &g->gameplay.muon);
 	NONE_004b6770();
@@ -381,6 +388,7 @@ int DrawNotes(game *g, skstruct *sk, Timer *T, CONFIG_PLAY *cfg) {
 			speed = cfg->hiSpeed[1];
 		}
 		
+		if (sk->dst_LINE[0].draw == nullptr) break; // Empty skin
 		if ((sk->horizontal == 0 && sk->dst_LINE[0].draw->y + (songtimer - g->gameplay.bmsobj_line.notes[i].bmsTiming)* speed * g->gameplay.speedmultiplier * (cfg->basespeed / 100.0) / 600.0 > drawStartHeight)
 			|| (sk->horizontal == 1 && (g->gameplay.bmsobj_line.notes[i].bmsTiming - songtimer)* speed * g->gameplay.speedmultiplier * (cfg->basespeed / 100.0) / 640.0 > drawStartHeight)) { 
 						
@@ -1656,7 +1664,7 @@ void ProcGameThread(game *g) {
 	g->gameplay.flag_closingPhase = 0;
 	
 	while (g->procPhase == 0 || GetTimeLapse(0,&g->timer1) < g->skstruct.loadstart) {
-		Sleep(16);
+		std::this_thread::sleep_for(std::chrono::milliseconds(16));
 		if (g->gameplay.flag_closingPhase) {
 			g->gameplay.flag_threadExist = 0;
 			break;
@@ -1671,7 +1679,7 @@ void ProcGameThread(game *g) {
 	}
 
 	while (GetTimeLapse(0, &g->timer1) < g->skstruct.loadstart + g->skstruct.loadend || g->gameplay.bmsResourceLoaded == 0) {
-		Sleep(16);
+		std::this_thread::sleep_for(std::chrono::milliseconds(16));
 		if (g->gameplay.flag_closingPhase) {
 			g->gameplay.flag_threadExist = 0;
 			break;
@@ -1684,7 +1692,7 @@ void ProcGameThread(game *g) {
 		|| g->KeyInput.inputID[2] || g->KeyInput.inputID[3] || g->KeyInput.inputID[4] || g->KeyInput.inputID[5] || g->KeyInput.inputID[6] || g->KeyInput.inputID[7] || g->KeyInput.inputID[8] || g->KeyInput.inputID[9]	|| g->KeyInput.inputID[11] 
 		|| g->KeyInput.p1_buttonInput[12] || g->KeyInput.p1_buttonInput[13] || g->KeyInput.p2_buttonInput[12] || g->KeyInput.p2_buttonInput[13]) {
 
-		Sleep(16);
+		std::this_thread::sleep_for(std::chrono::milliseconds(16));
 		ReactInput(g);
 		if (g->gameplay.flag_closingPhase) {
 			g->gameplay.flag_threadExist = 0;

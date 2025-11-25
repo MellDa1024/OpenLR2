@@ -1,5 +1,26 @@
-#pragma once
 #include "strclass.h"
+
+#include <cstring>
+#include <span>
+#include <string>
+#include <string_view>
+#include <cstdarg>
+#include <cctype>
+
+typedef unsigned char byte;
+
+#ifndef _WIN32
+
+#include <malloc.h>
+#include <strings.h>
+static unsigned long long _msize(void* ptr) {
+	return malloc_usable_size(ptr);
+}
+static int _stricmp(const char* s1, const char* s2) {
+	return strcasecmp(s1,s2);
+}
+
+#endif // _WIN32
 
 //43ad60
 CSTR::CSTR(int size) {
@@ -21,7 +42,6 @@ int CSTR::length() {
 
 //43adb0
 DWORD CSTR::CRC32() {
-	char cVar1;
 	char *pcVar2;
 	int pcVar3;
 	unsigned int uVar4;
@@ -109,7 +129,6 @@ bool CSTR::resize(size_t size) {
 CSTR& CSTR::add(const char *str, int len) {
 	int size;
 	int size2;
-	char ch;
 
 	if (len == 0) {
 		len = strlen(str);
@@ -207,50 +226,6 @@ uint CSTR::checkValidPos(int *pos, int *len) {
 	return 0;
 }
 
-//43afc0
-CSTR& CSTR::replace(int pos, int len1, const char *str2, int len2) {
-	char *_Src;
-	int iVar1;
-	char cVar2;
-	int _Size;
-	bool bVar3;
-	uint uVar4;
-	size_t sVar5;
-	char *pcVar6;
-
-	uVar4 = checkValidPos(&pos, &len1);
-	if (uVar4 != 0) {
-		/*if (body == NULL) {
-			sVar5 = 0;
-		}
-		else {
-			sVar5 = _msize(body);
-		}*/
-		sVar5 = msize();
-		_Size = len2;
-		iVar1 = (uVar4 - len1) + 1 + len2;
-		if ((iVar1 <= (int)sVar5) || (bVar3 = resize(iVar1), bVar3 != false)) {
-			iVar1 = pos;
-			_Src = body + pos + len1;
-
-			/*len1 = (int)(_Src + 1);
-			pcVar6 = _Src;
-			do {
-				cVar2 = *pcVar6;
-				pcVar6 = pcVar6 + 1;
-			} while (cVar2 != '\0');
-
-			memmove(body + pos + _Size, _Src, (size_t)(pcVar6 + (1 - len1)));
-			memmove(body + iVar1, str2, _Size);*/
-
-			memmove(body + pos + _Size, _Src, strlen(_Src) + 1);
-			memmove(body + iVar1, str2, _Size);
-		}
-	}
-	return *this;
-}
-
-#include <string>
 inline void replace_all(std::string& str, std::string_view from, std::string_view to)
 {
 	for (size_t pos = str.find(from); pos != std::string::npos;)
@@ -262,33 +237,6 @@ inline void replace_all(std::string& str, std::string_view from, std::string_vie
 
 //43b060
 CSTR& CSTR::replace(const char *str1, const char *str2) {
-	//char cVar1;
-	//char *pcVar2;
-	//char *pcVar3;
-	//char *_Str1;
-	//int iVar4;
-	//int len1;
-	//int len2;
-
-	//if (body != NULL) {
-	//	/*pcVar2 = str1;
-	//	do {
-	//		cVar1 = *pcVar2;
-	//		pcVar2 = pcVar2 + 1;
-	//	} while (cVar1 != '\0');*/
-	//	len1 = strlen(str1);
-	//	/*pcVar3 = str2;
-	//	do {
-	//		cVar1 = *pcVar3;
-	//		pcVar3 = pcVar3 + 1;
-	//	} while (cVar1 != '\0');*/
-	//	len2 = strlen(str2);
-	//	_Str1 = strchr(body, (int)*str1);
-	//	while (_Str1 != NULL && !strncmp(_Str1, str1, len1)) {
-	//		replace((int)(_Str1 + -(int)body), len1, str2, len2);
-	//		_Str1 = strchr(_Str1 + len2, (int)*str1);
-	//	}
-	//}
 	std::string string = this->body;
 	replace_all(string, str1, str2);
 	this->assign(string.c_str());
@@ -297,8 +245,6 @@ CSTR& CSTR::replace(const char *str1, const char *str2) {
 
 //43b100
 void CSTR::resize2(int size) {
-	char *pcVar1;
-
 	if (size != 0) {
 		if (body != NULL) {
 			body = (char *)realloc(body, size);
@@ -344,7 +290,9 @@ char* CSTR::writeAtPos(int pos, char ch) {
 //43b1d0
 CSTR& CSTR::upper() {
 	if (body) {
-		_strupr(body);
+		for (auto& c : std::span{body, strlen(body)}) {
+			c = std::toupper(c);
+		}
 	}
 	return *this;
 }
@@ -352,7 +300,9 @@ CSTR& CSTR::upper() {
 //43b1f0
 CSTR& CSTR::lower() {
 	if (body) {
-		_strlwr(body);
+		for (auto& c : std::span{body, strlen(body)}) {
+			c = std::tolower(c);
+		}
 	}
 	return *this;
 }
@@ -365,52 +315,37 @@ CSTR& CSTR::nullAtPos(int pos) {
 
 //43b230
 int CSTR::lastSpaceCount() {
-	char cVar1;
-	char *pStr;
 	int len;
-	char *pcVar2;
-	char *pBody;
-
-	pBody = body;
-	if (pBody == (char *)0x0) {
+	if (body == nullptr) {
 		len = 0;
 	}
 	else {
-		/*pStr = pBody;
-		do {
-			cVar1 = *pStr;
-			pStr = pStr + 1;
-		} while (cVar1 != '\0');
-		len = (int)(pStr + -(int)(pBody + 1));*/
-		len = strlen(pBody);
+		len = strlen(body);
 	}
-	if (pBody && len) {
-		for (pcVar2 = pBody + len - 1; ((pBody <= pcVar2 && (*pcVar2 == ' ')) || (*pcVar2 == '\t')); pcVar2--) {
+	if (body && len) {
+		char* pcVar2;
+		for (pcVar2 = body + len - 1; ((body <= pcVar2 && (*pcVar2 == ' ')) || (*pcVar2 == '\t')); pcVar2--) {
 
 		}
-		return (int)pBody - (int)pcVar2 + len - 1;
+		return body - pcVar2 + len - 1;
 	}
 	return 0;
 }
 
 //43b280
 int CSTR::findStrPos(const char *str) {
-	char *pcVar1;
 	if (body) {
-		pcVar1 = strstr(body, str);
-		if (pcVar1) {
-			return (int)(pcVar1 - (int)body);
+		if (char *chrPos = strstr(body, str); chrPos) {
+			return static_cast<int>(chrPos - body);
 		}
 	}
 	return -1;
 }
 
 int CSTR::findChrBackPos(const char ch) {
-	char* chrPos;
 	if (body) {
-		chrPos = strrchr(body, ch);
-		if (chrPos) {
-			return (int)(chrPos - (int)body);
+		if (char* chrPos = strrchr(body, ch); chrPos) {
+			return static_cast<int>(chrPos - body);
 		}
 	}
 	return -1;
@@ -442,7 +377,7 @@ char * cstrSprintf(CSTR *str, const char *format, ...) {
 	do {
 		_Size = bSize + 0x80;
 		va_start(ap, format);
-		iVar1 = _vsnprintf(str->body, bSize - 1, format, ap);
+		iVar1 = vsnprintf(str->body, bSize - 1, format, ap);
 		va_end(ap);
 		if (-1 < iVar1) {
 			return (char *)str;
@@ -461,7 +396,6 @@ char * cstrSprintf(CSTR *str, const char *format, ...) {
 
 //43b330
 int CSTR::toFile(const char *filepath) {
-	char cVar1;
 	char *_Str;
 	FILE *_File;
 	char *pcVar2;
@@ -576,8 +510,6 @@ CSTR::CSTR() {
 //43b650 copy construct
 CSTR::CSTR(const CSTR &str, int len) {
 	char *pStr;
-	char ch;
-	char *cur;
 
 	pStr = str.body;
 	if (pStr == NULL) {
@@ -599,9 +531,6 @@ CSTR::CSTR(const CSTR &str, int len) {
 
 //43b6c0
 CSTR::CSTR(const char *str, int len) {
-	char *pStr;
-	char ch;
-
 	if (str == NULL) {
 		this->body = NULL;
 		this->body = (char *)calloc(1, 0x40);
@@ -609,12 +538,6 @@ CSTR::CSTR(const char *str, int len) {
 	}
 
 	if (len == 0) {
-		/*pStr = str;
-		do {
-			ch = *pStr;
-			pStr = pStr + 1;
-		} while (ch != '\0');
-		len = (int)(pStr + -(int)(str + 1));*/
 		len = strlen(str);
 	}
 	else if (len < 0) {
@@ -643,16 +566,14 @@ CSTR CSTR::makeCRCstr() {
 	sprintf(local_4, "%x", dVar2);
 	str = local_4;
 	if (local_4 == NULL) {
-		pcVar3 = (int)calloc(1, 0x40);
-		ret = (char*)pcVar3;
-		return ret;
+		return (char*)calloc(1, 0x40);
 	}
 	CVar4 = local_4;
 	do {
 		cVar1 = *CVar4;
 		CVar4 = CVar4 + 1;
 	} while (cVar1 != '\0');
-	pcVar3 = (int)CVar4 - (int)(local_4 + 1);
+	pcVar3 = CVar4 - (local_4 + 1);
 	pstr = (char *)calloc(1, (size_t)(pcVar3 + 1));
 	ret = pstr;
 	if (pstr != (char *)0x0) {
@@ -664,33 +585,25 @@ CSTR CSTR::makeCRCstr() {
 
 //43b7e0
 CSTR& CSTR::assign(const char *str, int len) {
-	char cVar1;
-	bool bVar2;
-	size_t sVar3;
-	char *pcVar4;
-
 	if (str == NULL) {
 		fillzero();
 		return *this;
 	}
-	else {
-		if (len == 0) {
-			len = strlen(str);
-		}
+	if (len == 0) {
+		len = strlen(str);
+	}
+	size_t sVar3 = msize();
+	if ((len + 1 <= (int)sVar3) || resize(len + 1) != false) {
 		sVar3 = msize();
-
-		if (((int)(char *)(len + 1) <= (int)sVar3) || resize(len + 1) != false) {
-			sVar3 = msize();
-			memset(this->body, 0, sVar3);
-			strncpy(this->body, str, len);
-		}
+		memset(this->body, 0, sVar3);
+		strncpy(this->body, str, len);
 	}
 	return *this;
 }
 
 //43b890
 int CSTR::icmp(CSTR *param_1) {
-	if (body != (char *)0x0) {
+	if (body != nullptr) {
 		return _stricmp(body, param_1->body);
 	}
 	return 0;
@@ -698,159 +611,11 @@ int CSTR::icmp(CSTR *param_1) {
 
 //43b8b0
 CSTR CSTR::left(int len) {
-	//char cVar1;
-	//CSTR *pCVar2;
-	//char *pcVar3;
-	//int pcVar4;
-	//char *pstr;
-	//CSTR ret;
-
-	//pCVar2 = new CSTR(body, len);
-	//pcVar3 = pCVar2->body;
-	//if (pcVar3 == (char *)0x0) {
-	//	pcVar3 = (char *)calloc(1, 0x40);
-	//	ret.body = pcVar3;
-	//}
-	//else {
-	//	/*pcVar4 = pcVar3;
-	//	do {
-	//		cVar1 = *pcVar4;
-	//		pcVar4 = pcVar4 + 1;
-	//	} while (cVar1 != '\0');*/
-	//	pcVar4 = strlen(pcVar3);
-	//	pstr = (char *)calloc(1, (size_t)(pcVar4 + 1));
-	//	ret.body = pstr;
-	//	if (pstr != (char *)0x0) {
-	//		strncpy(pstr, pcVar3, pcVar4);
-	//	}
-	//}
-	//delete(pCVar2);
-
-	//return (ret);
-
 	return CSTR(body, len);
 }
 
 //43b940
 CSTR CSTR::right(int len) {
-	//char cVar1;
-	//int bodylen;
-	//char *pcVar2;
-	//CSTR *pCVar3;
-	//char *pStr1;
-	//char *pcVar4;
-	//CSTR ret;
-
-	//if (-1 < len) {
-	//	/*pStr1 = this->body;
-	//	if (pStr1 == (char *)0x0) {
-	//		pcVar2 = (char *)0x0;
-	//	}
-	//	else {
-	//		pcVar2 = pStr1;
-	//		do {
-	//			cVar1 = *pcVar2;
-	//			pcVar2 = pcVar2 + 1;
-	//		} while (cVar1 != '\0');
-	//		pcVar2 = pcVar2 + -(int)(pStr1 + 1);
-	//	}*/
-	//	bodylen = length();
-	//	if (len <= bodylen) {
-	//		/*if (pStr1 == (char *)0x0) {
-	//			pcVar2 = (char *)0x0;
-	//		}
-	//		else {
-	//			pcVar2 = pStr1;
-	//			do {
-	//				cVar1 = *pcVar2;
-	//				pcVar2 = pcVar2 + 1;
-	//			} while (cVar1 != '\0');
-	//			pcVar2 = pcVar2 + -(int)(pStr1 + 1);
-	//		}*/
-	//		pCVar3 = new CSTR(body - len + length(), len);
-	//		pStr1 = pCVar3->body;
-	//		if (pStr1 == (char *)0x0) {
-	//			pStr1 = (char *)calloc(1, 0x40);
-	//			ret.body = pStr1;
-	//		}
-	//		else {
-	//			/*pcVar2 = pStr1;
-	//			do {
-	//				cVar1 = *pcVar2;
-	//				pcVar2 = pcVar2 + 1;
-	//			} while (cVar1 != '\0');
-	//			pcVar4 = (char *)calloc(1, (size_t)(pcVar2 + -(int)(pStr1 + 1) + 1));
-	//			obuf->body = pcVar4;
-	//			if (pcVar4 != (char *)0x0) {
-	//				strncpy(pcVar4, pStr1, pcVar2 + -(int)(pStr1 + 1));
-	//			}*/
-	//			pcVar4 = (char *)calloc(1, (size_t)(pCVar3->length() + 1));
-	//			ret.body = pcVar4;
-	//			if (pcVar4 != (char *)0x0) {
-	//				strncpy(pcVar4, pStr1, pCVar3->length());
-	//			}
-	//		}
-
-	//		/*if (pCVar3 == NULL) {
-	//			return obuf;
-	//		}*/
-	//		delete(pCVar3);
-	//		return (ret);
-	//	}
-	//}
-	//pStr1 = this->body;
-	//if (pStr1 == (char *)0x0) {
-	//	pcVar4 = (char *)calloc(1, 0x40);
-	//}
-	//else {
-	//	//pcVar2 = pStr1;
-	//	//do {
-	//	//	cVar1 = *pcVar2;
-	//	//	pcVar2 = pcVar2 + 1;
-	//	//} while (cVar1 != '\0');
-	//	//pcVar4 = (char *)calloc(1, (size_t)(pcVar2 + -(int)(pStr1 + 1) + 1));
-	//	//if (pcVar4 == (char *)0x0) {
-	//	//	pStr1 = (char *)_calloc(1, 0x40);
-	//	//	obuf->body = pStr1;
-	//	//	return obuf;
-	//	//}
-	//	//strncpy(pcVar4, pStr1, pcVar2 + -(int)(pStr1 + 1));
-	//	pcVar4 = (char *)calloc(1, length() + 1);
-	//	if (pcVar4 == (char *)0x0) {
-	//		pStr1 = (char *)calloc(1, 0x40);
-	//		ret.body = pStr1;
-	//		return (ret);
-	//	}
-	//	strncpy(pcVar4, pStr1, length());
-	//}
-
-	//if (pcVar4 != (char *)0x0) {
-	//	/*pStr1 = pcVar4;
-	//	do {
-	//		cVar1 = *pStr1;
-	//		pStr1 = pStr1 + 1;
-	//	} while (cVar1 != '\0');
-	//	pcVar2 = (char *)calloc(1, (size_t)(pStr1 + -(int)(pcVar4 + 1) + 1));
-	//	obuf->body = pcVar2;
-	//	if (pcVar2 != (char *)0x0) {
-	//		strncpy(pcVar2, pcVar4, pStr1 + -(int)(pcVar4 + 1));
-	//	}
-	//	free(pcVar4);
-	//	return obuf;*/
-	//	pcVar2 = (char *)calloc(1, strlen(pcVar4) + 1);
-	//	ret.body = pcVar2;
-	//	if (pcVar2 != (char *)0x0) {
-	//		strncpy(pcVar2, pcVar4, strlen(pcVar4));
-	//	}
-	//	free(pcVar4);
-	//	return (ret);
-	//}
-	///*pStr1 = (char *)_calloc(1, 0x40);
-	//obuf->body = pStr1;*/
-	//ret = CSTR();
-	//return (ret);
-
-	
 	if (len > -1 && length() >= len) {
 		return CSTR(body - len + length(), len);
 	}
@@ -859,112 +624,11 @@ CSTR CSTR::right(int len) {
 
 //43bac0
 CSTR CSTR::getSliced(int pos, int len) {
-	/*CSTR oBuf;
-	char cVar1;
-	uint uVar2;
-	char *pcVar3;
-	char *pcVar4;
-	char *pcVar5;
-
-	uVar2 = checkValidPos(&pos, &len);
-	if (uVar2) {
-		CSTR pCVar6 = CSTR(body + pos, len);
-		pcVar3 = pCVar6.body;
-		if (pcVar3 == (char *)0x0) {
-			pcVar3 = (char *)calloc(1, 0x40);
-			oBuf.body = pcVar3;
-		}
-		else {
-			pcVar5 = (char *)calloc(1, (size_t)(pCVar6.length() + 1));
-			oBuf.body = pcVar5;
-			if (pcVar5 != (char *)0x0) {
-				strncpy(pcVar5, pcVar3, pCVar6.length());
-			}
-		}
-		return oBuf;
-	}
-	pcVar3 = (char *)calloc(1, 1);
-	if (pcVar3 != (char *)0x0) {
-		strncpy(pcVar3, "", 0);
-		pcVar4 = pcVar3;
-		do {
-			cVar1 = *pcVar4;
-			pcVar4 = pcVar4 + 1;
-		} while (cVar1 != '\0');
-
-		pcVar5 = (char *)calloc(1, strlen(pcVar3) + 1);
-		oBuf.body = pcVar5;
-		if (pcVar5 != (char *)0x0) {
-			strncpy(pcVar5, pcVar3, strlen(pcVar3));
-		}
-		free(pcVar3);
-		return oBuf;
-	}
-	pcVar3 = (char *)calloc(1, 0x40);
-	oBuf.body = pcVar3;
-	return oBuf;*/
-
-	CSTR oBuf;
-	char cVar1;
-	uint uVar2;
-	char *pcVar3;
-	char *pcVar4;
-	char *pcVar5;
-
 	if (checkValidPos(&pos, &len)) {
 		return CSTR(body + pos, len);
 	}
 	return CSTR("", 0); //more simple than original code, deleting some repeated code.
 }
-//CSTR& CSTR::getSliced(CSTR *oBuf, int pos, int len) {
-//	char cVar1;
-//	uint uVar2;
-//	char *pcVar3;
-//	char *pcVar4;
-//	char *pcVar5;
-//	CSTR pCVar6;
-//
-//	uVar2 = checkValidPos(&pos, &len);
-//	if (uVar2) {
-//		pCVar6 = CSTR(body + pos, len);
-//		pcVar3 = pCVar6.body;
-//		if (pcVar3 == (char *)0x0) {
-//			pcVar3 = (char *)calloc(1, 0x40);
-//			oBuf->body = pcVar3;
-//		}
-//		else {
-//			pcVar5 = (char *)calloc(1, (size_t)(pCVar6.length() + 1));
-//			oBuf->body = pcVar5;
-//			if (pcVar5 != (char *)0x0) {
-//				strncpy(pcVar5, pcVar3, pCVar6.length());
-//			}
-//		}
-//		/*if ((CSTR)pCVar6 != (CSTR)0x0) {
-//			free((void *)pCVar6);
-//		}*/
-//		return *oBuf;
-//	}
-//	pcVar3 = (char *)calloc(1, 1);
-//	if (pcVar3 != (char *)0x0) {
-//		strncpy(pcVar3, "", 0);
-//		pcVar4 = pcVar3;
-//		do {
-//			cVar1 = *pcVar4;
-//			pcVar4 = pcVar4 + 1;
-//		} while (cVar1 != '\0');
-//
-//		pcVar5 = (char *)calloc(1, strlen(pcVar3) + 1);
-//		oBuf->body = pcVar5;
-//		if (pcVar5 != (char *)0x0) {
-//			strncpy(pcVar5, pcVar3, strlen(pcVar3));
-//		}
-//		free(pcVar3);
-//		return *oBuf;
-//	}
-//	pcVar3 = (char *)calloc(1, 0x40);
-//	oBuf->body = pcVar3;
-//	return *oBuf;
-//}
 
 //43bbf0
 CSTR& CSTR::assign(const CSTR *iBuf) {
@@ -1040,40 +704,22 @@ CSTR& CSTR::lastCut(int len) {
 
 //43bef0
 CSTR& CSTR::trimWhiteSpace() {
-	char cVar1;
-	int lSpaceCount;
-	char *pcVar3;
-	char *pcVar4;
-	int bodylen;
 	int fSpaceCount;
-	//CSTR tempCSTR;
-
-	//fSpaeCount = frontSpaceCount()
-	pcVar4 = body;
-	pcVar3 = pcVar4;
+	char cVar1;
+	char *pcVar4 = body;
+	char *pcVar3 = pcVar4;
 	if (pcVar4 == (char *)0x0) {
 		fSpaceCount = 0;
 	}
 	else {
 		for (; ((cVar1 = *pcVar3, cVar1 != '\0' && (cVar1 == ' ')) || (cVar1 == '\t')); pcVar3++) {
 		}
-		fSpaceCount = (int)(pcVar3 + -(int)pcVar4);
+		fSpaceCount = static_cast<int>(pcVar3 - pcVar4);
 	}
-	/*if (pcVar4 == (char *)0x0) {
-		bodylen = 0;
-	}
-	else {
-		pcVar3 = pcVar4 + 1;
-		do {
-			cVar1 = *pcVar4;
-			pcVar4 = pcVar4 + 1;
-		} while (cVar1 != '\0');
-		bodylen = (int)(pcVar4 + -(int)pcVar3);
-	}*/
-	bodylen = length();
+	int bodylen = length();
 
-	lSpaceCount = lastSpaceCount();
-	//tempCSTR = getSliced(fSpaceCount, bodylen - lSpaceCount - fSpaceCount);//getSliced(&tempCSTR, fSpaceCount, bodylen - lSpaceCount - fSpaceCount);
+	int lSpaceCount = lastSpaceCount();
+	//CSTR tempCSTR = getSliced(fSpaceCount, bodylen - lSpaceCount - fSpaceCount);//getSliced(&tempCSTR, fSpaceCount, bodylen - lSpaceCount - fSpaceCount);
 	assign(getSliced(fSpaceCount, bodylen - lSpaceCount - fSpaceCount).body, 0);
 	//if ((CSTR)tempCSTR != (CSTR)0x0) {
 	//	_free(tempCSTR);

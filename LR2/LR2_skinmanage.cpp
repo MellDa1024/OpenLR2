@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "LR2_configsave.h"
 
+#include <filesystem>
 
 //maybe deleted by compiler, restored it for convenience
 int SetFirstSkin(SkinManage *sm, SKINTYPE type, CSTR *skinName) {
@@ -100,8 +101,8 @@ int SetFirstSkins(game *g){
 	ErrorLogAdd("スキンを列挙します。\n");
 	sm = &g->skinData;
 	InitSkinData(sm);
-	MakeSkinList(sm, CSTR("LR2files\\Theme\\"));
-	MakeSkinList(sm, CSTR("LR2files\\Sound\\"));
+	MakeSkinList(sm, CSTR("LR2files/Theme/"));
+	MakeSkinList(sm, CSTR("LR2files/Sound/"));
 	ErrorLogAdd("スキンの列挙を終了しました。\n");
 
 	if (SetFirstSkin(sm, SKINTYPE_7KEYS, &g->config.skin.skinFilePath[0]) == -1) {
@@ -176,6 +177,7 @@ int SetFirstSkins(game *g){
 int InitSkinData(SkinManage *skm){
 	skm->Max = 100;
 	skm->Data = (SkinHeader *)malloc(sizeof(SkinHeader) * 100);
+	assert(skm->Data != nullptr);
 	skm->Count = 0;
 	memset(skm->Data, 0, skm->Max * sizeof(SkinHeader));
 	for (int i = 0; i < 100; i++) {
@@ -193,6 +195,7 @@ int InitSkinData(SkinManage *skm){
 //4a7450
 int ExpandSkinMax(SkinManage *skm){
 	skm->Data = (SkinHeader *)realloc(skm->Data, (skm->Max + 100) * 0xb14);
+	assert(skm->Data != nullptr);
 	memset(skm->Data + skm->Max, 0, sizeof(SkinHeader) * 100);
 	if (skm->Max < skm->Max + 100) {
 		for (int i = skm->Max; i < skm->Max + 100; i++) {
@@ -219,7 +222,7 @@ int ParseLR2SkinCustom(SkinManage *skm, CSTR filepath) {
 	FILE *pFile;
 	char* pBuffer;
 
-	cstrSprintf(&md5Filepath, "LR2files\\SkinCustomize\\%s.xml", MD5str(filepath) );
+	cstrSprintf(&md5Filepath, "LR2files/SkinCustomize/%s.xml", MD5str(filepath) );
 	ReadSkinCustomize(&skCustom, md5Filepath);
 	pFile = fopen(filepath, "r");
 	if (!pFile) return 0;
@@ -267,9 +270,6 @@ int ParseLR2SkinCustom(SkinManage *skm, CSTR filepath) {
 			}
 		}
 		else if (buffer.left(11).isSame("#CUSTOMFILE")) {
-			FILE *pFile;
-			HANDLE hFindFile, hFindFileOld;
-			_WIN32_FIND_DATAA findFileData;
 			int flag;
 			SkinHeader &rSkin = skm->Data[skm->Count - 1];
 			SkinCustom &rCustom = rSkin.customs[rSkin.custom_count];
@@ -277,7 +277,10 @@ int ParseLR2SkinCustom(SkinManage *skm, CSTR filepath) {
 			SplitCSV(buffer, &csvBuf, ",");
 			rCustom.title.assign(&csvBuf.str[1]);
 			rCustom.dst_op_start = 0;
-			hFindFile = FindFirstFileA(csvBuf.str[2], &findFileData);
+
+#ifdef _WIN32
+			_WIN32_FIND_DATAA findFileData;
+			HANDLE hFindFile = FindFirstFileA(csvBuf.str[2], &findFileData);
 			do {
 				flag = 0; //logic arranged
 				if ( (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) 	flag = 2;
@@ -291,11 +294,38 @@ int ParseLR2SkinCustom(SkinManage *skm, CSTR filepath) {
 				}
 				if (rCustom.dst_op_count == rCustom.labelCapacity-2) {
 					rCustom.op_label = (CSTR*)realloc( rCustom.op_label, sizeof(CSTR)*(rCustom.labelCapacity + 100) );
+					// FIXME: invalid memset
 					memset(&rCustom.op_label[rCustom.labelCapacity],0,sizeof(CSTR)*100);
 					rCustom.labelCapacity += 100;
 				}
 			} while (FindNextFileA(hFindFile,&findFileData));
 			FindClose(hFindFile);
+#else
+			// NOTE: bad impl because of wildcards (see LunaticVibes for details)
+			auto p = csvBuf.str[2];
+			p.replace("\\", "/");
+			auto p_view = std::string_view{ p.body };
+			auto p_wildcard_pos = p_view.find('*');
+			for (const auto& entry : std::filesystem::directory_iterator({p_view.substr(0, p_wildcard_pos)})) {
+				auto fp = entry.path();
+				if (p_wildcard_pos != p_view.npos && p_view.size() > p_wildcard_pos + 1 && !fp.string().ends_with(p_view.substr(p_wildcard_pos + 1)))
+					continue;
+				const bool is_directory = entry.is_directory();
+				fName = fp.filename().string().c_str();
+				if (!is_directory && fName.right(3).isDiff("txt")) {
+					fName.nullAtPos(fName.findStrPos("."));
+					rCustom.op_label[rCustom.dst_op_count].assign(&fName);
+					rCustom.dst_op_count++;
+				}
+				if (rCustom.dst_op_count == rCustom.labelCapacity-2) {
+					rCustom.op_label = (CSTR*)realloc( rCustom.op_label, sizeof(CSTR)*(rCustom.labelCapacity + 100) );
+					// FIXME: invalid memset
+					memset(&rCustom.op_label[rCustom.labelCapacity],0,sizeof(CSTR)*100);
+					rCustom.labelCapacity += 100;
+				}
+			}
+#endif // _WIN32
+
 			rCustom.op_label[rCustom.dst_op_count].assign("RANDOM");
 			rCustom.dst_op_count++;
 
@@ -325,34 +355,21 @@ int ParseLR2SkinCustom(SkinManage *skm, CSTR filepath) {
 
 //4a8230 MakeSkinList
 int MakeSkinList(SkinManage *skm, CSTR dir) {
-	HANDLE hFindFile, hFindFileOld;
-	_WIN32_FIND_DATAA findFileData;
-	CSTR filter;
-	bool isLR2Skin;
-	if (dir.right(1).isDiff("\\")) 
+	if (dir.right(1).isDiff("\\") && dir.right(1).isDiff("/"))
 		dir.add("\\");
-	
-	filter.assign(&dir).add("*");
-	hFindFile = FindFirstFileA(filter, &findFileData);
-	do{
-		if ( (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-			filter.assign(&dir).add(findFileData.cFileName);
-			isLR2Skin = false;
-			if (filter.right(8).isSame(".lr2skin"))		isLR2Skin = true;
-			else if (filter.right(6).isSame(".lr2ss"))	isLR2Skin = true;
-			
-			if (isLR2Skin) ParseLR2SkinCustom(skm, filter); 
-		}
-		else {  //logic arranged
-		if (strcmp("..", findFileData.cFileName) && strcmp(".", findFileData.cFileName)) {
-			filter.assign(&dir).add(findFileData.cFileName).add("\\");
+#ifndef _WIN32
+	dir.replace("\\", "/");
+#endif // _WIN32
+	CSTR filter;
+	for (const auto& entry : std::filesystem::directory_iterator(dir.body)) {
+		if (entry.is_directory()) {
+			filter.assign(&dir).add(entry.path().filename().string().c_str());
 			MakeSkinList(skm, filter);
+		} else {
+			filter.assign(&dir).add(entry.path().filename().string().c_str());
+			if (filter.right(8).isSame(".lr2skin") || filter.right(6).isSame(".lr2ss"))
+				ParseLR2SkinCustom(skm, filter);
 		}
-		}
-		hFindFileOld = hFindFile;
-		if (FindNextFileA(hFindFile, &findFileData) == 0) {
-			FindClose(hFindFileOld);
-			return 0;
-		}
-	} while (true);
+	}
+	return 0;
 }

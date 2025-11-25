@@ -12,6 +12,24 @@
 #include <algorithm>
 #include <cmath>
 #include <array>
+#include <cstdint>
+
+using std::uintptr_t;
+
+#ifndef _WIN32
+
+#include <chrono>
+
+#define LOWORD(l) ((WORD)(((DWORD_PTR)(l)) & 0xffff))
+#define HIWORD(l) ((WORD)((((DWORD_PTR)(l)) >> 16) & 0xffff))
+
+static DWORD timeGetTime()
+{
+	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+		.count();
+}
+
+#endif // _WIN32
 
 #include "Engine.h"
 
@@ -23,7 +41,6 @@
 //https://www.fmod.com/docs/2.02/api/white-papers-transitioning-from-fmodex.html#system_adddsp-removed-from-the-system-api
 //https://www.fmod.com/docs/2.02/api/welcome-revision-history.html
 //http://upstream.rosalinux.ru/changelogs/fmod/44418/changelog.html
-
 
 //4b7b80
 const char* GetFMODerror(int errCode){
@@ -341,8 +358,7 @@ int EndSound(AUDIO *aud){
 }
 
 //4b82f0
-//v_chn not used
-int SOUND_dxlibFx(SOUNDDATA sound, int v_master, int v_chn, int pitch, double freq){
+int SOUND_dxlibFx(SOUNDDATA sound, int v_master, int /*v_chn*/, int pitch, double freq) {
 
 	double dMul;
 	
@@ -475,7 +491,7 @@ void WriteSoundFile(AUDIO *aud, CSTR filename, uint size) {
 }
 
 //4b8770
-int SOUND_normalize(AUDIO *aud, SOUNDDATA *sound){
+int SOUND_normalize(AUDIO */*aud*/, SOUNDDATA *sound){
 	uint len;
 	int bitdepth;
 	int channels;
@@ -502,6 +518,7 @@ int SOUND_normalize(AUDIO *aud, SOUNDDATA *sound){
 	sound->raw.dataSize = len;
 	sound->raw.samples = samples;
 	sound->raw.data = (byte *)malloc(len);
+	assert(sound->raw.data != nullptr);
 	
 	memcpy(sound->raw.data, sound, len);
 
@@ -544,6 +561,7 @@ int RecordSound(AUDIO *aud, SOUNDDATA *sound, double time, double len) {
 			if (aud->size <= paramlen + i) {
 				//exapnd aud buffer size (*2)
 				short* newbuffer = (short*)malloc(aud->size * 2 * 2);
+				assert(newbuffer != nullptr);
 				memset(newbuffer, 0, aud->size * 4);
 				memcpy(newbuffer, aud->buffer, aud->size * 2);
 				if (aud->buffer != NULL) {
@@ -554,11 +572,11 @@ int RecordSound(AUDIO *aud, SOUNDDATA *sound, double time, double len) {
 				aud->size = aud->size * 2;
 			}
 
-			int newval = *(short*)((int)aud->buffer + (paramlen + i) * 2) + (float)(*(short*)(sound->raw.data + i * 2)) * aud->volume * fade;
+			int newval = *(short*)((uintptr_t)aud->buffer + (paramlen + i) * 2) + (float)(*(short*)(sound->raw.data + i * 2)) * aud->volume * fade;
 
-			if (newval >= 0x7fff) *(short*)((int)aud->buffer + (paramlen + i) * 2) = 0x7fff;
-			else if (newval < -0x7fff) *(short*)((int)aud->buffer + (paramlen + i) * 2) = -0x8000;
-			else *(short*)((int)aud->buffer + (paramlen + i) * 2) = (short)newval;
+			if (newval >= 0x7fff) *(short*)((uintptr_t)aud->buffer + (paramlen + i) * 2) = 0x7fff;
+			else if (newval < -0x7fff) *(short*)((uintptr_t)aud->buffer + (paramlen + i) * 2) = -0x8000;
+			else *(short*)((uintptr_t)aud->buffer + (paramlen + i) * 2) = (short)newval;
 		}
 		return 1;
 	}
@@ -591,7 +609,7 @@ int LoadSound(AUDIO *aud, SOUNDDATA *sound, CSTR filepath, int loop, int disable
 	path.assign(&filepath);
 
 	if (IsFileExist(filepath) == false && IsAltSoundExist(&filepath) == -1) {
-		ErrorLogFmtAdd("音声ファイルが見つかりません。%s...\n",path);
+		ErrorLogFmtAdd("音声ファイルが見つかりません。%s...\n",path.body);
 		if (sound->load == '\0') {
 			sound->filename.fillzero();
 			sound->load = '\0';
@@ -772,7 +790,7 @@ int SOUND_FmodToDxlib(AUDIO *aud) {
 }
 
 //4b9340
-int ApplySoundFX(AUDIO *aud, int flag, char disable) {
+int ApplySoundFX(AUDIO *aud, int /*flag*/, char /*disable*/) {
 
 	if(aud->cmd_mediaOut) return 0;
 	if (aud->is_fmod_disabled == 1) {
@@ -1102,36 +1120,49 @@ int InitSound(AUDIO *aud, uint bufferLength, int numBuffer, char fDisable, int o
 
 	int numDrivers;
 	char driverName[256];
-	int chn2D, chn3D, chnTotal;
 
 	if (aud->cmd_mediaOut) {
 		FMOD_System_Create(&aud->fmodSys, FMOD_VERSION);
 		FMOD_System_Init(aud->fmodSys, 1, 0, NULL);
 		return 1;
 	}
-	else if (aud->is_fmod_disabled != true) {
+	if (!aud->is_fmod_disabled) {
 		ErrorLogAdd("サウンドシステムの初期化を行います。\n");
 		FMOD_System_Create(&aud->fmodSys, FMOD_VERSION);
 		FMOD_System_SetDSPBufferSize(aud->fmodSys, bufferLength, numBuffer);
 		ErrorLogAdd("\n");
 		FMOD_System_SetSoftwareChannels(aud->fmodSys, 0x100);
-		FMOD_System_Init(aud->fmodSys, 0x100, FMOD_INIT_NORMAL, NULL);
-		if (outputType == 0) {
-			FMOD_System_SetOutput(aud->fmodSys, FMOD_OUTPUTTYPE_WASAPI);
-			ErrorLogAdd("OUTPUT TYPE:DIRECTSOUND\n");
+		if (FMOD_System_Init(aud->fmodSys, 0x100, FMOD_INIT_NORMAL, NULL) != FMOD_OK) {
+			ErrorLogAdd("FMOD_System_Init failed!\n");
+			EndSound(aud);
+			return 1;
 		}
-		else if (outputType == 1) {
-			FMOD_System_SetOutput(aud->fmodSys, FMOD_OUTPUTTYPE_WASAPI);
-			ErrorLogAdd("OUTPUT TYPE:WASAPI\n");
+
+#ifdef _WIN32
+		if ([&] {
+			switch (outputType) {
+			case 0:
+			default:
+				ErrorLogAdd("OUTPUT TYPE:WASAPI (LR2 DIRECTSOUND config ignored)\n");
+				return FMOD_System_SetOutput(aud->fmodSys, FMOD_OUTPUTTYPE_WASAPI);
+			case 1:
+				ErrorLogAdd("OUTPUT TYPE:WASAPI\n");
+				return FMOD_System_SetOutput(aud->fmodSys, FMOD_OUTPUTTYPE_WASAPI);
+			case 2:
+				ErrorLogAdd("OUTPUT TYPE:ASIO\n");
+				return FMOD_System_SetOutput(aud->fmodSys, FMOD_OUTPUTTYPE_ASIO);
+			}
+			}() != FMOD_OK) {
+			ErrorLogAdd("FMOD_System_SetOutput failed! Using autodetect\n");
+			if (FMOD_System_SetOutput(aud->fmodSys, FMOD_OUTPUTTYPE_AUTODETECT) != FMOD_OK)
+			{
+				// FMOD_SYSTEM* is unusable after FMOD_System_SetOutput failed.
+				ErrorLogAdd("FMOD_System_SetOutput failed hard!\n");
+				EndSound(aud);
+				return 0;
+			}
 		}
-		else if (outputType == 2) {
-			FMOD_System_SetOutput(aud->fmodSys, FMOD_OUTPUTTYPE_ASIO);
-			ErrorLogAdd("OUTPUT TYPE:ASIO\n");
-		}
-		else{
-			FMOD_System_SetOutput(aud->fmodSys, FMOD_OUTPUTTYPE_WASAPI);
-			ErrorLogAdd("OUTPUT TYPE:DIRECTSOUND\n");
-		}
+#endif // _WIN32
 
 		FMOD_System_GetNumDrivers(aud->fmodSys, &numDrivers);
 		if (driver > numDrivers - 1) {
@@ -1272,10 +1303,10 @@ void RAWSOUND::MakeSampleRate44100(void) {
 						WORD lo = (int)((double)(unk[0] - LOWORD(val)) * (count / (double)(count + 1))) + LOWORD(val);
 
 						if ((int)hi >= 0x8000) hi = 0x7fff;
-						else if ((int)hi < -0x8000) hi = 0xffff8000;
+						else if ((int)hi < -0x8000) hi = 0xffff8000; // FIXME: narrowing
 
 						if ((int)lo >= 0x8000) lo = 0x7fff;
-						else if ((int)lo < -0x8000) lo = 0xffff8000;
+						else if ((int)lo < -0x8000) lo = 0xffff8000; // FIXME: narrowing
 
 						*unkd[j] = (hi << 16) | (lo && 0xffff);
 					}
