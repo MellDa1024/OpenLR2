@@ -359,7 +359,7 @@ char * cstrSprintf(CSTR *str, const char *format, ...) {
 	do {
 		_Size = bSize + 0x80;
 		va_start(ap, format);
-		iVar1 = _vsnprintf(str->body, bSize - 1, format, ap);
+		iVar1 = vsnprintf(str->body, bSize - 1, format, ap);
 		va_end(ap);
 		if (-1 < iVar1) {
 			return (char *)str;
