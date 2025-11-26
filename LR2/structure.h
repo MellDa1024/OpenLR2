@@ -147,23 +147,23 @@ struct CONFIG_INPUT {
 };
 
 struct CONFIG_JUKEBOX {
-	CSTR path[1000]; 
-	int numOfPath;
-	int autoreload;
-	int customfolder;
+	CSTR path[1000];
+	int numOfPath{};
+	int autoreload{};
+	int customfolder{};
 	CSTR newsongfolder;
-	int titleflash;
-	int rival[20];
+	int titleflash{};
+	int rival[20]{};
 };
 
 struct CONFIG_NETWORK {
-	int lr1ir; 
-	CSTR lr1id; 
-	CSTR lr1pass; 
-	int lr2ir; 
-	CSTR mail; 
-	int autoupdate; 
-	int getrival; 
+	int lr1ir{};
+	CSTR lr1id;
+	CSTR lr1pass;
+	int lr2ir{};
+	CSTR mail;
+	int autoupdate{};
+	int getrival{};
 };
 
 struct CONFIG_PLAY {
@@ -1355,9 +1355,9 @@ struct NETWORK {
 #ifdef _WIN32
 	WSADATA wsa;
 #endif // _WIN32
-	int isOnline;
-	int rankUpdateDelayLevel;
-	int waitTime;
+	bool isOnline{false};
+	int rankUpdateDelayLevel{0};
+	int waitTime{10000};
 	std::mutex criticalSection;
 	CSTR param;
 	CSTR httpResult;
@@ -1366,24 +1366,21 @@ struct NETWORK {
 	CSTR IR_pass;
 	CSTR IR_passMD5;
 	CSTR IR_name;
-	int IR_ID;
+	int IR_ID{0};
 	int rivals[20];
-	int rivalcount;
-	int getrival;
-	CSTR domain;
-	char waitForHandle;
-	int timeout;
+	int rivalcount{};
+	int getrival{};
+	CSTR domain = "www.dream-pro.info";
+	bool waitForHandle {false};
+	int timeout {15000};
 	CSTR request_result;
-	int loginResult;
 	struct RANKING rankingData;
 	struct MYRANKING myRanking;
 	std::jthread hHandle;
-	int IRstatus; /* 0:notIR 1:loading 2:loaded -1:playerNotExist -3:connection_fail -2:bansong 3:waitUpadate 4:connection 5:IRbusy */
+	int IRstatus {0}; /* 0:notIR 1:loading 2:loaded -1:playerNotExist -3:connection_fail -2:bansong 3:waitUpadate 4:connection 5:IRbusy */
 	CSTR IRresultMessage;
 
 	int GetInsaneList();
-
-	int Init();
 
 	void ParseRankingXml(const char* path);
 

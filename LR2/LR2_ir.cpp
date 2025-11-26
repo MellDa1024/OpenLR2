@@ -511,23 +511,6 @@ RANKING::RANKING() {
 	Init();
 }
 
-//4bbb80
-int NETWORK::Init() {
-	this->waitForHandle = '\0';
-	this->domain = "www.dream-pro.info";
-	this->timeout = 15000;
-	this->IRstatus = 0;
-	if (this->hHandle.joinable()) {
-		this->hHandle.join();
-	}
-	this->isOnline = 0;
-	this->IR_ID = 0;
-	this->rankingData.target_ID = 0;
-	this->waitTime = 10000;
-	this->rankingData.Init();
-	return 1;
-}
-
 void NETWORK::ParseRankingXml(const char* path)
 {
 	std::unique_lock l{criticalSection};
@@ -673,11 +656,11 @@ int NETWORK::HTTPrequest() {
 //4bc2b0
 void NETWORK::WaitAndInitRanking() {
 	GetTimeWrap();
-	this->waitForHandle = 1;
+	this->waitForHandle = true;
 	if (hHandle.joinable()) {
 		hHandle.join();
 	}
-	this->waitForHandle = 0;
+	this->waitForHandle = false;
 	this->rankingData.Init();
 }
 
@@ -826,13 +809,9 @@ int NETWORK::GetTargetInfo(int mode, CSTR songmd5, CSTR *oData, CSTR *oName, int
 }
 
 //4bcc50
-NETWORK::NETWORK(){
-	waitForHandle = '\0';
-	domain = "www.dream-pro.info";
-	timeout = 15000;
-	IRstatus = 0;
-	rankUpdateDelayLevel = 0;
-	IR_ID = 0;
+NETWORK::NETWORK() {
+	this->rankingData.target_ID = 0;
+	this->rankingData.Init();
 }
 
 //4bcda0
@@ -849,20 +828,18 @@ int NETWORK::Login(int isDirectPlay) {
 	if (WSAStartup(2, &this->wsa)) {
 		this->request_debug = "WinSockの初期化に失敗しました\n";
 		this->request_result = "WinSockの初期化に失敗しました。ネットワーク機能は使用できません・\n";
-		this->loginResult = -99;
-		this->isOnline = 0;
+		this->isOnline = false;
 		ErrorLogAdd(this->request_debug);
 		WSACleanup();
-		return this->loginResult;
+		return -99;
 	}
 #else
 	if (true) { // FIXME(linux): stub
 		this->request_debug = "linux\n";
 		this->request_result = "happy with yourself?\n";
-		this->loginResult = -99;
-		this->isOnline = 0;
+		this->isOnline = false;
 		ErrorLogAdd(this->request_debug);
-		return this->loginResult;
+		return -99;
 	}
 #endif // _WIN32
 
@@ -870,23 +847,20 @@ int NETWORK::Login(int isDirectPlay) {
 	this->target_URL = "http://www.dream-pro.info/~lavalse/LR2IR/2/login.cgi";
 	if (this->HTTPrequest() != 1) {
 		this->request_result = "サーバーとの接続に失敗しました。\n";
-		this->isOnline = 0;
-		this->loginResult = -99;
-		return this->loginResult;
+		this->isOnline = false;
+		return -99;
 	}
 
 	if (this->httpResult.left(3).isSame("NEW")) {
-		this->loginResult = 1;
-		this->isOnline = 1;
+		this->isOnline = true;
 		this->rankingData.myID = atol(this->httpResult.right(this->httpResult.length() - 4));
 		cstrSprintf(&this->request_result, "LR2IRに新規登録しました。\nLR2ID:%06d\n\n", this->rankingData.myID);
 		this->IR_ID = this->rankingData.myID;
-		return this->loginResult;
+		return 1;
 	}
 
 	if (this->httpResult.left(2).isSame("OK") || this->httpResult.left(2).isSame("B1") || this->httpResult.left(2).isSame("B2") || this->httpResult.left(2).isSame("B3")){
-		this->loginResult = 1;
-		this->isOnline = 1;
+		this->isOnline = true;
 		this->rankingData.myID = atol(this->httpResult.right(this->httpResult.length() - 3));
 
 		if (this->httpResult.left(2).isSame("B1")) {
@@ -933,42 +907,42 @@ int NETWORK::Login(int isDirectPlay) {
 				}
 			}
 		}
-		return this->loginResult;
+		return 1;
 	}
 
 	else if (this->httpResult.left(4).isSame("MAIL")) {
 		this->request_result = "無効なメールアドレスです。\n";
-		this->isOnline = 0;
-		return this->loginResult = -2;
+		this->isOnline = false;
+		return -2;
 	}
 	else if (this->httpResult.left(2).isSame("DB")) {
 		this->request_result = "データベースに接続できません。\n";
-		this->isOnline = 0;
-		return this->loginResult = -99;
+		this->isOnline = false;
+		return -99;
 	}
 	else if (this->httpResult.left(7).isSame("VERSION")) {
 		this->request_result = "最新版に更新して下さい。\n";
-		this->isOnline = 0;
-		return this->loginResult = -99;
+		this->isOnline = false;
+		return -99;
 	}
 	else if (this->httpResult.left(3).isSame("BAN")) {
 		this->request_result = "あなたのアカウントは凍結されました。\n";
-		this->isOnline = 0;
-		return this->loginResult = -99;
+		this->isOnline = false;
+		return -99;
 	}
 	else if (this->httpResult.left(5).isSame("SORRY")) {
 		this->request_result = "現在サーバーメンテナンス中です。\n";
-		this->isOnline = 0;
-		return this->loginResult = -99;
+		this->isOnline = false;
+		return -99;
 	}
 	else if (this->httpResult.left(3).isSame("END")) {
 		this->request_result = "LR2IRは終了しました。\n";
-		this->isOnline = 0;
-		return this->loginResult = -99;
+		this->isOnline = false;
+		return -99;
 	}
 	cstrSprintf(&this->request_result, "パスワードが違うか、その他のエラーです。\nLR2ID:%d\nLR2IDがいつの間にか変わってログイン出来ない！という方は#lunaticraveまでどうぞ。個別に対応します。", this->IR_ID);
-	this->isOnline = 0;
-	return this->loginResult = -3;
+	this->isOnline = false;
+	return -3;
 }
 
 //4bd640

@@ -342,7 +342,6 @@ int main(int argc, char** argv) {
 			InitInputStructure(&gs.KeyInput);
 			SetFirstSkins(&gs);
 			clsDx();
-			gs.net.Init();
 			if (gs.config.network.lr2ir == 1 && gs.is_starter == 0 && gs.cmd_nosave == 0) {
 				gs.net.IR_pass = gs.config.player.pass;
 				gs.net.IR_name = gs.config.player.id;

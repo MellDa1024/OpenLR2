@@ -687,7 +687,7 @@ int SaveResult(game *g, sqlite3* sql) {
 		UpdatePlayerStat(&g->gameplay.playerstat, sql);
 		g->sSelect.oldIRrank = bms.mybest.IRranking;
 
-		if (g->net.isOnline == 1 && g->is_starter == 0) {
+		if (g->net.isOnline && g->is_starter == 0) {
 			ErrorLogAdd("IRに登録しますか？\n");
 			g->net.myRanking.InitRanking();
 			if (g->gameplay.flag_longsound || g->gameplay.flag_0note) {
@@ -1017,7 +1017,7 @@ int SaveResult(game *g, sqlite3* sql) {
 				UpdatePlayerStat(&g->gameplay.playerstat, sql);
 				g->sSelect.oldIRrank = g->sSelect.bmsList[g->sSelect.cur_song].mybest.IRranking;
 
-				if (g->net.isOnline == 1 && g->is_starter == 0) {
+				if (g->net.isOnline && g->is_starter == 0) {
 					if (g->gameplay.flag_longsound) {
 						g->net.IRresultMessage = "この曲はIRに登録できません";
 					}

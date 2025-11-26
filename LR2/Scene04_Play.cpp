@@ -1791,7 +1791,7 @@ int ProcS_Play(game *g, sqlite3* sql) {
 		md5 = g->sSelect.bmsList[g->sSelect.cur_song].hash;
 	}
 
-	if (g->net.rankingData.target_ID > 0 && g->net.isOnline == 1) {
+	if (g->net.rankingData.target_ID > 0 && g->net.isOnline) {
 		g->gameplay.targetScore.InitJudgeQueue();
 		g->net.WaitAndInitRanking();
 		if ((g->gameplay.ghostBattle == 0 && g->gameplay.isAutoplay != 1) || g->gameplay.replay.status == 2) {
@@ -1892,7 +1892,7 @@ int ProcS_Play(game *g, sqlite3* sql) {
 		ReadGhostToScore(sql,md5,&g->gameplay.highScore);
 	}
 
-	if (g->net.rankingData.target_ID > 0 && g->net.isOnline == 1) {
+	if (g->net.rankingData.target_ID > 0 && g->net.isOnline) {
 		if (gData.length() <= 0 || gData.isDiff("Z") == 0) {
 			ErrorLogFmtAdd("ゴースト無しでターゲットを設定します ターゲット番号 %d ターゲット名 %s\n", g->net.rankingData.target_number, g->net.rankingData.ranking[g->net.rankingData.target_number].name.body);
 

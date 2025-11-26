@@ -1784,7 +1784,7 @@ int ProcS_Select(game *g) {
 	if (g->sSelect.bmsList[g->sSelect.cur_song].isBanner && g->skstruct.reloadbanner == 1 && g->procSelecter == 2) {
 		g->hThreadBanner = std::jthread(ThreadProc_LoadBanner, g);
 	}
-	if (g->net.isOnline == 1 && g->procSelecter == 2) {
+	if (g->net.isOnline && g->procSelecter == 2) {
 		g->net.WaitAndInitRanking();
 		if (g->sSelect.bmsList[g->sSelect.cur_song].keymode >= 5 && (g->sSelect.bmsList[g->sSelect.cur_song].courseStageCount < 1 || g->sSelect.bmsList[g->sSelect.cur_song].courseIR)) {
 			g->net.IRstatus = 1;
