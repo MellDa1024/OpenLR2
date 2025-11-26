@@ -1206,6 +1206,7 @@ int CmdSearch(game *g, CSTR *cmd, sqlite3 *sql) {
 				CSTR scorehash;
 				cstrSprintf(&scorehash, "%s%s%d%d", g->net.IR_passMD5.body, g->net.myRanking.songMD5.body, g->net.myRanking.exscore, g->net.myRanking.clear);
 				scorehash = MD5str(scorehash);
+				// TOFIX: metadata not escaped. Consolidate with the other score sending function.
 				cstrSprintf(&g->net.param, "songmd5=%s&id=%d&passmd5=%s&title=%s&genre=%s&artist=%s&maxbpm=%d&minbpm=%d&&playlevel=%d&clear=%d&exscore=%d&pg=%d&gr=%d&gd=%d&bd=%d&pr=%d&maxcombo=%d&playcount=%d&clearcount=%d&rate=%d&minbp=%d&totalnotes=%d&opt_history=%d&opt_this=%d&line=%d&judge=%d&inputtype=%d&ghost=%s&rseed=%d&clear_db=%d&clear_ex=%d&clear_sd=%d&scorehash=%s",
 					g->net.myRanking.songMD5.body, g->net.IR_ID, g->net.IR_passMD5.body, g->net.myRanking.title.body, g->net.myRanking.genre.body, g->net.myRanking.artist.body, g->net.myRanking.maxbpm, g->net.myRanking.minbpm, g->net.myRanking.playlevel, g->net.myRanking.clear,
 					g->net.myRanking.exscore, g->net.myRanking.pg, g->net.myRanking.gr, g->net.myRanking.gd, g->net.myRanking.bd, g->net.myRanking.pr, g->net.myRanking.maxcombo, g->net.myRanking.playcount, g->net.myRanking.clearcount, g->net.myRanking.rate,
