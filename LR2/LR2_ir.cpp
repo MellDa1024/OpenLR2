@@ -592,7 +592,7 @@ int NETWORK::HTTPrequest() {
 		for (; i != timeout; i++) {
 			recvBuf = "";
 			int recvSize = recv(s, recvBuf, recvBuf.msize() - 1, 0);
-			if (this->waitForHandle == 1) {
+			if (this->waitForHandle) {
 				request = "DISCONNECT";
 				break;
 			}
