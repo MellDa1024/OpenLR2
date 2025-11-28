@@ -82,7 +82,7 @@ time_t GetFileUnixtime(CSTR str) {
 	LPWIN32_FIND_DATAA lpFindFileData = (LPWIN32_FIND_DATAA)&FindFileData;
 	HANDLE hFindFile = FindFirstFileA(str, lpFindFileData);
 	if (hFindFile == (HANDLE)-1) {
-		ErrorLogFmtAdd("ファイルのLR2TIME取得エラー:%sが見つからない\n", str);
+		ErrorLogFmtAdd("ファイルのLR2TIME取得エラー:%sが見つからない\n", str.body);
 		return -1;
 	}
 

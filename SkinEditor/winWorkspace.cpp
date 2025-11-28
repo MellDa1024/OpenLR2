@@ -283,7 +283,7 @@ int WORKSPACE::drawCustomize() {
     for (int i = 0; i < meta.custom_count; i++) {
         SkinCustom& cu = meta.customs[i];
 
-        ImGui::Text("%s", cu.title);
+        ImGui::TextUnformatted(cu.title);
         ImGui::SameLine();
         
         char item[64];
@@ -401,9 +401,9 @@ int WORKSPACE::drawTextEdit() {
                 {
                     ImGui::TableSetColumnIndex(column);
                     if(read.csv.str[column].atPos(0) == nullptr)
-                        ImGui::TextDisabled("%s", read.csv.str[column]);
+                        ImGui::TextDisabled("%s", read.csv.str[column].body);
                     else
-                        ImGui::Text("%s", read.csv.str[column]);
+                        ImGui::TextUnformatted(read.csv.str[column]);
                 }
                 ImGui::EndTable();
             }
