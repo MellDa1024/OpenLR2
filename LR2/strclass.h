@@ -59,4 +59,9 @@ class CSTR {
 		CSTR& trimWhiteSpace();
 		CSTR getFilename();
 };
-char * cstrSprintf(CSTR *str, const char *format, ...);
+
+char *cstrSprintf(CSTR *str, const char *format, ...)
+#ifndef _MSC_VER
+	__attribute__((format(printf, 2, 3)))
+#endif // _MSC_VER
+	;
