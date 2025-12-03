@@ -1,7 +1,6 @@
 ﻿#include "LR2_ghost.h"
 #include "structure.h"
 
-//4a8600
 int PLAYSCORE::InitJudgeQueue(void){
 	// TODO: replace this->judge_queue with std::vector, then remove this function
 	this->name.fillzero();
@@ -30,7 +29,6 @@ int PLAYSCORE::InitJudgeQueue(void){
 	return 0;
 }
 
-//4a8660
 int PLAYSCORE::ResetJudgeQueue(int size){
 	free(this->judge_queue);
 	this->judge_queue = NULL;
@@ -43,7 +41,6 @@ int PLAYSCORE::ResetJudgeQueue(int size){
 	return 1;
 }
 
-//4a86c0
 int PLAYSCORE::ResizeJudgeQueue(size_t size){
 	this->judge_queue = (char *)realloc(this->judge_queue, size);
 	for (int i = this->judge_queue_capacity; i < size; i++) {
@@ -53,7 +50,6 @@ int PLAYSCORE::ResizeJudgeQueue(size_t size){
 	return 1;
 }
 
-//4a8740
 int PLAYSCORE::AddJudgeQueue(char judge){
 	if (this->judge_queue_len == this->judge_queue_capacity) {
 		ResizeJudgeQueue(this->judge_queue_capacity + 1000);
@@ -63,7 +59,7 @@ int PLAYSCORE::AddJudgeQueue(char judge){
 	return 1;
 }
 
-//4a8770 //TODO:rename variabale
+// TODO:rename variabale
 int PLAYSCORE::DealJudgeFromQueue(void){
 	byte val;
 	int note;
@@ -105,7 +101,6 @@ int PLAYSCORE::DealJudgeFromQueue(void){
 	return 1;
 }
 
-//4a8870
 char PLAYSCORE::GetJudgeFromQueue(void){
 	if (this->judge_queue_capacity == 0) {
 		return -1;
@@ -116,7 +111,6 @@ char PLAYSCORE::GetJudgeFromQueue(void){
 	return this->judge_queue[this->judge_queue_len + -1];
 }
 
-//4a88a0
 int PLAYSCORE::SetDefaultGhost(int target, int notes){
 	int tgPerfect;
 
@@ -161,7 +155,6 @@ int PLAYSCORE::SetDefaultGhost(int target, int notes){
 	return 1;
 }
 
-//4a89d0
 int PLAYSCORE::SetGhost(int exscore, int notes, CSTR name){
 	ErrorLogFmtAdd("exスコアからゴーストを設定します...");
 	InitJudgeQueue();
@@ -174,7 +167,6 @@ int PLAYSCORE::SetGhost(int exscore, int notes, CSTR name){
 	return 1;
 }
 
-//4a8a90 
 CSTR PLAYSCORE::EncodeGhostData(void) {
 	if (this->judge_queue_len == 0) return "GHOST_ERROR";
 
@@ -476,7 +468,6 @@ CSTR PLAYSCORE::EncodeGhostData(void) {
 	return str;
 }
 
-//4a96b0
 int PLAYSCORE::DecodeGhostData(CSTR data) {
 	CSTR decode;
 
@@ -691,7 +682,6 @@ int PLAYSCORE::DecodeGhostData(CSTR data) {
 	return 1;
 }
 
-//4a9eb0
 int PLAYSCORE::SetScore(PLAYERSTATUS *pstat, char flagExpect) {
 	if (this->totalnotes <= 0) {
 		ErrorLogAdd("SetScore::TOTALNOTESが0です\n");
@@ -724,7 +714,6 @@ int PLAYSCORE::SetScore(PLAYERSTATUS *pstat, char flagExpect) {
 }
 
 
-//4448f0
 int WriteGhostInDatabase(sqlite3 *sql, CSTR songMD5, PLAYSCORE *score) {
 	ErrorLogAdd("データベースにゴーストを書き込みます\n");
 
