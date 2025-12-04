@@ -228,9 +228,9 @@ int main(int argc, char** argv) {
 		else if (tStr2.left(2).isSame("-a")) {
 			gs.cmd_auto = '\x01';
 		}
-		/*else if (tStr2.left(2).isSame("-n")) {
-			atol(tStr1.right(tStr1.length() - 2));
-		}*/
+		else if (tStr2.left(2).isSame("-n")) {
+			gs.cmd_n = atol(tStr1.right(tStr1.length() - 2)); //TOFIX : never used
+		}
 	}
 	gs.config.system.thread = 0;
 	cstrSprintf(&pathScoreDB, "LR2files/Database/Score/%s.db", gs.config.player.id.body);
