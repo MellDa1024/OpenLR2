@@ -85,8 +85,6 @@ int main(int argc, char** argv) {
 	gs.config.system.coreCount = std::thread::hardware_concurrency();
 	if (gs.config.system.coreCount == 0) gs.config.system.coreCount = 2;
 
-	const bool use_dx9 = getenv("OPENLR2_NO_DX9") == nullptr; // chown2: crashes on DxLib_Init with DX9 for me
-
 	int tmp;
 
 	SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
@@ -154,6 +152,7 @@ int main(int argc, char** argv) {
 	gs.rec.recMode = 0;
 	gs.audio.replay2avi = false;
 	gs.skstruct.drBuf.isDisabled = '\0';
+	bool use_dx9 = false;
 	//commandline
 	for (int i = 1; i < argc; i++) {
 		CSTR tStr1;
@@ -216,6 +215,9 @@ int main(int argc, char** argv) {
 		}
 		else if (tStr2.starts_with("-n")) {
 			gs.cmd_n = atol(tStr1.right(tStr1.length() - 2)); //TOFIX : never used
+		}
+		else if (tStr2.starts_with("-dx9")) {
+			use_dx9 = true;
 		}
 	}
 	gs.config.system.thread = 0;
@@ -328,6 +330,7 @@ int main(int argc, char** argv) {
 	SetMultiThreadFlag(1);
 	SetUseFPUPreserveFlag(1);
 	SetUseDirectInputFlag(1); //DXLIBVER: not in original, but we need it to make same reaction.
+	// NOTE(chown2): with DX9, in a virtual machine crashes on DxLib_Init
 	if (use_dx9) {
 		SetUseDirect3DVersion(DX_DIRECT3D_9); //DXLIBVER: if not set, it's DX11 (over 3.13e)
 	}
