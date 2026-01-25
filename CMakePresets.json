@@ -29,19 +29,19 @@
     {
       "name": "windows-vs-asan-debug",
       "configurePreset": "windows-vs-asan",
-      "displayName": "Debug (x86, ASAN)",
+      "displayName": "x86 Debug (ASAN)",
       "configuration": "Debug"
     },
     {
       "name": "windows-vs-debug",
       "configurePreset": "windows-vs",
-      "displayName": "Debug (x86)",
+      "displayName": "x86 Debug",
       "configuration": "Debug"
     },
     {
       "name": "windows-vs-relwithdebinfo",
       "configurePreset": "windows-vs",
-      "displayName": "RelWithDebInfo (x86)",
+      "displayName": "x86 RelWithDebInfo",
       "configuration": "RelWithDebInfo"
     }
   ]
