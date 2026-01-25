@@ -24,8 +24,7 @@ bool parse_cp932_xml(TiXmlDocument* xml, const char* filepath) {
 	std::stringstream total;
 	total << file.rdbuf();
 	std::string totalUtf = ansi2utf(total.str(), 932);
-	xml->Parse(totalUtf.c_str(), 0, TIXML_ENCODING_UTF8);
-	return true;
+	return xml->Parse(totalUtf.c_str(), 0, TIXML_ENCODING_UTF8) != nullptr;
 }
 
 int ReadXml_Int(const char *level1, const char *level2, const char *level3, int initvalue, int *oBuf, TiXmlDocument *xmlData){
