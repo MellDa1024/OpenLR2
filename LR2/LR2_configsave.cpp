@@ -61,9 +61,7 @@ int ReadKeyConfig(game *game, const char *FilePath) {
 
 	hXml = new TiXmlDocument(FilePath);
 	if (!parse_cp932_xml(hXml, FilePath)) {
-		if (hXml) {
-			delete(hXml);
-		}
+		delete(hXml);
 		hXml = NULL;
 	}
 
@@ -143,9 +141,7 @@ int ReadMIDI(game *gs, const char *filepath){
 
 	hXml = new TiXmlDocument(filepath);
 	if (!parse_cp932_xml(hXml, filepath)) {
-		if (hXml) {
-			delete(hXml);
-		}
+		delete(hXml);
 		hXml = NULL;
 	}
 	ReadXml_Int("midi", "control", "S01", 0, (gs->config).input.midi_control + 1, hXml);
@@ -866,9 +862,7 @@ int ReadSkinCustomize(SkinUser *sku, char *FilePath) {
 	
 	hXml = new TiXmlDocument(FilePath);
 	if (!parse_cp932_xml(hXml, FilePath)) {
-		if (hXml) {
-			delete(hXml);
-		}
+		delete(hXml);
 		hXml = NULL;
 	}
 
@@ -1061,9 +1055,7 @@ int ReadConfig(game* g, const char* filepath) {
 
 	hXml->SetCondenseWhiteSpace(false);
 	if (!parse_cp932_xml(hXml, filepath)) {
-		if (hXml) {
-			delete(hXml);
-		}
+		delete(hXml);
 		hXml = NULL;
 	}
 
@@ -1265,9 +1257,7 @@ int ReadConfig(game* g, const char* filepath) {
 int ReadOpenLr2Config(game* g, const char* filepath) {
 	TiXmlDocument *hXml = new TiXmlDocument(filepath);
 	if (!parse_cp932_xml(hXml, filepath)) {
-		if (hXml) {
-			delete(hXml);
-		}
+		delete(hXml);
 		hXml = nullptr;
 	}
 	ReadXml_PositiveIntAsBool("config", "play", "gaugeautoshift", false, &g->config.play.m_gas, hXml);
