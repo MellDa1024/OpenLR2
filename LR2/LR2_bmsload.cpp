@@ -55,8 +55,9 @@ bool isVisibleNote(int ch){
 int InitNoteBuffer(LaneStruct *lane, int count){
 
 	lane->size = count;
+	// FIXME: never freed, memory leak.
 	lane->notes = (NoteStruct *)malloc(count * sizeof(NoteStruct));
-	
+
 	lane->count = 0;
 	lane->autoplay = 0;
 
