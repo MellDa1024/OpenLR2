@@ -200,7 +200,7 @@ static void QuickRestart(game& game, bool newRandom) {
 		game.gameplay.flag_retry = 0;
 	}
 
-	for (int i = 0; i < 6480; i++) {
+	for (int i = 0; i < SLOTS; i++) {
 		StopSound(&game.audio, &game.gameplay.keysound[i]);
 	}
 }

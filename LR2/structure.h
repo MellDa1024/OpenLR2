@@ -21,6 +21,11 @@
 #pragma warning (disable: 26495) // 'always initialize a member variable' - usually zeroed with memset
 #endif
 
+#define SINGLESLOTS 3844
+#define SLOTS SINGLESLOTS*10
+//36*36*5(6480) -> 62*62*10(38440)
+
+
 struct sqlite3;
 
 typedef unsigned char   undefined;
@@ -1223,13 +1228,13 @@ struct gameplay {
 	int bpmt_count;
 	int bpmt_buffersize;
 	int bpmt_start;
-	struct SOUNDDATA keysound[6480];
-	CSTR keysound_filename[6480];
-	CSTR BMP_filename[6480];
+	struct SOUNDDATA keysound[SLOTS];
+	CSTR keysound_filename[SLOTS];
+	CSTR BMP_filename[SLOTS];
 	struct SOUNDDATA muon;
-	char bgaUnused656b8[6480];
-	int bgaHandle[6480];
-	int bgaHandleHandle[6480];
+	char bgaUnused656b8[SLOTS];
+	int bgaHandle[SLOTS];
+	int bgaHandleHandle[SLOTS];
 	int bgaLayer1;
 	int bgaLayer2;
 	int missLayer;
@@ -1516,10 +1521,10 @@ struct struct_0x14_2 {
 };
 
 struct CHARTCONVERTER {
-	struct struct_0x14 arr1[1296];
-	struct struct_0x14 arr2[1296];
+	struct struct_0x14 arr1[SINGLESLOTS];
+	struct struct_0x14 arr2[SINGLESLOTS];
 	int arr1count;
-	struct struct_0x14_2 arr3[1296];
+	struct struct_0x14_2 arr3[SINGLESLOTS];
 	int unused14404;
 	int noteCountPerLane[7];
 	int laneCount;

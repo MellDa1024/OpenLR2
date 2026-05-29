@@ -510,7 +510,7 @@ int main(int argc, char** argv) {
 	gs.gameplay.flag_threadDoingProcGame = 0;
 	InitSkin(&gs.skstruct, 0, 0);
 	gs.skstruct.fontname.assign(&gs.config.skin.fontname);
-	for (int i = 0; i < 6480; i++) gs.gameplay.keysound->load = 0;
+	for (int i = 0; i < SLOTS; i++) gs.gameplay.keysound->load = 0;
 	for (int i = 0; i < 200; i++) gs.skstruct2.caption[i].fillzero();
 	for (int i = 0; i < 10; i++) gs.skstruct2.helpfilePath[i].fillzero();
 	for (int i = 0; i < 20; i++) gs.skstruct2.customfileRANDOM[i].fillzero();
@@ -591,7 +591,7 @@ int main(int argc, char** argv) {
 		gs.gameplay.flag_closingPhase = 1;
 		gs.gameplay.isPreviewLoad = 0;
 		gs.gameplay.flag_gameinput = 0;
-		for (int i = 0; i < 6480; i++) {
+		for (int i = 0; i < SLOTS; i++) {
 			StopSound(&gs.audio, &gs.gameplay.keysound[i]);
 		}
 		gs.gameplay.previewStatus = 0;
@@ -888,7 +888,7 @@ int main(int argc, char** argv) {
 
 					StopSysSound(&gs);
 					if (gs.is_recordmode == 0) {
-						for (int i = 0; i < 6480; i++) {
+						for (int i = 0; i < SLOTS; i++) {
 							StopSound(&gs.audio, &gs.gameplay.keysound[i]);
 							ReleaseSound(&gs.audio, &gs.gameplay.keysound[i]);
 						}
@@ -1258,7 +1258,7 @@ int main(int argc, char** argv) {
 					gs.gameplay.flag_closingPhase = 1;
 					gs.gameplay.isPreviewLoad = 0;
 					gs.gameplay.flag_gameinput = 0;
-					for (int i = 0; i < 6480; i++) {
+					for (int i = 0; i < SLOTS; i++) {
 						StopSound(&gs.audio, &gs.gameplay.keysound[i]);
 					}
 					gs.gameplay.previewStatus = 0;
@@ -1442,7 +1442,7 @@ int main(int argc, char** argv) {
 					if (gs.gameplay.isAutoplay) {
 						gs.procSelecter = 2;
 						if(gs.is_recordmode == 0){
-							for (int i = 0; i < 6480; i++) {
+							for (int i = 0; i < SLOTS; i++) {
 								StopSound(&gs.audio, &gs.gameplay.keysound[i]);
 								ReleaseSound(&gs.audio, &gs.gameplay.keysound[i]);
 							}
@@ -1451,7 +1451,7 @@ int main(int argc, char** argv) {
 					}
 					else if (gs.gameplay.player[0].note_current == 0 && gs.gameplay.player[1].note_current == 0 && gs.config.play.m_lunaris == 0) {
 						gs.procSelecter = 2;
-						for (int i = 0; i < 6480; i++) {
+						for (int i = 0; i < SLOTS; i++) {
 							StopSound(&gs.audio, &gs.gameplay.keysound[i]);
 							ReleaseSound(&gs.audio, &gs.gameplay.keysound[i]);
 						}
@@ -1463,7 +1463,7 @@ int main(int argc, char** argv) {
 					}
 					else if (gs.config.play.m_lunaris == 0 && gs.config.play.battle != 1) {
 						gs.procSelecter = 2;
-						for (int i = 0; i < 6480; i++) {
+						for (int i = 0; i < SLOTS; i++) {
 							StopSound(&gs.audio, &gs.gameplay.keysound[i]);
 							ReleaseSound(&gs.audio, &gs.gameplay.keysound[i]);
 						}
@@ -1475,7 +1475,7 @@ int main(int argc, char** argv) {
 					}
 					else {
 						gs.procSelecter = 2;
-						for (int i = 0; i < 6480; i++) {
+						for (int i = 0; i < SLOTS; i++) {
 							StopSound(&gs.audio, &gs.gameplay.keysound[i]);
 							ReleaseSound(&gs.audio, &gs.gameplay.keysound[i]);
 						}
@@ -1561,12 +1561,12 @@ int main(int argc, char** argv) {
 				case 5:
 					if (gs.is_recordmode == 0) {
 						if (gs.procSelecter == 4) {
-							for (int i = 0; i < 6480; i++) {
+							for (int i = 0; i < SLOTS; i++) {
 								StopSound(&gs.audio, &gs.gameplay.keysound[i]);
 							}
 						}
 						else {
-							for (int i = 0; i < 6480; i++) {
+							for (int i = 0; i < SLOTS; i++) {
 								StopSound(&gs.audio, &gs.gameplay.keysound[i]);
 								ReleaseSound(&gs.audio, &gs.gameplay.keysound[i]);
 							}
@@ -2247,7 +2247,7 @@ int main(int argc, char** argv) {
 	gs.gameplay.flag_closingPhase = 1;
 	gs.gameplay.isPreviewLoad = 0;
 	gs.gameplay.flag_gameinput = 0;
-	for (int i = 0; i < 6480; i++) {
+	for (int i = 0; i < SLOTS; i++) {
 		StopSound(&gs.audio, &gs.gameplay.keysound[i]);
 	}
 	gs.procPhase = 3;
@@ -2303,10 +2303,10 @@ int main(int argc, char** argv) {
 		WriteMidiXml(&gs, fs::make_preferred("LR2files/Config/midi.xml").data());
 	}
 	CloseMIDI();
-	for (int i = 0; i < 6480; i++) {
+	for (int i = 0; i < SLOTS; i++) {
 		StopSound(&gs.audio, &gs.gameplay.keysound[i]);
 	}
-	for (int i = 0; i < 6480; i++) {
+	for (int i = 0; i < SLOTS; i++) {
 		StopSound(&gs.audio, &gs.gameplay.keysound[i]);
 		ReleaseSound(&gs.audio, &gs.gameplay.keysound[i]);
 	}

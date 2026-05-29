@@ -13,15 +13,17 @@
 
 #include <DxLib/DxLib.h>
 
+
+
 int StopAllKeysound(game *g){
-	for (int i = 0; i < 6480; i++) {
+	for (int i = 0; i < SLOTS; i++) {
 		StopSound(&g->audio, &g->gameplay.keysound[i]);
 	}
 	return 1;
 }
 
 int InitKeysound(game *g){
-	for (int i = 0; i < 6480; i++) {
+	for (int i = 0; i < SLOTS; i++) {
 		StopSound(&g->audio, &g->gameplay.keysound[i]);
 		ReleaseSound(&g->audio, &g->gameplay.keysound[i]);
 	}
@@ -30,7 +32,7 @@ int InitKeysound(game *g){
 }
 
 int ReleaseBGA(game *g){
-	for (int i = 0; i < 6480; i++) {
+	for (int i = 0; i < SLOTS; i++) {
 		DeleteGraph(g->gameplay.bgaHandle[i]);
 		g->gameplay.bgaHandle[i] = -1;
 	}
@@ -301,7 +303,7 @@ int InitGameplay(gameplay *gp, CONFIG_PLAY *cfg) {
 			}
 		}
 	}
-	for (int i = 0; i < 6480; i++) {
+	for (int i = 0; i < SLOTS; i++) {
 		gp->bgaHandle[i] = -1;
 		gp->bgaHandleHandle[i] = -1;
 		gp->bgaUnused656b8[i] = 0;
@@ -391,7 +393,7 @@ int InitGameplay(gameplay *gp, CONFIG_PLAY *cfg) {
 	}
 	gp->rategraph[0].cursor = 0;
 	gp->rategraph[1].cursor = 0;
-	for (int i = 0; i < 6480; i++) {
+	for (int i = 0; i < SLOTS; i++) {
 		gp->keysound_filename[i].fillzero();
 		gp->BMP_filename[i].fillzero();
 	}
@@ -486,8 +488,8 @@ int LoadBmsResource(gameplay *gp, CSTR /*BMSfilepath*/, AUDIO *aud, ConfigStruct
 	std::vector<std::jthread> keysoundsLoadWorkers;
 	std::atomic<int> keysoundsLoaded = 0;
 	std::atomic<bool> keysoundsLoadAbort = false;
-	keysoundLoadQueue.reserve(6480);
-	for (int i = 0; i < 6480; i++) {
+	keysoundLoadQueue.reserve(SLOTS);
+	for (int i = 0; i < SLOTS; i++) {
 		if (gp->keysound_filename[i].length() > 0) {
 			keysoundLoadQueue.push_back(i);
 		}
@@ -514,7 +516,7 @@ int LoadBmsResource(gameplay *gp, CSTR /*BMSfilepath*/, AUDIO *aud, ConfigStruct
 	gp->flag_0note = 1;
 	for (int i = 0; i < gp->bmsobj.count; i++) {
 		if ( (10 <= gp->bmsobj.notes[i].op && gp->bmsobj.notes[i].op < 30)
-			&& (0 < gp->bmsobj.notes[i].val && gp->bmsobj.notes[i].val < 6480.0)
+			&& (0 < gp->bmsobj.notes[i].val && gp->bmsobj.notes[i].val < SLOTS)
 			&& gp->keysound[(int)gp->bmsobj.notes[i].val].load) {
 
 			gp->flag_0note = 0;
@@ -532,7 +534,7 @@ int LoadBmsResource(gameplay *gp, CSTR /*BMSfilepath*/, AUDIO *aud, ConfigStruct
 #endif // _WIN32
 	GetTransColor(&Rtmp,&Gtmp,&Btmp);
 	SetTransColor(0,0,0);
-	for (int i = 0; i < 6480; i++) {
+	for (int i = 0; i < SLOTS; i++) {
 		if (gp->BMP_filename[i].length() > 0) {
 			if (gp->BMP_filename[i].right(3).isSame("mpg") || gp->BMP_filename[i].right(3).isSame("avi")) {
 				SetTransColor(0, 255, 0);
@@ -564,7 +566,7 @@ int LoadBmsResource(gameplay *gp, CSTR /*BMSfilepath*/, AUDIO *aud, ConfigStruct
 		for (int i = 0; i < gp->bmsobj.count; i++) {
 			if (!(gp->bmsobj.notes[i].op >= 10 && gp->bmsobj.notes[i].op < 30)) {
 				if (gp->bmsobj.notes[i].op == 1) {
-					if (0 < gp->bmsobj.notes[i].val && gp->bmsobj.notes[i].val < 6480.0) { //TODO : is it okay to delete compiler code dealing unsigned?
+					if (0 < gp->bmsobj.notes[i].val && gp->bmsobj.notes[i].val < SLOTS) { //TODO : is it okay to delete compiler code dealing unsigned?
 						if ((gp->song_runtime < gp->keysound[(int)gp->bmsobj.notes[i].val].length + gp->bmsobj.notes[i].realTiming) && (int)gp->keysound[(int)gp->bmsobj.notes[i].val].length > 0) {
 							double len = gp->keysound[(int)gp->bmsobj.notes[i].val].length;
 							if ((int)gp->keysound[(int)gp->bmsobj.notes[i].val].length < 0) len += 4294967296.0;
@@ -573,13 +575,13 @@ int LoadBmsResource(gameplay *gp, CSTR /*BMSfilepath*/, AUDIO *aud, ConfigStruct
 					}
 				}
 				else if ((gp->bmsobj.notes[i].op == 4 || gp->bmsobj.notes[i].op == 7)
-					&& 0 < gp->bmsobj.notes[i].val && gp->bmsobj.notes[i].val < 6480.0
+					&& 0 < gp->bmsobj.notes[i].val && gp->bmsobj.notes[i].val < SLOTS
 					&& gp->song_runtime < gp->bmsobj.notes[i].realTiming) {
 
 					gp->song_runtime = gp->bmsobj.notes[i].realTiming;
 				}
 			}
-			else if (0 < gp->bmsobj.notes[i].val && gp->bmsobj.notes[i].val < 6480.0) {
+			else if (0 < gp->bmsobj.notes[i].val && gp->bmsobj.notes[i].val < SLOTS) {
 				if (gp->keysound[(int)gp->bmsobj.notes[i].val].load == 0 && gp->song_runtime < gp->bmsobj.notes[i].realTiming)
 					gp->song_runtime = gp->bmsobj.notes[i].realTiming;
 
@@ -688,7 +690,7 @@ int InitGameplay_retry(gameplay *gp, AUDIO *snd, game *g) {
 		}
 	}
 
-	for (int i = 0; i < 1296; i++) {
+	for (int i = 0; i < SINGLESLOTS; i++) {
 		gp->bgaHandleHandle[i] = -1;
 	}
 
@@ -967,8 +969,8 @@ void MakeExtraChart(gameplay *gp, CHARTCONVERTER *cc) {  //test completed
 	}
 
 	//find most used lane of sound
-	int laneOfSound[1296];
-	for (int i = 0; i < 1296; i++) {
+	int laneOfSound[SINGLESLOTS];
+	for (int i = 0; i < SINGLESLOTS; i++) {
 		int maxLaneNotes = 0;
 		int Lane[20] = { 0, };
 		laneOfSound[i] = -1;
@@ -993,7 +995,7 @@ void MakeExtraChart(gameplay *gp, CHARTCONVERTER *cc) {  //test completed
 	bool flagShuffle = 0;
 
 	//set default lane for non-used sound with previous sound lane
-	for (int i = 1; i < 1296; i++) {
+	for (int i = 1; i < SINGLESLOTS; i++) {
 		if (laneOfSound[i] == -1 && cc->arr1[cc->arr3[i].soundLoadID].field4_0x10 > 0) {
 			
 			int lane = laneOfSound[i-1];
@@ -1678,7 +1680,7 @@ int SPtoDP(LaneStruct *lane, int baseNoteID, CHARTCONVERTER *cc) {
 	for (int i = 0; i < 7; i++) cc->noteCountPerLane[i] = 0;
 	cc->laneCount = 0;
 
-	for (int i = 0; i < 1296; i++) {
+	for (int i = 0; i < SINGLESLOTS; i++) {
 		cc->arr1[i].count = 0;
 		cc->arr1[i].field3_0xc = -1;
 		cc->arr3[i].field3_0xc = -1;
@@ -1698,7 +1700,7 @@ int SPtoDP(LaneStruct *lane, int baseNoteID, CHARTCONVERTER *cc) {
 		if (cc->noteCountPerLane[i]) cc->laneCount++;
 	}
 
-	qsort(&cc->arr1, 1296, sizeof(cc->arr1), CMP_CCARRbyCount);
+	qsort(&cc->arr1, SINGLESLOTS, sizeof(cc->arr1), CMP_CCARRbyCount);
 
 	bool fA = false, fB = false;
 	if (cc->arr2[0].count && cc->arr1[0].count&& ((cc->arr1[0].ID == cc->arr2[0].ID && (cc->arr1[1].ID == cc->arr2[1].ID || cc->arr1[1].ID == cc->arr2[2].ID || cc->arr1[2].ID == cc->arr2[1].ID || cc->arr1[2].ID == cc->arr2[2].ID)) 
@@ -1716,16 +1718,16 @@ int SPtoDP(LaneStruct *lane, int baseNoteID, CHARTCONVERTER *cc) {
 		cc->unk14428 = 0;
 	}
 
-	qsort(&cc->arr2,1296,sizeof(cc->arr2), CMP_CCARRbyID);
+	qsort(&cc->arr2, SINGLESLOTS,sizeof(cc->arr2), CMP_CCARRbyID);
 	if (fA) {
-		for (int i = 0; i < 1296; i++) {
+		for (int i = 0; i < SINGLESLOTS; i++) {
 			if (cc->arr2[i].field3_0xc == 0) cc->arr2[i].field3_0xc = 1;
 			else if (cc->arr2[i].field3_0xc == 1) cc->arr2[i].field3_0xc = 0;
 		}
 	}
 
 	int unkArr[2] = { 0,0 };
-	for (int i = 0; i < 1296; i++) {
+	for (int i = 0; i < SINGLESLOTS; i++) {
 		if (cc->arr1[i].count > 0) {
 			if (fB && cc->arr2[cc->arr1[i].ID].field3_0xc != -1 && i == 0) {
 				unkArr[cc->arr2[cc->arr1[0].ID].field3_0xc] += cc->arr1[0].count; //really 0. not i
@@ -1753,13 +1755,13 @@ int SPtoDP(LaneStruct *lane, int baseNoteID, CHARTCONVERTER *cc) {
 		}
 	}
 	
-	for (int i = 0; i < 1296; i++) {
+	for (int i = 0; i < SINGLESLOTS; i++) {
 		cc->arr2[i].count = cc->arr1[i].count;
 		cc->arr2[i].ID = cc->arr1[i].ID;
 		cc->arr2[i].field3_0xc = cc->arr1[i].field3_0xc;
 	}
 
-	qsort(&cc->arr1, 1296, sizeof(cc->arr1), CMP_CCARRbyID);
+	qsort(&cc->arr1, SINGLESLOTS, sizeof(cc->arr1), CMP_CCARRbyID);
 	for (int i = baseNoteID + 1; i < lane->count; i++) {
 
 		if (lane->notes[i].op == 2) break;
@@ -1828,7 +1830,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 	int stages{};
 
 	LaneStruct tmpLane[10]{};
-	double BPMslot[1296]{}, STOPslot[1296]{};
+	double BPMslot[SINGLESLOTS]{}, STOPslot[SINGLESLOTS]{};
 	int bmsobj_stageFirst{};
 	double oldSpeedMultiplier{};
 		
@@ -1876,8 +1878,8 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 	ErrorLogFmtAdd("RANDOMSEEDは%dです。\n", gp->randomseed);
 	SRand(gp->randomseed);
 
-	for (int i = 0; i < 1296; i++) BPMslot[i] = -1.0;
-	for (int i = 0; i < 1296; i++) STOPslot[i] = -1.0;
+	for (int i = 0; i < SINGLESLOTS; i++) BPMslot[i] = -1.0;
+	for (int i = 0; i < SINGLESLOTS; i++) STOPslot[i] = -1.0;
 
 	int isDSC = 0, isPMS = 0;
 	bool is5key = 0, is7key = 0, is9key = 0;
@@ -1942,7 +1944,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 	cc.unk14438 = -1;
 	cc.RealTimingSplitScratch = -1;
 	cc.flagSplitUnknown = 0;
-	for (int i = 0; i < 1296; i++) {
+	for (int i = 0; i < SINGLESLOTS; i++) {
 		cc.arr1[i].ID = i;
 		cc.arr1[i].filenameHead.fillzero();
 		cc.arr1[i].count = 0;
@@ -2318,7 +2320,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 					int div = (fBuf.length() - 7) / 2;
 					for (int i = 0; i < div; i++) {
 						int ii = i * 2 + 7;
-						if (Base36ToInt(*fBuf.atPos(ii), *fBuf.atPos(ii + 1))) {
+						if (Base62ToInt(*fBufOrg.atPos(ii), *fBufOrg.atPos(ii + 1))) {
 							float notepos = i / (float)div; //do not simplify this. float80 - float32 noise is in original LR2
 							gp->bmsobj.notes[gp->bmsobj.count].bmsTiming = (int)thisMeasure + notepos;
 							if (isVisibleNote(channel)) {
@@ -2339,10 +2341,10 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 							}
 
 							if (channel == 8 || channel == 9) { //BPM, STOP
-								gp->bmsobj.notes[gp->bmsobj.count].val = Base36ToInt(*fBuf.atPos(ii), *fBuf.atPos(ii + 1));
+								gp->bmsobj.notes[gp->bmsobj.count].val = Base62ToInt(*fBufOrg.atPos(ii), *fBufOrg.atPos(ii + 1));
 							}
 							else {
-								gp->bmsobj.notes[gp->bmsobj.count].val = Base36ToInt(*fBuf.atPos(ii), *fBuf.atPos(ii + 1)) + stage * 1296;
+								gp->bmsobj.notes[gp->bmsobj.count].val = Base62ToInt(*fBufOrg.atPos(ii), *fBufOrg.atPos(ii + 1)) + stage * SINGLESLOTS;
 							}
 							gp->bmsobj.notes[gp->bmsobj.count].op = channel;
 							gp->bmsobj.count++;
@@ -2350,7 +2352,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 
 							if (((10 <= channel && channel < 20) || (30 <= channel && channel < 40) || (50 <= channel && channel < 60)) && (meta->keymode < 10 && ((cfg->play.battle == 1 && (cfg->play.random[0] != cfg->play.random[1])) || cfg->play.battle == 2))) {
 								gp->bmsobj.notes[gp->bmsobj.count].bmsTiming = (int)thisMeasure + notepos;
-								gp->bmsobj.notes[gp->bmsobj.count].val = Base36ToInt(*fBuf.atPos(ii), *fBuf.atPos(ii + 1)) + stage * 1296;
+								gp->bmsobj.notes[gp->bmsobj.count].val = Base62ToInt(*fBufOrg.atPos(ii), *fBufOrg.atPos(ii + 1)) + stage * SINGLESLOTS;
 								gp->bmsobj.notes[gp->bmsobj.count].op = channel + 10;
 								gp->bmsobj.count++;
 								if (gp->bmsobj.count == gp->bmsobj.size) ExpandNoteBuffer(&gp->bmsobj, 1000);
@@ -2400,7 +2402,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 				is9key = 1;
 			}
 			else if (fBuf.left(7).isSame("#LNOBJ ")) {
-				lnobj = Base36ToInt(*fBuf.atPos(7), *fBuf.atPos(8)) + stage * 1296;
+				lnobj = Base62ToInt(*fBufOrg.atPos(7), *fBufOrg.atPos(8)) + stage * SINGLESLOTS;
 			}
 			else if (fBuf.left(7).isSame("#TOTAL ")) {
 				total[1] = total[0] = atol(fBuf.right(fBuf.length() - 7));
@@ -2422,59 +2424,59 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 			else if (fBuf.left(4).isSame("#BPM")) {
 				int param1;
 				double param2;
-				param1 = Base36ToInt(*fBuf.atPos(4), *fBuf.atPos(5));
+				param1 = Base62ToInt(*fBufOrg.atPos(4), *fBufOrg.atPos(5));
 				param2 = atof(fBuf.right(fBuf.length() - 7));
-				if (1 <= param1 && param1 < 1296) {
+				if (1 <= param1 && param1 < SINGLESLOTS) {
 					BPMslot[param1] = param2 * gp->freqSpeedMultiplier;
 				}
 			}
 			else if (fBuf.left(5).isSame("#STOP")) {
 				int param1, param2;
-				param1 = Base36ToInt(*fBuf.atPos(5), *fBuf.atPos(6));
+				param1 = Base62ToInt(*fBufOrg.atPos(5), *fBufOrg.atPos(6));
 				param2 = atol(fBuf.right(fBuf.length() - 8));
-				if (1 <= param1 && param1 < 1296 && param2 > 0) {
+				if (1 <= param1 && param1 < SINGLESLOTS && param2 > 0) {
 					STOPslot[param1] = param2;
 				}
 			}
 			else if (fBuf.left(4).isSame("#WAV") && cfg->play.autojudge != 2) {
 				int param1;
-				param1 = Base36ToInt(*fBuf.atPos(4), *fBuf.atPos(5));
+				param1 = Base62ToInt(*fBufOrg.atPos(4), *fBufOrg.atPos(5));
 				gp->loadObject_total++;
-				if (param1 < 1296) {
-					if (gp->isCourse == 0 && stage * 1296 + param1 < 1296) {
+				if (param1 < SINGLESLOTS) {
+					if (gp->isCourse == 0 && stage * SINGLESLOTS + param1 < SINGLESLOTS) {
 						CSTR filename = fBuf.right(fBuf.length() - 7);
 						filename.nullAtPos(2);
 						for (int i = 0; true; i++) {
 							if (i == cc.arr1count) {
 								cc.arr1[i].filenameHead = filename;
-								cc.arr3[stage * 1296 + param1].soundLoadID = i;
+								cc.arr3[stage * SINGLESLOTS + param1].soundLoadID = i;
 								cc.arr1count++;
 								break;
 							}
 							if (filename.isSame(cc.arr1[i].filenameHead)) {
-								cc.arr3[stage * 1296 + param1].soundLoadID = i;
+								cc.arr3[stage * SINGLESLOTS + param1].soundLoadID = i;
 								break;
 							}
 						}
 					}
 					fBuf = fBufOrg;
 					*fBufOrg.atPos(0) = 0;
-					int wavNum = Base36ToInt(*fBuf.atPos(4), *fBuf.atPos(5));
-					if (wavNum < 1296) {
+					int wavNum = Base62ToInt(*fBufOrg.atPos(4), *fBufOrg.atPos(5));
+					if (wavNum < SINGLESLOTS) {
 						fBuf.lastCut(fBuf.length() - 7);
-						FindAltSound(fBuf, directory, &gp->keysound_filename[stage * 1296 + wavNum]);
+						FindAltSound(fBuf, directory, &gp->keysound_filename[stage * SINGLESLOTS + wavNum]);
 					}
 				}
 			}
 			else if (fBuf.left(4).isSame("#BMP") && (cfg->play.bga == 3 || cfg->play.bga == 1 || (cfg->play.bga == 2 && gp->isAutoplay == 1) || gp->replay.status == 2) && cfg->play.autojudge != 2) {
 				int param1;
 				gp->loadObject_total++;
-				param1 = Base36ToInt(*fBuf.atPos(4), *fBuf.atPos(5));
+				param1 = Base62ToInt(*fBufOrg.atPos(4), *fBufOrg.atPos(5));
 				fBuf = fBufOrg;
 				*fBufOrg.atPos(0) = 0;
-				if (param1 < 1296) {
+				if (param1 < SINGLESLOTS) {
 					fBuf.lastCut(fBuf.length() - 7);
-					FindAltImage(fBuf, directory, &gp->BMP_filename[stage*1296 + param1]);
+					FindAltImage(fBuf, directory, &gp->BMP_filename[stage* SINGLESLOTS + param1]);
 				}
 			}
 			else {

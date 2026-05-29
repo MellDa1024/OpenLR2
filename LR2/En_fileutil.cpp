@@ -567,6 +567,21 @@ int SplitCSV(CSTR csvStr, CSVbuf *oBuf, const char */*splitter*/) {
 	} while (true);
 }
 
+int Base62ToInt(char ch1, char ch2) {
+	int ret = 0;
+
+	if (0x61 <= ch1 && ch1 < 0x61 + 26) ret = ch1 - 0x61 + 36;
+	else if (0x31 <= ch1 && ch1 < 0x31 + 10) ret = ch1 - 0x30;
+	else if (0x41 <= ch1 && ch1 < 0x41 + 26) ret = ch1 - 0x41 + 10;
+	ret = ret * 62;
+
+	if (0x61 <= ch2 && ch2 < 0x61 + 26) ret += ch2 - 0x61 + 36;
+	else if (0x31 <= ch2 && ch2 < 0x31 + 10) ret += ch2 - 0x30;
+	else if (0x41 <= ch2 && ch2 < 0x41 + 26) ret += ch2 - 0x41 + 10;
+
+	return ret;
+}
+
 int Base36ToInt(char ch1, char ch2) {
 	int ret = 0;
 

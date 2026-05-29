@@ -870,7 +870,7 @@ int ProcSinglenote(game *g, int lane, int keypress, int timing, int player) {
 			return 1;
 		}
 
-		if(0 < g->gameplay.bmsobj_note[lane].noteVal && g->gameplay.bmsobj_note[lane].noteVal < 6480)
+		if(0 < g->gameplay.bmsobj_note[lane].noteVal && g->gameplay.bmsobj_note[lane].noteVal < SLOTS)
 			PlaySound(&g->audio, &g->gameplay.keysound[g->gameplay.bmsobj_note[lane].noteVal], g->audio.chnStageKey[note.stage], note.stage);
 		return 1;
 	}
@@ -997,7 +997,7 @@ int ProcLongnote(game *g, int lane, int keypress, int timing, int player) {
 			return 1;
 		}
 
-		if (0 < g->gameplay.bmsobj_note[lane].noteVal && g->gameplay.bmsobj_note[lane].noteVal < 6480)
+		if (0 < g->gameplay.bmsobj_note[lane].noteVal && g->gameplay.bmsobj_note[lane].noteVal < SLOTS)
 			PlaySound(&g->audio, &g->gameplay.keysound[g->gameplay.bmsobj_note[lane].noteVal], g->audio.chnStageKey[note.stage], note.stage);
 
 		return 1;
@@ -1312,7 +1312,7 @@ int ProcGame(game *g) {
 				else {
 					SetTimeLapse(3, &g->timer1);
 					g->procPhase = 3;
-					for (int i = 0; i < 6480; i++) {
+					for (int i = 0; i < SLOTS; i++) {
 						StopSound(&g->audio, &g->gameplay.keysound[i]);
 					}
 					if (g->rec.recMode == 2) {
@@ -1523,7 +1523,7 @@ int ProcGame(game *g) {
 		}
 		if (g->is_starter) {
 			if (g->KeyInput.inputID[KEY_INPUT_ESCAPE] == 2 || (g->KeyInput.p1_buttonInput[12] == 2 && g->KeyInput.p1_buttonInput[13] == 2)) {
-				for (int i = 0; i < 6480; i++) {
+				for (int i = 0; i < SLOTS; i++) {
 					StopSound(&g->audio, &g->gameplay.keysound[i]);
 				}
 				break;
@@ -1539,7 +1539,7 @@ int ProcGame(game *g) {
 		if ((g->gameplay.player[0].HP[gaugeType[0]] < 2.0 && g->config.play.battle != 1 && g->gameplay.ghostBattle == 0) || (g->gameplay.player[0].HP[gaugeType[0]] < 2.0 && g->gameplay.player[1].HP[gaugeType[1]] < 2.0 && (g->config.play.battle == 1 || g->gameplay.ghostBattle)) && (g->gameplay.isPreviewLoad == 0)) {
 			SetTimeLapse(3, &g->timer1);
 			g->procPhase = 3;
-			for (int i = 0; i < 6480; i++) {
+			for (int i = 0; i < SLOTS; i++) {
 				StopSound(&g->audio, &g->gameplay.keysound[i]);
 			}
 			if (g->rec.recMode == 2) {

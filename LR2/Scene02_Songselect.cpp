@@ -2678,7 +2678,7 @@ int ProcI_Select(game *g, sqlite3 *sql) {
 				g->gameplay.flag_closingPhase = 1;
 				g->gameplay.isPreviewLoad = 0;
 				g->gameplay.flag_gameinput = 0;
-				for (int i = 0; i < 6480; i++) {
+				for (int i = 0; i < SLOTS; i++) {
 					StopSound(&g->audio, &g->gameplay.keysound[i]);
 				}
 				g->gameplay.previewStatus = 0;
