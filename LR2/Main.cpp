@@ -15,8 +15,8 @@ extern "C" {
 #include <sqlite/sqlite3.h>
 }
 
-#define LR2TITLE "LR2 beta4 version 251121 - testbuild"
-#define LR2VERSIONSTRING "LR2 beta4 version 251121 - testbuild"
+#define LR2TITLE "OpenLR2 beta1 version 260530"
+#define LR2VERSIONSTRING "OpenLR2 beta1 version 260530"
 
 #ifdef _WIN32
 
