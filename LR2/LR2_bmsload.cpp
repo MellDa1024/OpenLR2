@@ -1998,7 +1998,9 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 	//TOFIX : in nonstop mode(courseType==1), gp->courseConnection[stage - 1] doesn't check if stage >= 1. It can affects at #BPM
 	/* start of stage loop */
 	for (int stage = 0; stage < stages; stage++) {
-		//
+		
+		bool isBase62 = false;
+
 		int oldbpmtCount = gp->bpmt_count;
 		float firstNoteTime = -1.0;
 		bmsobj_stageFirst = gp->bmsobj.count;
@@ -2322,7 +2324,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 					int div = (fBuf.length() - 7) / 2;
 					for (int i = 0; i < div; i++) {
 						int ii = i * 2 + 7;
-						if (Base62ToInt(*fBufOrg.atPos(ii), *fBufOrg.atPos(ii + 1))) {
+						if (Base36or62ToInt(*fBufOrg.atPos(ii), *fBufOrg.atPos(ii + 1),isBase62)) {
 							float notepos = i / (float)div; //do not simplify this. float80 - float32 noise is in original LR2
 							gp->bmsobj.notes[gp->bmsobj.count].bmsTiming = (int)thisMeasure + notepos;
 							if (isVisibleNote(channel)) {
@@ -2343,10 +2345,10 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 							}
 
 							if (channel == 8 || channel == 9) { //BPM, STOP
-								gp->bmsobj.notes[gp->bmsobj.count].val = Base62ToInt(*fBufOrg.atPos(ii), *fBufOrg.atPos(ii + 1));
+								gp->bmsobj.notes[gp->bmsobj.count].val = Base36or62ToInt(*fBufOrg.atPos(ii), *fBufOrg.atPos(ii + 1), isBase62);
 							}
 							else {
-								gp->bmsobj.notes[gp->bmsobj.count].val = Base62ToInt(*fBufOrg.atPos(ii), *fBufOrg.atPos(ii + 1)) + stage * SINGLESLOTS;
+								gp->bmsobj.notes[gp->bmsobj.count].val = Base36or62ToInt(*fBufOrg.atPos(ii), *fBufOrg.atPos(ii + 1), isBase62) + stage * SINGLESLOTS;
 							}
 							gp->bmsobj.notes[gp->bmsobj.count].op = channel;
 							gp->bmsobj.count++;
@@ -2354,7 +2356,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 
 							if (((10 <= channel && channel < 20) || (30 <= channel && channel < 40) || (50 <= channel && channel < 60)) && (meta->keymode < 10 && ((cfg->play.battle == 1 && (cfg->play.random[0] != cfg->play.random[1])) || cfg->play.battle == 2))) {
 								gp->bmsobj.notes[gp->bmsobj.count].bmsTiming = (int)thisMeasure + notepos;
-								gp->bmsobj.notes[gp->bmsobj.count].val = Base62ToInt(*fBufOrg.atPos(ii), *fBufOrg.atPos(ii + 1)) + stage * SINGLESLOTS;
+								gp->bmsobj.notes[gp->bmsobj.count].val = Base36or62ToInt(*fBufOrg.atPos(ii), *fBufOrg.atPos(ii + 1), isBase62) + stage * SINGLESLOTS;
 								gp->bmsobj.notes[gp->bmsobj.count].op = channel + 10;
 								gp->bmsobj.count++;
 								if (gp->bmsobj.count == gp->bmsobj.size) ExpandNoteBuffer(&gp->bmsobj, 1000);
@@ -2404,10 +2406,13 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 				is9key = 1;
 			}
 			else if (fBuf.left(7).isSame("#LNOBJ ")) {
-				lnobj = Base62ToInt(*fBufOrg.atPos(7), *fBufOrg.atPos(8)) + stage * SINGLESLOTS;
+				lnobj = Base36or62ToInt(*fBufOrg.atPos(7), *fBufOrg.atPos(8 + 1), isBase62) + stage * SINGLESLOTS;
 			}
 			else if (fBuf.left(7).isSame("#TOTAL ")) {
 				total[1] = total[0] = atol(fBuf.right(fBuf.length() - 7));
+			}
+			else if (fBuf.left(8).isSame("#BASE 62")) {
+				isBase62 = true;
 			}
 			else if (fBuf.left(6).isSame("#RANK ")) {
 				if (stage == 0) {
@@ -2426,7 +2431,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 			else if (fBuf.left(4).isSame("#BPM")) {
 				int param1;
 				double param2;
-				param1 = Base62ToInt(*fBufOrg.atPos(4), *fBufOrg.atPos(5));
+				param1 = Base36or62ToInt(*fBufOrg.atPos(4), *fBufOrg.atPos(5),isBase62);
 				param2 = atof(fBuf.right(fBuf.length() - 7));
 				if (1 <= param1 && param1 < SINGLESLOTS) {
 					BPMslot[param1] = param2 * gp->freqSpeedMultiplier;
@@ -2434,7 +2439,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 			}
 			else if (fBuf.left(5).isSame("#STOP")) {
 				int param1, param2;
-				param1 = Base62ToInt(*fBufOrg.atPos(5), *fBufOrg.atPos(6));
+				param1 = Base36or62ToInt(*fBufOrg.atPos(5), *fBufOrg.atPos(6),isBase62);
 				param2 = atol(fBuf.right(fBuf.length() - 8));
 				if (1 <= param1 && param1 < SINGLESLOTS && param2 > 0) {
 					STOPslot[param1] = param2;
@@ -2442,7 +2447,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 			}
 			else if (fBuf.left(4).isSame("#WAV") && cfg->play.autojudge != 2) {
 				int param1;
-				param1 = Base62ToInt(*fBufOrg.atPos(4), *fBufOrg.atPos(5));
+				param1 = Base36or62ToInt(*fBufOrg.atPos(4), *fBufOrg.atPos(5),isBase62);
 				gp->loadObject_total++;
 				if (param1 < SINGLESLOTS) {
 					if (gp->isCourse == 0 && stage * SINGLESLOTS + param1 < SINGLESLOTS) {
@@ -2463,7 +2468,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 					}
 					fBuf = fBufOrg;
 					*fBufOrg.atPos(0) = 0;
-					int wavNum = Base62ToInt(*fBufOrg.atPos(4), *fBufOrg.atPos(5));
+					int wavNum = Base36or62ToInt(*fBufOrg.atPos(4), *fBufOrg.atPos(5),isBase62);
 					if (wavNum < SINGLESLOTS) {
 						fBuf.lastCut(fBuf.length() - 7);
 						FindAltSound(fBuf, directory, &gp->keysound_filename[stage * SINGLESLOTS + wavNum]);
@@ -2473,7 +2478,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 			else if (fBuf.left(4).isSame("#BMP") && (cfg->play.bga == 3 || cfg->play.bga == 1 || (cfg->play.bga == 2 && gp->isAutoplay == 1) || gp->replay.status == 2) && cfg->play.autojudge != 2) {
 				int param1;
 				gp->loadObject_total++;
-				param1 = Base62ToInt(*fBufOrg.atPos(4), *fBufOrg.atPos(5));
+				param1 = Base36or62ToInt(*fBufOrg.atPos(4), *fBufOrg.atPos(5),isBase62);
 				fBuf = fBufOrg;
 				*fBufOrg.atPos(0) = 0;
 				if (param1 < SINGLESLOTS) {
