@@ -456,6 +456,7 @@ int DrawNotes(game *g, skstruct *sk, Timer *T, CONFIG_PLAY *cfg) {
 				}
 
 				if (note_y > 0.0) note_y = 0.0;
+				if (noteL_y > 0.0) noteL_y = 0.0;
 				
 				if (key < 10) {
 					note_x = sk->adjust.note_1p_x + g->gameplay.nabeatsu_x + 0.0;
