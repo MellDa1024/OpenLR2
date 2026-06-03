@@ -2406,7 +2406,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 				is9key = 1;
 			}
 			else if (fBuf.left(7).isSame("#LNOBJ ")) {
-				lnobj = Base36or62ToInt(*fBufOrg.atPos(7), *fBufOrg.atPos(8 + 1), isBase62) + stage * SINGLESLOTS;
+				lnobj = Base36or62ToInt(*fBufOrg.atPos(7), *fBufOrg.atPos(8), isBase62) + stage * SINGLESLOTS;
 			}
 			else if (fBuf.left(7).isSame("#TOTAL ")) {
 				total[1] = total[0] = atol(fBuf.right(fBuf.length() - 7));
