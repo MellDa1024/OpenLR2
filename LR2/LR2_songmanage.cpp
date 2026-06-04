@@ -392,7 +392,7 @@ int UpdateSongDataTag(SONGDATA *song, sqlite3 *sql){
 
 int EditTag(SONGDATA *song, sqlite3 *sql) {
 	sqlite3_stmt *stmt;
-	CSTR query;
+	char query[1024];
 
 	int wtime = GetFileUnixtime(song->filepath);
 	int ntime = GetNowUnixtime();
