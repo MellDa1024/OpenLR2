@@ -1,6 +1,6 @@
 # OpenLR2
 Rewritten source code of BMS player Lunatic Rave 2. Project started in January 2021.
-Original code is aligned with LR2 beta3 100201.
+Original code accessible at [LR2Beta3-v100201]([LR2Beta3-v100201](https://github.com/GOMazk/OpenLR2/tree/LR2Beta3-v100201))
 
 ## Open source?
 After the closure of LR2IR, the project has been made public.
@@ -17,7 +17,7 @@ https://web.archive.org/web/20190802100906/http://www.dream-pro.info/~lavalse/LR
 > 
 > To avoid data corruption, it's generally recommended to have a fresh LR2 directory, or use the "-ns" flag.
 > 
-> Backingup your "LR2files\Database\Score\" folder is highly recommended.
+> Backing up your "LR2files\Database\Score\" folder is highly recommended.
 
 ## New Features
 
