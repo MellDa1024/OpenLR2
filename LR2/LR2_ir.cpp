@@ -545,7 +545,11 @@ int NETWORK::HTTPrequest() {
 		ioctlsocket(s, 0x8004667e, &argp);
 
 		request.fillzero();
-		cstrSprintf(&request, "POST %s HTTP/1.0\r\nContent-Length:%d\n\n%s", this->target_URL.body, this->param.length(), this->param.body);
+		cstrSprintf(&request, "POST %s HTTP/1.0\r\n"
+							  "Content-Type: application/x-www-form-urlencoded\r\n"
+							  "Content-Length:%d\r\n"
+							  "\r\n"
+							  "%s", this->target_URL.body, this->param.length(), this->param.body);
 
 		if (send(s, request, request.length() + 1, 0) < 0) {
 			cstrSprintf(&this->request_debug, "データの送信に失敗しました : %d\n", WSAGetLastError());
