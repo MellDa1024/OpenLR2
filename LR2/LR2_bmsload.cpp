@@ -1872,10 +1872,12 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 	oldSpeedMultiplier = gp->freqSpeedMultiplier;
 
 	//TOFIX : seed is not putted into replaydata, when use ghostbattle. (retry puts seed) (see also ProcS_Play())
+	//TOFIX: 0 is a valid seed. Note that LR2IR also returned randomseed=0 on missing ghosts.
 	if (gp->randomseed != 0) {
 		ErrorLogFmtAdd("RANDSEEDを引き継ぎます\n");
 	}
 	else if (gp->replay.status != 2) {
+		gp->randomseed = 0xFFFF;
 		if (cfg->play.random[0] == 2 && gp->forceRandomLayout != 0) {
 			ErrorLogFmtAdd("Force random layout %d for keymode %d\n", gp->forceRandomLayout, gp->keymode);
 			switch (gp->keymode) {
@@ -1885,10 +1887,9 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 			}
 			if (gp->randomseed == 0xFFFF) {
 				ErrorLogAdd("Impossible random layout\n");
-				gp->randomseed = 0;
 			}
 		}
-		if (gp->randomseed == 0) {
+		if (gp->randomseed == 0xFFFF) {
 			gp->randomseed = GetRand(0x7ffe);
 		}
 		if (gp->replay.status == 1) {
