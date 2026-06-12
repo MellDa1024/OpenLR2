@@ -1,7 +1,10 @@
 #include "LR2_customir.h"
+
+#ifdef _WIN32
+
 #include "LR2_customir_api.h"
-#include "structure.h"
 #include "LR2_songmanage.h"
+#include "structure.h"
 
 #include <filesystem>
 #include <format>
@@ -13,6 +16,7 @@
 
 #include <DxLib/DxLib.h>
 #include <libloaderapi.h>
+#include <wtypes.h>
 
 #if _WIN64
 #if _DEBUG
@@ -32,6 +36,24 @@ constexpr auto&& ARCH = ".x86";
 
 // TODO
 #define OverlayNotification ErrorLogFmtAdd
+
+class CustomIR {
+public:
+	CustomIR() = delete;
+	CustomIR(const std::filesystem::path& directory);
+	bool Initialize();
+	bool Login();
+	SendScoreStatus SendScore(const IRScoreV1& score);
+
+	[[nodiscard]] const std::string& Name() const { return mName; };
+private:
+	struct ModuleDeleter {
+		void operator()(std::remove_pointer_t<HMODULE>* handle);
+	};
+	std::unique_ptr<std::remove_pointer_t<HMODULE>, ModuleDeleter> mDllHandle;
+	std::string mName;
+	MethodTable mMethods;
+};
 
 CustomIR::CustomIR(const std::filesystem::path& _directory) {
 	for (auto& file : std::filesystem::directory_iterator(_directory)) {
@@ -481,3 +503,11 @@ void CUSTOMIR_MANAGER::SendScore(game& game, sqlite3* sql, int player) {
 		}
 	}, IRScoreInternal{ game, sql, player }, mModules));
 }
+#else
+
+CUSTOMIR_MANAGER::~CUSTOMIR_MANAGER() {};
+void CUSTOMIR_MANAGER::Initialize(const std::filesystem::path& directory) {};
+void CUSTOMIR_MANAGER::Login() {};
+void CUSTOMIR_MANAGER::SendScore(game& game, sqlite3* sql, int player) {};
+
+#endif // _WIN32

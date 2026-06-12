@@ -1,36 +1,16 @@
 #pragma once
 
-#include "LR2_customir_api.h"
-
 #include <array>
 #include <filesystem>
 #include <future>
 #include <memory>
 #include <string>
 #include <type_traits>
-
-#include <wtypes.h>
+#include <vector>
 
 struct game;
 struct sqlite3;
-
-class CustomIR {
-public:
-	CustomIR() = delete;
-	CustomIR(const std::filesystem::path& directory);
-	bool Initialize();
-	bool Login();
-	SendScoreStatus SendScore(const IRScoreV1& score);
-
-	[[nodiscard]] const std::string& Name() const { return mName; };
-private:
-	struct ModuleDeleter {
-		void operator()(std::remove_pointer_t<HMODULE>* handle);
-	};
-	std::unique_ptr<std::remove_pointer_t<HMODULE>, ModuleDeleter> mDllHandle;
-	std::string mName;
-	MethodTable mMethods;
-};
+class CustomIR;
 
 class CUSTOMIR_MANAGER {
 public:
