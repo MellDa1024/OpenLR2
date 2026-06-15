@@ -1,4 +1,6 @@
-﻿#include <fstream>
+﻿// LR2IR integration is deprecated. Please help us improve CustomIR instead.
+
+#include <fstream>
 #include <sstream>
 #include <string>
 #pragma comment(lib, "ws2_32.lib")
