@@ -70,6 +70,7 @@
     <ClInclude Include="LR2\Scenes.h" />
     <ClInclude Include="LR2\strclass.h" />
     <ClInclude Include="LR2\structure.h" />
+    <ClInclude Include="LR2\LR2_version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\md5.cpp" />
@@ -104,6 +105,7 @@
     <ClCompile Include="LR2\LR2_songmanage.cpp" />
     <ClCompile Include="LR2\LR2_statlong.cpp" />
     <ClCompile Include="LR2\LR2_statplay.cpp" />
+    <ClCompile Include="LR2\LR2_version.cpp" />
     <ClCompile Include="LR2\Main.cpp" />
     <ClCompile Include="LR2\Scene02_Songselect.cpp" />
     <ClCompile Include="LR2\Scene03_Decide.cpp" />

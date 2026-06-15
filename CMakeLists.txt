@@ -78,6 +78,7 @@ add_library(
     LR2/LR2_songmanage.cpp
     LR2/LR2_statlong.cpp
     LR2/LR2_statplay.cpp
+    LR2/LR2_version.cpp
     LR2/Scene02_Songselect.cpp
     LR2/Scene03_Decide.cpp
     LR2/Scene04_Play.cpp

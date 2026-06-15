@@ -150,6 +150,9 @@
     <ClInclude Include="LR2\LR2_customir_api.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="LR2\LR2_version.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LR2\dbgtool.cpp">
@@ -285,6 +288,9 @@
       <Filter>소스 파일\lib</Filter>
     </ClCompile>
     <ClCompile Include="LR2\LR2_customir.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="LR2\LR2_version.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
