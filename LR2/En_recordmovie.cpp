@@ -14,6 +14,9 @@
  #include <vfw.h>
 #endif
 
+static int Mp3toWavF(FILE * iFile, FILE * oFile);
+static bool Mp3toWavP(char * iPath, char * oPath);
+
 bool RECORDING::RefreshCurFrame() {
 	this->curFrame = this->writeSamplePos;
 	return true;
@@ -367,8 +370,6 @@ int Mp3toWavF(FILE *iFile, FILE *oFile) { //TODO : need test
 		return 0; 
 	}
 
-	// FIXME: missing fclose(iFile); fclose(oFile);
-
 	return 1;
 }
 
@@ -386,4 +387,5 @@ bool Mp3toWavP(char *iPath, char *oPath) {
 	}
 
 	return Mp3toWavF(iFile, oFile) == 0;
+	// TOFIX: missing fclose(iFile); fclose(oFile);
 }
