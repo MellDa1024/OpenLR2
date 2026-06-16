@@ -1511,7 +1511,7 @@ struct struct_0x14 {
 	int ID;
 	CSTR filenameHead;
 	int count;
-	int field3_0xc;
+	int side;
 	int field4_0x10;
 };
 
@@ -1528,8 +1528,7 @@ struct CHARTCONVERTER {
 	struct struct_0x14 arr2[SINGLESLOTS];
 	int arr1count;
 	struct struct_0x14_2 arr3[SINGLESLOTS];
-	int unused14404;
-	int noteCountPerLane[7];
+	int noteCountPerLane[8];
 	int laneCount;
 	int unk14428;
 	int unk1442c;
