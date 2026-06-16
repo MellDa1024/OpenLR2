@@ -1,15 +1,18 @@
-﻿#include <fstream>
+﻿// LR2IR integration is deprecated. Please help us improve CustomIR instead.
+
+#include <fstream>
 #include <sstream>
 #include <string>
-#pragma comment(lib,"ws2_32.lib")
-#include "LR2_ir.h"
+#pragma comment(lib, "ws2_32.lib")
 #include "DxLib/DxLib.h"
-#include "tinyxml/tinyxml.h"
 #include "En_dbio.h"
 #include "En_fileutil.h"
 #include "En_timer.h"
 #include "En_xml.h"
+#include "LR2_ir.h"
+#include "LR2_version.h"
 #include "filesystem.h"
+#include "tinyxml/tinyxml.h"
 
 #ifdef _WIN32
 #include <shellapi.h>
@@ -49,7 +52,7 @@ void MYRANKING::InitRanking() {
 	this->inputtype = 0;
 }
 
-int CMP_PlayerByExscore(const void *p1, const void *p2) {
+static int CMP_PlayerByExscore(const void *p1, const void *p2) {
 	
 	RANKINGPLAYER* s1 = (RANKINGPLAYER*)p1;
 	RANKINGPLAYER* s2 = (RANKINGPLAYER*)p2;
@@ -546,10 +549,12 @@ int NETWORK::HTTPrequest() {
 
 		request.fillzero();
 		cstrSprintf(&request, "POST %s HTTP/1.0\r\n"
+							  "User-Agent: %s/%d\r\n"
 							  "Content-Type: application/x-www-form-urlencoded\r\n"
 							  "Content-Length:%d\r\n"
 							  "\r\n"
-							  "%s", this->target_URL.body, this->param.length(), this->param.body);
+							  "%s",
+							  this->target_URL.body, openlr2::clientName, openlr2::versionCode, this->param.length(), this->param.body);
 
 		if (send(s, request, request.length() + 1, 0) < 0) {
 			cstrSprintf(&this->request_debug, "データの送信に失敗しました : %d\n", WSAGetLastError());
