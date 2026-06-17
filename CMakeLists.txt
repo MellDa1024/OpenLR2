@@ -185,3 +185,22 @@ add_executable(OpenLR2 WIN32 LR2/Main.cpp OpenLR2.manifest)
 set_target_properties(OpenLR2 PROPERTIES CXX_STANDARD 23)
 target_link_libraries(OpenLR2 PUBLIC OpenLR2Lib)
 set_target_properties(OpenLR2 PROPERTIES OUTPUT_NAME "OpenLR2${ARCH_SUFFIX}")
+
+set(IR_CONF_SUFFIX $<$<CONFIG:Debug>:_D>)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(IR_ARCH_SUFFIX ".x64")
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    set(IR_ARCH_SUFFIX ".x86")
+else()
+    message(FATAL_ERROR "Unsupported CMAKE_SIZEOF_VOID_P")
+endif()
+
+add_library(ExampleIR SHARED ExampleIR/ExternalIR.cpp)
+set_target_properties(ExampleIR PROPERTIES CXX_STANDARD 23)
+# For LR2_customir_api.h.
+# If you are making an IR module of your own, you should copy this file into your project instead.
+target_include_directories(ExampleIR PUBLIC LR2)
+set_target_properties(
+    ExampleIR
+    PROPERTIES OUTPUT_NAME "ExampleIR${IR_CONF_SUFFIX}${IR_ARCH_SUFFIX}"
+)
