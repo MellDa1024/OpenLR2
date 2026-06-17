@@ -1,7 +1,6 @@
 ﻿// LR2IR integration is deprecated. Please help us improve CustomIR instead.
 
 #include <string>
-#pragma comment(lib, "ws2_32.lib")
 #include "En_dbio.h"
 #include "En_fileutil.h"
 #include "En_timer.h"
@@ -14,6 +13,8 @@
 #include <DxLib/DxLib.h>
 
 #ifdef _WIN32
+#pragma comment(lib, "ws2_32.lib")
+
 #include <shellapi.h>
 #endif // _WIN32
 

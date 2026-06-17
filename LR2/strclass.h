@@ -1,5 +1,7 @@
 #pragma once
+#ifdef _MSC_VER
 #pragma warning(disable:4996)
+#endif
 #include <stdio.h>
 #include <malloc.h>
 typedef unsigned int uint;
