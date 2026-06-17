@@ -4,7 +4,9 @@
 #include <fstream>
 #include <format>
 
+#ifdef _WIN32
 #include <windows.h>
+#endif // _WIN32
 
 namespace State {
     static std::filesystem::path path;
@@ -71,6 +73,7 @@ extern "C" OLR2_IR_EXPORT void GetMethodTable(MethodTable& table) {
     table.SendScoreV1 = &SendScore;
 }
 
+#ifdef _WIN32
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
@@ -94,4 +97,4 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     }
     return TRUE;
 }
-
+#endif // _WIN32
