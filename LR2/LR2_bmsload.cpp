@@ -1287,7 +1287,7 @@ void DPtoSP(gameplay *gp) { //test completed
 
 			int newop = op - 10;
 			bool fSameLane = 0, fSameTime = 0;
-			memset(laneA, 0, sizeof(laneA));
+			std::ranges::fill(laneA, 0);
 
 			for (int prev = i - 1; prev >= 0; prev--) {
 				if (10 <= gp->bmsobj.notes[prev].op && gp->bmsobj.notes[prev].op <= 19) {
@@ -1379,7 +1379,7 @@ void PMStoSP(gameplay *gp) { //test&fix completed
 	qsort(gp->bmsobj.notes, gp->bmsobj.count, sizeof(NoteStruct), CMP_NotesByRealTimingOp);
 	int prev = 0; //prevMeasureStart
 	int measure = 0;
-	memset(laneA, 0, sizeof(laneA));
+	std::ranges::fill(laneA, 0);
 	left = 9;
 	right = 1;
 	measureLaneCount = 0;
@@ -1496,7 +1496,7 @@ void PMStoSP(gameplay *gp) { //test&fix completed
 					left = gp->bmsobj.notes[j].op;
 					if (left == 18 || left == 19) {
 						bool fSameLane = 0;
-						memset(laneB, 0, sizeof(laneB));
+						std::ranges::fill(laneB, 0);
 						newLane = 14 + (left - 18);
 
 						for (int x = j - 1; x >= 0; x--) {
@@ -1586,7 +1586,7 @@ void PMStoSP(gameplay *gp) { //test&fix completed
 			prev = i;
 			left = 9;
 			right = 1;
-			memset(laneA, 0, sizeof(laneA));
+			std::ranges::fill(laneA, 0);
 		}
 		else if (op == 2 && measureLaneCount == 0) {
 			measure++;
@@ -1594,7 +1594,7 @@ void PMStoSP(gameplay *gp) { //test&fix completed
 			left = 9;
 			right = 1;
 			prev = i;
-			memset(laneA, 0, sizeof(laneA));
+			std::ranges::fill(laneA, 0);
 		}
 		else if (11 <= op && op <= 19) {
 			laneA[op - 10] = 1;
@@ -2248,6 +2248,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 					case 23:
 						if (isPMS) channel = 39;
 						else channel = -1;
+						break;
 					case 24:
 						if (isDSC) channel = 37;
 						else channel = 36;
@@ -3014,7 +3015,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 			double t_realTiming = 0.0;
 			double t_renderTiming = 0.0;
 			double t_bmsTiming = 0.0;
-			memset(mapAdded, 0, 20);
+			for (auto& a : mapAdded) for (auto& v : a) v = 0;
 			int addNoteCount[2] = { 0, };
 
 			for (int i = 0; i < gp->bmsobj.count; i++) {
@@ -3027,13 +3028,13 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 
 									if (key > -1) {
 										for (int lane = 0; lane <= key; lane++) {
-											if (mapAdded[lane + p * 10] == 0) emptyCount++;
+											if (mapAdded[p][lane] == 0) emptyCount++;
 										}
 										if (emptyCount && emptyCount > 0) {
 											int addlane = GetRand(emptyCount - 1);
 
 											for (int lane = 0; lane <= key; lane++) {
-												if (mapAdded[lane + p * 10] == 0) {
+												if (mapAdded[p][lane] == 0) {
 													if (addlane == 0) {
 														gp->bmsobj.notes[gp->bmsobj.count].bmsTiming = t_bmsTiming;
 														gp->bmsobj.notes[gp->bmsobj.count].bmsTiming_ln = t_bmsTiming;
@@ -3065,7 +3066,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 					t_renderTiming = gp->bmsobj.notes[i].renderTiming;
 					t_realTiming = gp->bmsobj.notes[i].realTiming;
 					l_realTiming = gp->bmsobj.notes[i].realTiming;
-					memset(mapAdded, 0, sizeof(mapAdded));
+					for (auto& a : mapAdded) for (auto& v : a) v = 0;
 					addNoteCount[0] = 0;
 					addNoteCount[1] = 0;
 				}
@@ -3105,7 +3106,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 							if (GetRand(100) <= cfg->play.m_loudness) {
 								if (key > -1) {
 									for (int lane = 0; lane <= key; lane++) {
-										if (mapAdded[lane + p * 10] == 0) {
+										if (mapAdded[p][lane] == 0) {
 											gp->bmsobj.notes[gp->bmsobj.count].bmsTiming = t_bmsTiming;
 											gp->bmsobj.notes[gp->bmsobj.count].bmsTiming_ln = t_bmsTiming;
 											gp->bmsobj.notes[gp->bmsobj.count].realTiming = t_realTiming;
@@ -3129,7 +3130,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 					t_realTiming = gp->bmsobj.notes[i].realTiming;
 					t_renderTiming = gp->bmsobj.notes[i].renderTiming;
 					l_realTiming = gp->bmsobj.notes[i].realTiming;
-					memset(mapAdded, 0, sizeof(mapAdded));
+					for (auto& a : mapAdded) for (auto& v : a) v = 0;
 					addNoteCount[0] = 0;
 					addNoteCount[1] = 0;
 				}
@@ -3523,7 +3524,7 @@ int ParseBmsFile(gameplay *gp, CSTR filename, AUDIO *aud, ConfigStruct* cfg, BMS
 	double p1LastTiming = 0.0, p2LastTiming = 0.0;
 	int intArr[30] = { -1, };
 	for (int i = 0; i < 30; i++) intArr[i] = -1;
-	memset(mapAdded, 0, sizeof(mapAdded));
+	for (auto& a : mapAdded) for (auto& v : a) v = 0;
 	char chArr[20] = { 0, };
 	int isBattle = 0;
 

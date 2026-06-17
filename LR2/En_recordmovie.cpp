@@ -14,9 +14,8 @@
  #include <vfw.h>
 #endif
 
-RECORDING::RECORDING() {
-	memset(this, 0, sizeof(RECORDING)); // FIXME: bad memset
-}
+static int Mp3toWavF(FILE * iFile, FILE * oFile);
+static bool Mp3toWavP(char * iPath, char * oPath);
 
 bool RECORDING::RefreshCurFrame() {
 	this->curFrame = this->writeSamplePos;
@@ -105,30 +104,26 @@ static int REC_CpyAVIStreamToFile(PAVIFILE pfile, PAVISTREAM pavi, int /*unused*
 }
 
 static int CreateStream(CSTR filename, int framerate, COMPVARS *compvars, BITMAPINFOHEADER* lpbmi, PAVIFILE* pAVIFILE, PAVISTREAM* pAVIstream) {
-
 	IAVIFile* pFile;
-	AVISTREAMINFOA si;
-	PAVISTREAM pAviCompressed;
-	PAVISTREAM pavi;
-	AVICOMPRESSOPTIONS options;
-
 	if (AVIFileOpenA(&pFile, filename, OF_CREATE | OF_WRITE, 0) != 0) {
 		MessageBoxA(NULL, "ファイルの作成またはオープンに失敗しました。", NULL, MB_ICONEXCLAMATION);
 		return 0;
 	}
-	memset(&si, 0, sizeof(AVISTREAMINFOA));
+	AVISTREAMINFOA si{};
 	si.fccHandler = compvars->fccHandler;
 	si.dwRate = framerate;
 	si.fccType = 0x73646976; //'vids'
 	si.dwScale = 1;
 	SetRect(&si.rcFrame, 0, 0, lpbmi->biWidth, lpbmi->biHeight);
 
+	PAVISTREAM pavi;
 	if (AVIFileCreateStreamA(pFile, &pavi, &si) != 0) {
 		MessageBoxA(NULL, "ストリームの作成に失敗しました。", NULL, MB_ICONEXCLAMATION);
 		AVIFileRelease(pFile);
 		return 0;
 	}
 
+	AVICOMPRESSOPTIONS options{};
 	options.dwKeyFrameEvery = compvars->lKey;
 	options.fccHandler = compvars->fccHandler;
 	options.dwQuality = compvars->lQ;
@@ -141,6 +136,7 @@ static int CreateStream(CSTR filename, int framerate, COMPVARS *compvars, BITMAP
 	options.cbParms = 0;
 	options.dwInterleaveEvery = 0;
 
+	PAVISTREAM pAviCompressed;
 	if (AVIMakeCompressedStream(&pAviCompressed, pavi, &options, NULL) != 0) {
 		AVIStreamRelease(pavi);
 		AVIFileRelease(pFile);
@@ -177,7 +173,7 @@ bool RECORDING::PrepareAVIRecord(double framerate, int bit, CSTR filename, uint 
 	else {
 		SetMouseDispFlag(1);
 		ProcessMessage();
-		memset(&this->compvars, 0, sizeof(COMPVARS));
+		this->compvars = {};
 		this->compvars.cbSize = 64;
 		if (ICCompressorChoose(NULL,0,NULL,NULL,&this->compvars,NULL) == 0) return false;
 		FILE *pFile = fopen(fs::make_preferred("LR2files/Config/compvars.dat").data(), "wb");
@@ -374,8 +370,6 @@ int Mp3toWavF(FILE *iFile, FILE *oFile) { //TODO : need test
 		return 0; 
 	}
 
-	// FIXME: missing fclose(iFile); fclose(oFile);
-
 	return 1;
 }
 
@@ -393,4 +387,5 @@ bool Mp3toWavP(char *iPath, char *oPath) {
 	}
 
 	return Mp3toWavF(iFile, oFile) == 0;
+	// TOFIX: missing fclose(iFile); fclose(oFile);
 }

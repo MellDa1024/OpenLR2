@@ -1,10 +1,7 @@
 ﻿// LR2IR integration is deprecated. Please help us improve CustomIR instead.
 
-#include <fstream>
-#include <sstream>
 #include <string>
 #pragma comment(lib, "ws2_32.lib")
-#include "DxLib/DxLib.h"
 #include "En_dbio.h"
 #include "En_fileutil.h"
 #include "En_timer.h"
@@ -13,6 +10,8 @@
 #include "LR2_version.h"
 #include "filesystem.h"
 #include "tinyxml/tinyxml.h"
+
+#include <DxLib/DxLib.h>
 
 #ifdef _WIN32
 #include <shellapi.h>

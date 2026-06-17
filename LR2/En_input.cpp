@@ -7,9 +7,26 @@
 #include "En_dxlibstub.h"
 #endif // _WIN32
 
-#include <cstring>
+#include <algorithm>
 
-MIDI midi;
+#ifdef _WIN32
+#include <windows.h>
+#else
+struct HMIDIIN {};
+#ifndef CALLBACK
+#define CALLBACK
+#endif // CALLBACK
+#endif // _WIN32
+
+typedef struct MIDI {
+	byte input[260]; //0x101:ptich_minus 0x102:pitch_plus 0x103:pedal;
+	int unusedFC;
+	int controller_n;
+	int controller_v;
+	HMIDIIN phmiArray[16];
+}MIDI;
+
+static MIDI midi;
 
 #ifndef _WIN32
 #define LOWORD(l) ((WORD)(((DWORD_PTR)(l)) & 0xffff))
@@ -18,21 +35,20 @@ MIDI midi;
 
 // TODO structure array rework
 int InitInputStructure2(inputStructure *is){
-	
 	is->is_doubleclick = 0;
 	is->mousewheel = 0;
 	is->mouse_buttonL = 0;
 	is->mouse_buttonR = 0;
 	is->mouse_buttonW = 0;
 	is->mouse_button4 = 0;
-	memset(is->p1_buttonInput, 0, sizeof is->p1_buttonInput);
-	memset(is->p2_buttonInput, 0, sizeof is->p2_buttonInput);
-	memset(is->otherbuttons, 0, sizeof is->otherbuttons);
-	memset(is->inputID, 0, sizeof(char) * 0x600);
+	std::ranges::fill(is->p1_buttonInput, 0);
+	std::ranges::fill(is->p2_buttonInput, 0);
+	std::ranges::fill(is->otherbuttons, 0);
+	std::ranges::fill_n(is->inputID, 0x600, 0);
 	return 1;
 }
 
-void EndMIDIInput(void){
+static void EndMIDIInput(void){
 #ifdef _WIN32
 	UINT numDev;
 
@@ -48,7 +64,7 @@ void EndMIDIInput(void){
 #endif // _WIN32
 }
 
-void GetMidiInput(dword msg, dword /*timestamp*/) {
+static void GetMidiInput(dword msg, dword /*timestamp*/) {
 	// http://www.gweep.net/~prefect/eng/reference/protocol/midispec.html
 	byte status = (msg & 0xff);
 	byte data1 = LOWORD(msg) >> 8;
@@ -125,7 +141,7 @@ int CloseMIDI(void){
 	return 1;
 }
 
-void ProcessInput(inputStructure *is, int interval) {
+static void ProcessInput(inputStructure *is, int interval) {
 
 	int mouseX, mouseY;
 	uint new_joyInput[256];
@@ -217,7 +233,7 @@ void ProcessInput(inputStructure *is, int interval) {
 
 	GetTimeWrap();
 	//joypad
-	memset(new_joyInput, 0, sizeof(int) * 0x100);
+	std::ranges::fill_n(new_joyInput, 0x100, 0);
 	for (int i = 1; i < 4; i++) {
 		int r = GetJoypadInputState(i);
 		for (int j = 0; j < 32; j++) {
@@ -286,7 +302,7 @@ void ProcessInput(inputStructure *is, int interval) {
 	}
 }
 
-void CALLBACK MIDIInProc(HMIDIIN /*hMidiIn*/, uint wMsg, dword /*dwInstance*/, dword dwParam1, dword dwParam2){
+static void CALLBACK MIDIInProc(HMIDIIN /*hMidiIn*/, uint wMsg, dword /*dwInstance*/, dword dwParam1, dword dwParam2){
 	if (wMsg == 0x3c3) { // = 963
 		GetMidiInput(dwParam1, dwParam2);
 	}
@@ -296,10 +312,10 @@ int WaitInput(inputStructure *is){
 	is->is_doubleclick = 0;
 	is->mousewheel = 0;
 	is->mouse_buttonL = 0;
-	memset(is->p1_buttonInput, 0, sizeof is->p1_buttonInput);
-	memset(is->p2_buttonInput, 0, sizeof is->p2_buttonInput);
-	memset(is->otherbuttons, 0, sizeof is->otherbuttons);
-	memset(is->inputID, 0, 0x600);
+	std::ranges::fill(is->p1_buttonInput, 0);
+	std::ranges::fill(is->p2_buttonInput, 0);
+	std::ranges::fill(is->otherbuttons, 0);
+	std::ranges::fill_n(is->inputID, 0x600, 0);
 	while (FindPressedKey(is) == 0 && is->mouse_buttonL != 1 && is->mouse_buttonR != 1) {
 		WaitTimer(40);
 		ProcessInput(is, 0);
@@ -418,21 +434,17 @@ int InputToButton(inputStructure *is, CONFIG_INPUT *cfg_input, int player, int i
 	return 1;
 }
 
-void InitMIDIInput(void){
+static void InitMIDIInput(void){
 #ifdef _WIN32
-	UINT numDev;
-	HMIDIIN phmi;
-
-	for (int i = 0; i < 256; i++) { //TOFIX : unneccessary loop
-		midi.controller_v = 0;
-		midi.controller_n = 0;
-	}
+	midi.controller_v = 0;
+	midi.controller_n = 0;
 	midi.unusedFC = 0x7f;
-	numDev = midiInGetNumDevs();
+	UINT numDev = midiInGetNumDevs();
 	if (numDev > 15) {
 		numDev = 15;
 	}
 
+	HMIDIIN phmi;
 	for (int i = 0; i < numDev; i++) {
 		midiInOpen(&phmi, i, (DWORD_PTR)MIDIInProc, NULL, CALLBACK_FUNCTION);
 		midiInStart(phmi);
@@ -442,8 +454,7 @@ void InitMIDIInput(void){
 }
 
 int InitInputStructure(inputStructure *is){
-
-	memset(is->inputID, 0, sizeof(char)*0x600);
+	std::ranges::fill_n(is->inputID, 0x600, 0);
 	is->mouse_buttonL = 0;
 	is->mouse_buttonR = 0;
 	is->mouse_buttonW = 0;

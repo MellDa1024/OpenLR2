@@ -1128,7 +1128,7 @@ int CmdSearch(game *g, CSTR *cmd, sqlite3 *sql) {
 	}
 	else if (cmd->isSame("/deletescore")) {
 		DeleteScoreFromDB(g->sSelect.bmsList[g->sSelect.cur_song].hash, sql);
-		memset(&g->sSelect.bmsList[g->sSelect.cur_song].mybest, 0, sizeof(STATUS));
+		g->sSelect.bmsList[g->sSelect.cur_song].mybest = {};
 		g->sSelect.bmsList[g->sSelect.cur_song].mybest.minbp = -1;
 		*cmd = "deleted";
 		return 1;
@@ -2546,10 +2546,7 @@ int ProcI_Select(game *g, sqlite3 *sql) {
 
 	for (int i = 1; i < 30; i++) {
 		if (g->skstruct.dst_BAR_BODY_OFF[i - 1].dstCount > 0 && g->skstruct.dst_BAR_BODY_OFF[i].dstCount > 0) {
-			DSTdraw dstd1, dstd2, dstd3;
-			InitDSTdraw(&dstd1);
-			InitDSTdraw(&dstd2);
-			InitDSTdraw(&dstd3);
+			DSTdraw dstd1{}, dstd2{}, dstd3{};
 
 			int bar = (g->sSelect.listCalculatedBar / 1000 - g->skstruct.BAR_CENTER) + i;
 			while (bar < 0){
