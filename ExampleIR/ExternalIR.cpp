@@ -4,7 +4,9 @@
 #include <fstream>
 #include <format>
 
+#ifdef _WIN32
 #include <windows.h>
+#endif // _WIN32
 
 namespace State {
     static std::filesystem::path path;
@@ -62,7 +64,7 @@ static SendScoreStatus SendScore(const IRScoreV1& score) {
     return SendScoreStatus::Ok;
 }
 
-extern "C" __declspec(dllexport) void GetMethodTable(MethodTable& table) {
+extern "C" OLR2_IR_EXPORT void GetMethodTable(MethodTable& table) {
     // Fill out the pointers to methods you want to use. Leave them at nullptr if you don't want to use them.
     // Only essential method is GetName(). Without it, your module will be rejected.
     // As API gets updated, new methods may appear available at MethodTable, but old ones will never be removed or their prototypes modified. Method indexes are also stable.
@@ -71,6 +73,7 @@ extern "C" __declspec(dllexport) void GetMethodTable(MethodTable& table) {
     table.SendScoreV1 = &SendScore;
 }
 
+#ifdef _WIN32
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
@@ -94,4 +97,4 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     }
     return TRUE;
 }
-
+#endif // _WIN32
