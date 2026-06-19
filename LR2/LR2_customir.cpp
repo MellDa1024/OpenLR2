@@ -23,17 +23,17 @@
 #if _WIN32
 
 #if _WIN64
-#if _DEBUG
+#ifndef NDEBUG
 constexpr auto&& ARCH = "_D.x64";
 #else
 constexpr auto&& ARCH = ".x64";
-#endif // _DEBUG
+#endif // NDEBUG
 #else
-#if _DEBUG
+#ifndef NDEBUG
 constexpr auto&& ARCH = "_D.x86";
 #else
 constexpr auto&& ARCH = ".x86";
-#endif // _DEBUG
+#endif // NDEBUG
 #endif // _WIN64
 
 constexpr auto&& DLL = ".dll";
@@ -41,17 +41,17 @@ constexpr auto&& DLL = ".dll";
 #else
 
 #if __x86_64__
-#if _DEBUG
+#ifndef NDEBUG
 constexpr auto&& ARCH = "_D.x64";
 #else
 constexpr auto&& ARCH = ".x64";
-#endif // _DEBUG
+#endif // NDEBUG
 #else
-#if _DEBUG
+#ifndef NDEBUG
 constexpr auto&& ARCH = "_D.x86";
 #else
 constexpr auto&& ARCH = ".x86";
-#endif // _DEBUG
+#endif // NDEBUG
 #endif // __x86_64__
 
 constexpr auto&& DLL = ".so";

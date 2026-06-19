@@ -82,20 +82,16 @@ static bool run_tests() {
 }
 
 int main(int argc, char** argv) {
-#ifdef _DEBUG
+#ifdef _WIN32
+#ifndef NDEBUG
 	while (!IsDebuggerPresent()) std::this_thread::sleep_for(std::chrono::milliseconds(200));
-#endif
+#endif // NDEBUG
+#endif // _WIN32
 
-	sqlite3* sql3;
-
-	int wSizeY;
-	int wSizeX;
 	game gs;
 
 	gs.config.system.coreCount = std::thread::hardware_concurrency();
 	if (gs.config.system.coreCount == 0) gs.config.system.coreCount = 2;
-
-	int tmp;
 
 	SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
 	SetFontCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
@@ -411,6 +407,7 @@ int main(int argc, char** argv) {
 	SetDrawScreen(DX_SCREEN_BACK);
 
 	memcpy(gs.config.jukebox.rival, gs.net.rivals, 4 * 20);
+	sqlite3* sql3;
 	sqlite3_open(gs.is_starter
 			? fs::make_preferred("LR2files/Database.db" ).data()
 			: fs::make_preferred("LR2files/Database/song.db").data(), &sql3);
@@ -461,7 +458,7 @@ int main(int argc, char** argv) {
 		gs.sSelect.directory = gs.directoryPath.getDirectory();
 		gs.sSelect.bmsListCount = 1;
 
-		tmp = GetSongDataFromPath(gs.directoryPath, gs.sSelect.bmsList, sql3, &gs.sSelect);
+		int tmp = GetSongDataFromPath(gs.directoryPath, gs.sSelect.bmsList, sql3, &gs.sSelect);
 		if (tmp == -1) return -1;
 		if (tmp == 2) gs.cmd_nosave = 1;
 	}
@@ -682,6 +679,8 @@ int main(int argc, char** argv) {
 
 #ifdef _WIN32
 		if (GetWindowModeFlag()) { // windowed
+			int wSizeY;
+			int wSizeX;
 			GetWindowSize(&wSizeX, &wSizeY);
 			if (0 < wSizeX && wSizeX < 9999 && gs.config.system.windowsize_x != wSizeX) {
 				gs.config.system.windowsize_x = wSizeX;
@@ -899,7 +898,7 @@ int main(int argc, char** argv) {
 							gs.sSelect.listTopbar = 0;
 							gs.sSelect.listSelectedBarFromScreenTop = gs.skstruct.BAR_CENTER;
 							if (gs.cmd_directplay == 0) {
-								tmp = gs.sSelect.listCalculatedBar / 1000;
+								int tmp = gs.sSelect.listCalculatedBar / 1000;
 								if ((gs.sSelect.listCalculatedBar != tmp * 1000) &&	(gs.sSelect.scrollDirection == 2))
 									tmp++;
 								gs.sSelect.cur_song = (tmp + gs.sSelect.bmsListCount * 30) % gs.sSelect.bmsListCount;
