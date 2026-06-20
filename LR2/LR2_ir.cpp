@@ -146,14 +146,6 @@ int RANKING::ParseXML(const char* path) {
 		if (val) {
 			ranking[rankingCount].id = atol(val->ToElement()->GetText());
 		}
-		val = cur->FirstChildElement("sp");
-		if (val) {
-			ranking[rankingCount].sp = atol(val->ToElement()->GetText());
-		}
-		val = cur->FirstChildElement("dp");
-		if (val) {
-			ranking[rankingCount].dp = atol(val->ToElement()->GetText());
-		}
 		val = cur->FirstChildElement("clear");
 		if (val) {
 			ranking[rankingCount].clear = atol(val->ToElement()->GetText());
@@ -189,10 +181,6 @@ int RANKING::ParseXML(const char* path) {
 		val = cur->FirstChildElement("minbp");
 		if (val) {
 			ranking[rankingCount].minbp = atol(val->ToElement()->GetText());
-		}
-		val = cur->FirstChildElement("option");
-		if (val) {
-			ranking[rankingCount].option = atol(val->ToElement()->GetText());
 		}
 		val = cur->FirstChildElement("comment");
 		if (val && val->ToElement()) {
