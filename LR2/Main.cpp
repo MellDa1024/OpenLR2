@@ -81,6 +81,31 @@ static bool run_tests() {
 	return true;
 }
 
+#ifdef _WIN32
+// Applies the configured screen mode.
+//   0 = borderless fullscreen (virtual; composited by the DWM)
+//   1 = windowed
+//   2 = exclusive fullscreen (bypasses the DWM -> lower input latency)
+// DxLib picks exclusive vs borderless through SetFullScreenResolutionMode;
+// ChangeWindowMode only toggles windowed(1)/fullscreen(0).
+static void ApplyScreenMode(int screenmode) {
+	switch (screenmode) {
+	case 2:
+		SetFullScreenResolutionMode(DX_FSRESOLUTIONMODE_DESKTOP);
+		ChangeWindowMode(0);
+		break;
+	case 1:
+		ChangeWindowMode(1);
+		break;
+	case 0:
+	default:
+		SetFullScreenResolutionMode(DX_FSRESOLUTIONMODE_BORDERLESS_WINDOW);
+		ChangeWindowMode(0);
+		break;
+	}
+}
+#endif // _WIN32
+
 int main(int argc, char** argv) {
 #ifdef _WIN32
 #ifndef NDEBUG
@@ -436,7 +461,7 @@ int main(int argc, char** argv) {
 	if ((gs.is_recordmode == '\0') && (gs.auto2avi == '\0')) {
 		SetWaitVSyncFlag(0); //VSYNC
 #ifdef _WIN32
-		ChangeWindowMode(gs.config.system.screenmode);
+		ApplyScreenMode(gs.config.system.screenmode);
 #endif // _WIN32
 		SetWaitVSyncFlag(0); //VSYNC
 		SetDrawScreen(DX_SCREEN_BACK);
@@ -1912,7 +1937,7 @@ int main(int argc, char** argv) {
 #ifdef _WIN32
 			printfDx("%s ", GetUseDirect3DVersion() == 3? "DX11" : "DX9"); //none:0 DX_DIRECT3D_9:1 9EX:2 11:3 default 2? //DEBUG
 #endif // _WIN32
-			printfDx("%s ", gs.config.system.screenmode? "windowed":"fullscreen");
+			printfDx("%s ", gs.config.system.screenmode == 1 ? "windowed" : gs.config.system.screenmode == 2 ? "exclusive" : "fullscreen");
 			if (GetWaitVSyncFlag()) SetWaitVSyncFlag(0); //TEST
 			printfDx("%s\n", DxLib::GetWaitVSyncFlag() ? "Vsync" : "");
 			int dx, dy;
@@ -2204,7 +2229,7 @@ int main(int argc, char** argv) {
 			SetObjectStrings_SongSelect(&gs);
 		}
 		if (gs.KeyInput.inputID[KEY_INPUT_F4] == 1 && gs.procSelecter == 2) {
-			LoopInRange(0, 1, 1, &gs.config.system.screenmode);
+			LoopInRange(0, 2, 1, &gs.config.system.screenmode); // 0=borderless 1=windowed 2=exclusive
 			gs.is_clicked_screenModeChange = 1;
 		}
 		if (gs.sSelect.is_filter_changed) {
@@ -2221,7 +2246,7 @@ int main(int argc, char** argv) {
 			SetGraphMode(640, 480, (gs.config.system.highcolor == 0 ? 32 : 16), 60); //TODO_RESOULUTION
 			SetWaitVSyncFlag(0); //VSYNC
 #ifdef _WIN32
-			ChangeWindowMode(gs.config.system.screenmode);
+			ApplyScreenMode(gs.config.system.screenmode);
 #endif // _WIN32
 			SetWaitVSyncFlag(0); //VSYNC
 			SetDrawScreen(DX_SCREEN_BACK);
@@ -2240,7 +2265,7 @@ int main(int argc, char** argv) {
 			SetObjectStrings_SongSelect(&gs);
 		}
 #ifdef _WIN32
-		else if(GetWindowModeFlag() != gs.config.system.screenmode){
+		else if(GetWindowModeFlag() != (gs.config.system.screenmode == 1 ? 1 : 0)){ // 0 and 2 are both fullscreen
 			for (int i = 0; i < 200; i++) {
 				gs.skstruct.caption[i].fillzero();
 			}
