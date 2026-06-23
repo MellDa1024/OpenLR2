@@ -2276,7 +2276,8 @@ int main(int argc, char** argv) {
 		remove("LR2files/movie_temp.mp3");
 		remove("LR2files/movie_temp.wav");
 	}
-	gs.net.WaitAndInitRanking();
+	gs.net.WaitForRankingHandle();
+	gs.net.rankingData.Init();
 	gs.gameplay.flag_closingPhase = 1;
 	gs.gameplay.isPreviewLoad = 0;
 	gs.gameplay.flag_gameinput = 0;

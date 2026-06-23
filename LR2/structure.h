@@ -1420,7 +1420,6 @@ struct NETWORK {
 
 	int HTTPrequest();
 	void WaitForRankingHandle();
-	void WaitAndInitRanking();
 	int GetRanking(CSTR hash, char flagInit);
 
 	int GetRivalInfo(int ID_rival);

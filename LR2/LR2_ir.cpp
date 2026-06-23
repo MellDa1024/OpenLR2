@@ -639,11 +639,6 @@ void NETWORK::WaitForRankingHandle() {
 	this->waitForHandle = false;
 }
 
-void NETWORK::WaitAndInitRanking() {
-	WaitForRankingHandle();
-	this->rankingData.Init();
-}
-
 int NETWORK::GetRanking(CSTR hash, char flagInit) {
 
 	CSTR path;
