@@ -111,14 +111,14 @@ static int GetDisplayRefreshRate(int displayIndex) {
 }
 
 // Applies the configured screen mode.
-//   0 = borderless fullscreen (virtual; composited by the DWM)
+//   0 = desktop fullscreen (exclusive, bypasses the DWM -> lower input latency)
 //   1 = windowed
-//   2 = exclusive fullscreen (bypasses the DWM -> lower input latency)
+//   2 = borderless fullscreen (virtual; composited by the DWM)
 // DxLib picks exclusive vs borderless through SetFullScreenResolutionMode;
 // ChangeWindowMode only toggles windowed(1)/fullscreen(0).
 static void ApplyScreenMode(int screenmode) {
 	switch (screenmode) {
-	case 2: {
+	case 0: {
 		const int displayIndex = GetWindowDisplayIndex();
 		if (displayIndex >= 0) {
 			SetUseDisplayIndex(displayIndex);
@@ -132,7 +132,7 @@ static void ApplyScreenMode(int screenmode) {
 		g_exclusiveDisplayIndex = -1;
 		ChangeWindowMode(1);
 		break;
-	case 0:
+	case 2:
 	default:
 		g_exclusiveDisplayIndex = -1;
 		SetFullScreenResolutionMode(DX_FSRESOLUTIONMODE_BORDERLESS_WINDOW);
@@ -356,7 +356,7 @@ int main(int argc, char** argv) {
 	gs.flag_Screenshot = false;
 	ReadOptionstrFile(gs.txtStruct.option_str, fs::make_preferred("LR2files/Config/optionstr.csv").data());
 	if (gs.txtStruct.option_str[12].str[2].length() == 0)
-		gs.txtStruct.option_str[12].str[2].assign("EXCLUSIVE");
+		gs.txtStruct.option_str[12].str[2].assign("BORDERLESS");
 	gs.audio.is_fmod_disabled = gs.config.sound.disablefmod;
 	if (gs.config.sound.disablefmod != 0) {
 		gs.config.select.preview = 0;
@@ -1988,7 +1988,7 @@ int main(int argc, char** argv) {
 #ifdef _WIN32
 			printfDx("%s ", GetUseDirect3DVersion() == 3? "DX11" : "DX9"); //none:0 DX_DIRECT3D_9:1 9EX:2 11:3 default 2? //DEBUG
 #endif // _WIN32
-			printfDx("%s ", gs.config.system.screenmode == 1 ? "windowed" : gs.config.system.screenmode == 2 ? "exclusive" : "fullscreen");
+			printfDx("%s ", gs.config.system.screenmode == 1 ? "windowed" : gs.config.system.screenmode == 2 ? "borderless" : "desktop");
 			if (GetWaitVSyncFlag()) SetWaitVSyncFlag(0); //TEST
 			printfDx("%s\n", DxLib::GetWaitVSyncFlag() ? "Vsync" : "");
 			int dx, dy;
@@ -2000,7 +2000,7 @@ int main(int argc, char** argv) {
 		gs.sSelect.flag_maniacPanel = 0;
 		if(gs.procSelecter == 2){
 			if ( (gs.KeyInput.inputID[KEY_INPUT_F5] == 1 || gs.sSelect.is_buttonIRpage != 0) && gs.sSelect.bmsList[gs.sSelect.cur_song].keymode > 4 && gs.config.network.lr2ir == 1) {
-				// Both borderless(0) and exclusive(2) own the display: drop to windowed(1) before
+				// Both desktop(0) and borderless(2) own the display: drop to windowed(1) before
 				// opening the external browser, otherwise exclusive blocks/crashes the browser show.
 				if (gs.config.system.screenmode == 0 || gs.config.system.screenmode == 2) {
 					gs.config.system.screenmode = 1;
@@ -2281,7 +2281,7 @@ int main(int argc, char** argv) {
 			SetObjectStrings_SongSelect(&gs);
 		}
 		if (gs.KeyInput.inputID[KEY_INPUT_F4] == 1 && gs.procSelecter == 2) {
-			LoopInRange(0, 2, 1, &gs.config.system.screenmode); // 0=borderless 1=windowed 2=exclusive
+			LoopInRange(0, 2, 1, &gs.config.system.screenmode); // 0=desktop 1=windowed 2=borderless
 			gs.is_clicked_screenModeChange = 1;
 		}
 		if (gs.sSelect.is_filter_changed) {
