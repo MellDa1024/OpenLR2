@@ -1953,7 +1953,9 @@ int main(int argc, char** argv) {
 		gs.sSelect.flag_maniacPanel = 0;
 		if(gs.procSelecter == 2){
 			if ( (gs.KeyInput.inputID[KEY_INPUT_F5] == 1 || gs.sSelect.is_buttonIRpage != 0) && gs.sSelect.bmsList[gs.sSelect.cur_song].keymode > 4 && gs.config.network.lr2ir == 1) {
-				if (gs.config.system.screenmode == 0) {
+				// Both borderless(0) and exclusive(2) own the display: drop to windowed(1) before
+				// opening the external browser, otherwise exclusive blocks/crashes the browser show.
+				if (gs.config.system.screenmode == 0 || gs.config.system.screenmode == 2) {
 					gs.config.system.screenmode = 1;
 					SetObjectStrings_SongSelect(&gs);
 					for (int i = 0; i < 200; i++) {
@@ -2113,6 +2115,7 @@ int main(int argc, char** argv) {
 			if (gs.gameplay.flag_gameinput != 0 && gs.config.system.thread == 0 && gs.config.system.vsync == 1 && gs.is_recordmode == 0) {
 				//TODO : Get appropriate device
 				double a = DxLib::GetRefreshRate();
+				if (a <= 0) a = 60.0; // device can report 0 Hz after losing exclusive fullscreen focus -> avoid div-by-zero
 				double m_lMillisecPerFrame = 1000 / a - 1.0;
 
 				while (GetTimeWrap() - gs.timer1.vSyncTick < m_lMillisecPerFrame) {
