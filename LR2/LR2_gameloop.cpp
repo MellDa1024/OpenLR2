@@ -204,7 +204,7 @@ void ReactInput(game *g) {
 				}
 			}
 
-			if (g->config.play.p1_lanecover && g->gameplay.lanecoverDisplayP1 == 1) {
+			if (g->config.play.p1_lanecover && g->gameplay.lanecoverDisplayP1 == 1 && g->config.play.disablelanecoveradjustwithkey != 1) {
 				if ((g->KeyInput.p1_buttonInput[12] == 2 || g->KeyInput.p1_buttonInput[13] == 2)
 					&& (g->KeyInput.p1_buttonInput[6] == 1)) {
 					g->config.play.p1_lanecoverv -= g->config.play.shuttermargin;
@@ -229,25 +229,29 @@ void ReactInput(game *g) {
 				if ((g->KeyInput.p1_buttonInput[12] == 2 || g->KeyInput.p1_buttonInput[13] == 2)
 					&& (g->KeyInput.p1_buttonInput[6] == 1)) {
 					g->config.play.hiSpeed[0] += g->config.play.hsmargin;
+					g->gameplay.isSpeedChanged = true;
 				}
 
 				if ((g->KeyInput.p1_buttonInput[12] == 2 || g->KeyInput.p1_buttonInput[13] == 2)
 					&& (g->KeyInput.p1_buttonInput[7] == 1)) {
 					g->config.play.hiSpeed[0] -= g->config.play.hsmargin;
+					g->gameplay.isSpeedChanged = true;
 				}
 
 				if ((g->KeyInput.p2_buttonInput[12] == 2 || g->KeyInput.p2_buttonInput[13] == 2)
 					&& (g->KeyInput.p2_buttonInput[6] == 1) && g->config.play.battle != 1) {
 					g->config.play.hiSpeed[0] += g->config.play.hsmargin;
+					g->gameplay.isSpeedChanged = true;
 				}
 
 				if ((g->KeyInput.p2_buttonInput[12] == 2 || g->KeyInput.p2_buttonInput[13] == 2)
 					&& (g->KeyInput.p2_buttonInput[7] == 1) && g->config.play.battle != 1) {
 					g->config.play.hiSpeed[0] -= g->config.play.hsmargin;
+					g->gameplay.isSpeedChanged = true;
 				}
 			}
 
-			if (g->config.play.p2_lanecover && g->gameplay.lanecoverDisplayP2 == 1) {
+			if (g->config.play.p2_lanecover && g->gameplay.lanecoverDisplayP2 == 1 && g->config.play.disablelanecoveradjustwithkey != 1) {
 				if ((g->KeyInput.p2_buttonInput[12] == 2 || g->KeyInput.p2_buttonInput[13] == 2)
 					&& (g->KeyInput.p2_buttonInput[6] == 1) && g->config.play.battle == 1) {
 					g->config.play.p2_lanecoverv -= g->config.play.shuttermargin;
@@ -262,11 +266,13 @@ void ReactInput(game *g) {
 				if ((g->KeyInput.p2_buttonInput[12] == 2 || g->KeyInput.p2_buttonInput[13] == 2)
 					&& (g->KeyInput.p2_buttonInput[6] == 1) && g->config.play.battle == 1) {
 					g->config.play.hiSpeed[1] += g->config.play.hsmargin;
+					g->gameplay.isSpeedChanged = true;
 				}
 
 				if ((g->KeyInput.p2_buttonInput[12] == 2 || g->KeyInput.p2_buttonInput[13] == 2)
 					&& (g->KeyInput.p2_buttonInput[7] == 1) && g->config.play.battle == 1) {
 					g->config.play.hiSpeed[1] -= g->config.play.hsmargin;
+					g->gameplay.isSpeedChanged = true;
 				}
 			}
 		}

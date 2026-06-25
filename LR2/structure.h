@@ -244,6 +244,7 @@ struct CONFIG_PLAY {
 	int gomiscore{};
 	int disablecurspeedchange{};
 	int disableleftclickexit{};
+	int disablelanecoveradjustwithkey{};
 };
 
 struct CONFIG_PLAYER {
