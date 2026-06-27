@@ -384,7 +384,7 @@ int main(int argc, char** argv) {
 		gs.net.IR_passMD5 = MD5str(gs.config.player.pass);
 		gs.net.getrival = gs.config.network.getrival;
 		gs.net.IR_ID = gs.gameplay.playerstat.irid;
-		if (gs.net.Login(gs.cmd_directplay) == 1) {
+		if (gs.net.LR2IR_Login(gs.cmd_directplay) == 1) {
 			SaveIRID(gs.net.rankingData.myID, gs.config.player.id);
 		}
 		else {
@@ -399,7 +399,8 @@ int main(int argc, char** argv) {
 		std::filesystem::create_directories(path, ec);
 		gs.net.customIR.Initialize(path, gs.config.network.displayIr.body ? gs.config.network.displayIr.body : "");
 	}
-	gs.net.customIR.Login();
+	const std::string loginResult = gs.net.customIR.Login();
+	ErrorLogAdd(loginResult.c_str());
 
 	int loadingGrHandle = LoadGraph(fs::make_preferred("LR2files/Config/loading.bmp").data(), 0);
 
@@ -425,6 +426,8 @@ int main(int argc, char** argv) {
 			gs.net.ApplyInsaneList();
 		}
 		if (gs.is_starter == false) {
+			printfDx(loginResult.c_str());
+			printfDx("\n");
 			printfDx("%s\n", openlr2::versionName);
 			printfDx("PUSH ANY KEY\n");
 			ScreenFlip();

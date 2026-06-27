@@ -251,14 +251,22 @@ void CUSTOMIR_MANAGER::Initialize(const std::filesystem::path& directory, std::s
 	}
 }
 
-void CUSTOMIR_MANAGER::Login() {
+std::string CUSTOMIR_MANAGER::Login() {
+	std::string result;
+	mLoggedInIrs.clear();
 	for (auto& ir : mModules) {
 		if (ir->Login()) {
-			OverlayNotification("[%s] Logged in\n", ir->Name().c_str());
+			result += "[" + ir->Name() + "] Logged in\n";
+			mLoggedInIrs.push_back(ir->Name());
 		} else {
-			OverlayNotification("[%s] Failed to log in\n", ir->Name().c_str());
+			result += "[" + ir->Name() + "] Failed to log in\n";
 		}
 	}
+	return result;
+}
+
+bool CUSTOMIR_MANAGER::IsDisplayIrOnline() const {
+	return std::ranges::contains(mLoggedInIrs, mDisplayIr);
 }
 
 std::optional<openlr2::IRGhostResult> CUSTOMIR_MANAGER::TryGetTargetInfo(const char* songmd5, int mode, int targetPlayerId) {

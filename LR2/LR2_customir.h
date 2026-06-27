@@ -33,7 +33,8 @@ public:
 	// Get the result with \ref GetResult
 	void BeginResultIr(game& game, sqlite3* sql, int player);
 	void Initialize(const std::filesystem::path& directory, std::string activeProvider);
-	void Login();
+	std::string Login();
+	[[nodiscard]] bool IsDisplayIrOnline() const;
 	// \note Delegates to the display IR
 	// \retval nullopt - Fail
 	std::optional<openlr2::IRGhostResult> TryGetTargetInfo(const char* songmd5, int mode, int targetPlayerId);
@@ -42,6 +43,7 @@ private:
 	std::vector<std::future<void>> mSendThreads;
 	std::future<std::optional<openlr2::IRRankResult>> mResultIrFuture;
 	std::string mDisplayIr;
+	std::vector<std::string> mLoggedInIrs;
 };
 
 namespace openlr2 {
