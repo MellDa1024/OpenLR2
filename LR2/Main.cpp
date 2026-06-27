@@ -84,17 +84,23 @@ static bool run_tests() {
 #ifdef _WIN32
 static int g_exclusiveDisplayIndex = -1;
 
+// Pick the monitor that contains the center of the game window. This makes
+// fullscreen follow the game window after it was moved to another monitor.
 static int GetWindowDisplayIndex() {
+	// wx/wy are the game window position. ww/wh are the game window size.
 	int wx = 0, wy = 0;
 	int ww = 0, wh = 0;
 	GetWindowPosition(&wx, &wy);
 	GetWindowSize(&ww, &wh);
 
+	// targetX/targetY are the center point used to decide the target monitor.
 	const int targetX = wx + ww / 2;
 	const int targetY = wy + wh / 2;
 	const int displayCount = GetDisplayNum();
 	for (int i = 0; i < displayCount; i++) {
+		// dx/dy are the monitor position. dw/dh are the monitor size.
 		int dx = 0, dy = 0, dw = 0, dh = 0, primary = 0;
+		// Get each monitor rectangle and check if the game window center is inside it.
 		if (GetDisplayInfo(i, &dx, &dy, &dw, &dh, &primary) != 0) continue;
 		if (targetX >= dx && targetX < dx + dw && targetY >= dy && targetY < dy + dh) return i;
 	}
