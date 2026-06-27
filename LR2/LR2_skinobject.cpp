@@ -176,7 +176,7 @@ bool GetOptionFlag_dst(game *gs, int option) {
 			break;
 
 		case 50:
-			if (!gs->net.customIR.IsDisplayIrOnline()) return ret;
+			if (gs->net.isOnline != 1 && !gs->net.customIR.IsDisplayIrOnline()) return ret;
 			break;
 
 		case 51:
