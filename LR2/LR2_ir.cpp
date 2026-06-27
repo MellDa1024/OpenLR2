@@ -21,12 +21,10 @@
 
 void MYRANKING::InitRanking() {
 	this->songMD5.fillzero();
-	this->unused.fillzero();
 	this->passMD5.fillzero();
 	this->title.fillzero();
 	this->genre.fillzero();
 	this->artist.fillzero();
-	this->_ghost.fillzero();
 	this->maxbpm = 0;
 	this->minbpm = 0;
 	this->playlevel = 0;
@@ -90,8 +88,6 @@ void RANKING::Init() {
 	for (int i = 0; i < this->rankingMax; i++) {
 		this->ranking[i].name.fillzero();
 		this->ranking[i].id = 0;
-		this->ranking[i].sp = 0;
-		this->ranking[i].dp = 0;
 		this->ranking[i].clear = 0;
 		this->ranking[i].notes = 0;
 		this->ranking[i].combo = 0;
@@ -101,8 +97,6 @@ void RANKING::Init() {
 		this->ranking[i].bd = 0;
 		this->ranking[i].pr = 0;
 		this->ranking[i].minbp = 0;
-		this->ranking[i].option = 0;
-		this->ranking[i].sussussuspected = 0;
 		this->ranking[i].playcount = 0;
 		this->ranking[i].ranking = 0;
 		this->ranking[i].comment.fillzero();
