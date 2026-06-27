@@ -27,7 +27,6 @@ typedef struct MIDI {
 }MIDI;
 
 static MIDI midi;
-static bool g_clientMousePositionFix = false;
 
 #ifndef _WIN32
 #define LOWORD(l) ((WORD)(((DWORD_PTR)(l)) & 0xffff))
@@ -41,8 +40,8 @@ static int ScaleClientPointToSkin(int point, int clientSize, int skinSize) {
 	return -((-point * skinSize + clientSize - 1) / clientSize);
 }
 
-static void FixMousePointWithClientPosition(int* mouseX, int* mouseY) {
-	if (!g_clientMousePositionFix) return;
+static void FixMousePointWithClientPosition(int* mouseX, int* mouseY, bool allowClientMousePositionFix) {
+	if (!allowClientMousePositionFix) return;
 	if (GetUseFullScreenResolutionMode() != DX_FSRESOLUTIONMODE_BORDERLESS_WINDOW) return;
 
 	const HWND hWnd = GetMainWindowHandle();
@@ -61,10 +60,6 @@ static void FixMousePointWithClientPosition(int* mouseX, int* mouseY) {
 	*mouseY = ScaleClientPointToSkin(cursorPoint.y, clientHeight, skinSizeY);
 }
 #endif // _WIN32
-
-void SetClientMousePositionFixFlag(bool enabled) {
-	g_clientMousePositionFix = enabled;
-}
 
 // TODO structure array rework
 int InitInputStructure2(inputStructure *is){
@@ -174,7 +169,7 @@ int CloseMIDI(void){
 	return 1;
 }
 
-static void ProcessInput(inputStructure *is, int interval) {
+static void ProcessInput(inputStructure *is, int interval, bool allowClientMousePositionFix = true) {
 
 	int mouseX, mouseY;
 	uint new_joyInput[256];
@@ -185,7 +180,7 @@ static void ProcessInput(inputStructure *is, int interval) {
 
 	GetMousePoint(&mouseX, &mouseY);
 #ifdef _WIN32
-	FixMousePointWithClientPosition(&mouseX, &mouseY);
+	FixMousePointWithClientPosition(&mouseX, &mouseY, allowClientMousePositionFix);
 #endif // _WIN32
 	is->mouse_moveX = mouseX - is->mouse_oldX;
 	is->mouse_moveY = mouseY - is->mouse_oldY;
@@ -362,9 +357,9 @@ int WaitInput(inputStructure *is){
 	return 1;
 }
 
-int InputToButton(inputStructure *is, CONFIG_INPUT *cfg_input, int player, int isReplay) {
+int InputToButton(inputStructure *is, CONFIG_INPUT *cfg_input, int player, int isReplay, bool allowClientMousePositionFix) {
 	
-	ProcessInput(is, cfg_input->sys_inputinterval);
+	ProcessInput(is, cfg_input->sys_inputinterval, allowClientMousePositionFix);
 	if (midi.controller_n > 0) {
 		is->midi_n = midi.controller_n;
 		is->midi_v = midi.controller_v;
