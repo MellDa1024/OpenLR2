@@ -34,12 +34,6 @@ static MIDI midi;
 #endif
 
 #ifdef _WIN32
-static int ScaleClientPointToSkin(int point, int clientSize, int skinSize) {
-	if (clientSize <= 0 || skinSize <= 0) return point;
-	if (point >= 0) return point * skinSize / clientSize;
-	return -((-point * skinSize + clientSize - 1) / clientSize);
-}
-
 static void FixMousePointWithClientPosition(int* mouseX, int* mouseY, bool allowClientMousePositionFix) {
 	if (!allowClientMousePositionFix) return;
 	if (GetUseFullScreenResolutionMode() != DX_FSRESOLUTIONMODE_BORDERLESS_WINDOW) return;
@@ -56,8 +50,14 @@ static void FixMousePointWithClientPosition(int* mouseX, int* mouseY, bool allow
 	if (GetCursorPos(&cursorPoint) == 0) return;
 	if (ScreenToClient(hWnd, &cursorPoint) == 0) return;
 
-	*mouseX = ScaleClientPointToSkin(cursorPoint.x, clientWidth, skinSizeX);
-	*mouseY = ScaleClientPointToSkin(cursorPoint.y, clientHeight, skinSizeY);
+	auto scaleClientPointToSkin = [](int point, int clientSize, int skinSize) {
+		if (clientSize <= 0 || skinSize <= 0) return point;
+		if (point >= 0) return point * skinSize / clientSize;
+		return -((-point * skinSize + clientSize - 1) / clientSize);
+	};
+
+	*mouseX = scaleClientPointToSkin(cursorPoint.x, clientWidth, skinSizeX);
+	*mouseY = scaleClientPointToSkin(cursorPoint.y, clientHeight, skinSizeY);
 }
 #endif // _WIN32
 
