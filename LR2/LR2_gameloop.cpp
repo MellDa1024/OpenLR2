@@ -8,8 +8,6 @@
 
 void ReactInput(game *g) {
 
-	const bool allowClientMousePositionFix = g->procSelecter != 4;
-
 	GetTimeWrap();
 	if (g->txtStruct.readme.show > 0 && g->is_starter == 0) {
 
@@ -65,41 +63,41 @@ void ReactInput(game *g) {
 	if (g->sSelect.metaSelected.keymode >= 10) {
 		if (g->procSelecter == 4 && g->config.play.battle == 3) {
 			if (g->gameplay.replay.status == 2 && GetTimeLapse(41, &g->timer1) != -1.0)
-				InputToButton(&g->KeyInput, &g->config.input, 1, 1, allowClientMousePositionFix);
+				InputToButton(&g->KeyInput, &g->config.input, 1, 1);
 			else
-				InputToButton(&g->KeyInput, &g->config.input, 1, 0, allowClientMousePositionFix);
+				InputToButton(&g->KeyInput, &g->config.input, 1, 0);
 		}
 		else {
 			if (g->gameplay.replay.status == 2 && GetTimeLapse(41, &g->timer1) != -1.0)
-				InputToButton(&g->KeyInput, &g->config.input, 0, 1, allowClientMousePositionFix);
+				InputToButton(&g->KeyInput, &g->config.input, 0, 1);
 			else
-				InputToButton(&g->KeyInput, &g->config.input, 0, 0, allowClientMousePositionFix);
+				InputToButton(&g->KeyInput, &g->config.input, 0, 0);
 		}
 	}
 	else {
 		if (g->procSelecter == 4 && g->config.play.battle == 0) {
 			if (g->gameplay.replay.status == 2 && GetTimeLapse(41, &g->timer1) != -1.0)
-				InputToButton(&g->KeyInput, &g->config.input, 1, 1, allowClientMousePositionFix);
+				InputToButton(&g->KeyInput, &g->config.input, 1, 1);
 			else
-				InputToButton(&g->KeyInput, &g->config.input, 1, 0, allowClientMousePositionFix);
+				InputToButton(&g->KeyInput, &g->config.input, 1, 0);
 		}
 		else if (g->sSelect.metaSelected.keymode <= 8) {
 			if (g->gameplay.replay.status == 2 && GetTimeLapse(41, &g->timer1) != -1.0)
-				InputToButton(&g->KeyInput, &g->config.input, 0, 1, allowClientMousePositionFix);
+				InputToButton(&g->KeyInput, &g->config.input, 0, 1);
 			else
-				InputToButton(&g->KeyInput, &g->config.input, 0, 0, allowClientMousePositionFix);
+				InputToButton(&g->KeyInput, &g->config.input, 0, 0);
 		}
 		else if (g->procSelecter == 4 && g->config.play.battle == 3) {
 			if (g->gameplay.replay.status == 2 && GetTimeLapse(41, &g->timer1) != -1.0)
-				InputToButton(&g->KeyInput, &g->config.input, 1, 1, allowClientMousePositionFix);
+				InputToButton(&g->KeyInput, &g->config.input, 1, 1);
 			else
-				InputToButton(&g->KeyInput, &g->config.input, 1, 0, allowClientMousePositionFix);
+				InputToButton(&g->KeyInput, &g->config.input, 1, 0);
 		}
 		else {
 			if (g->gameplay.replay.status == 2 && GetTimeLapse(41, &g->timer1) != -1.0)
-				InputToButton(&g->KeyInput, &g->config.input, 0, 1, allowClientMousePositionFix);
+				InputToButton(&g->KeyInput, &g->config.input, 0, 1);
 			else
-				InputToButton(&g->KeyInput, &g->config.input, 0, 0, allowClientMousePositionFix);
+				InputToButton(&g->KeyInput, &g->config.input, 0, 0);
 		}
 	}
 	GetTimeWrap();

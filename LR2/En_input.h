@@ -10,7 +10,7 @@ int CloseMIDI(void);
 int ResetPressCount(inputStructure * is);
 int DetermineResultPlayDevice(inputStructure * is);
 
-int InputToButton(inputStructure *is, CONFIG_INPUT *cfg_input, int player, int isReplay, bool allowClientMousePositionFix = true);
+int InputToButton(inputStructure *is, CONFIG_INPUT *cfg_input, int player, int isReplay);
 
 int FindPressedKey(inputStructure * is);
 int WaitInput(inputStructure *is);

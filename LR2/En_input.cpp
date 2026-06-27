@@ -34,8 +34,7 @@ static MIDI midi;
 #endif
 
 #ifdef _WIN32
-static void FixMousePointWithClientPosition(int* mouseX, int* mouseY, bool allowClientMousePositionFix) {
-	if (!allowClientMousePositionFix) return;
+static void FixMousePointWithClientPosition(int* mouseX, int* mouseY) {
 	if (GetUseFullScreenResolutionMode() != DX_FSRESOLUTIONMODE_BORDERLESS_WINDOW) return;
 
 	const HWND hWnd = GetMainWindowHandle();
@@ -169,7 +168,7 @@ int CloseMIDI(void){
 	return 1;
 }
 
-static void ProcessInput(inputStructure *is, int interval, bool allowClientMousePositionFix = true) {
+static void ProcessInput(inputStructure *is, int interval) {
 
 	int mouseX, mouseY;
 	uint new_joyInput[256];
@@ -180,7 +179,7 @@ static void ProcessInput(inputStructure *is, int interval, bool allowClientMouse
 
 	GetMousePoint(&mouseX, &mouseY);
 #ifdef _WIN32
-	FixMousePointWithClientPosition(&mouseX, &mouseY, allowClientMousePositionFix);
+	FixMousePointWithClientPosition(&mouseX, &mouseY);
 #endif // _WIN32
 	is->mouse_moveX = mouseX - is->mouse_oldX;
 	is->mouse_moveY = mouseY - is->mouse_oldY;
@@ -357,9 +356,9 @@ int WaitInput(inputStructure *is){
 	return 1;
 }
 
-int InputToButton(inputStructure *is, CONFIG_INPUT *cfg_input, int player, int isReplay, bool allowClientMousePositionFix) {
-	
-	ProcessInput(is, cfg_input->sys_inputinterval, allowClientMousePositionFix);
+int InputToButton(inputStructure *is, CONFIG_INPUT *cfg_input, int player, int isReplay) {
+
+	ProcessInput(is, cfg_input->sys_inputinterval);
 	if (midi.controller_n > 0) {
 		is->midi_n = midi.controller_n;
 		is->midi_v = midi.controller_v;
